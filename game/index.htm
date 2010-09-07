@@ -1,0 +1,40 @@
+
+#if($game)
+Spiel:
+<h3>$game.getName()</h3>
+ #if($gameEditKey)
+
+	Link zur Edit:<br/>
+	<a href="http://localhost:8080/age/game/edit.htm?editKey=$gameEditKey">http://localhost:8080/webapps/game/edit.htm?editKey=$gameEditKey</a>
+ #end
+
+ <a href="./play.htm?new=$game.key" class="newGame"> neue instance</a>
+
+<br/><br/>
+laufende spiele:
+<ul class="games">
+
+#foreach( $instance in $game.children )
+ #if( $instance.table.style.bgImageName)
+       #set($src = "../images/game/"+ $instance.key+"/0_"+ $instance.table.style.bgImageName )
+ #else
+ 	#set($src="")
+ #end
+    <li style="background-color:$game.table.style.bgColor">
+    <a href="./play.htm?game=$instance.key">
+    <p> $instance.name</p>
+    <img width="70" src="$src"/>
+    </a>
+   Players: $instance.playersSize
+    </li>
+#end
+
+
+</ul>
+
+
+
+#else
+keine Spiel gefunden.
+
+#end

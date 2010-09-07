@@ -1,0 +1,8 @@
+1) Bei AJAX request die antwort wird in Tags <body>response</body> eingefügt. AgeUpdater.ajaxFileUpload - split("===")!!!!
+2) tmp Ornder sollte geleert werden.
+3) Items count sollte mit anderen Konzept gelösst werden.
+4) bgImage sollte IMG und nicht backgroud-image sein!!!
+5)
+6)
+
+

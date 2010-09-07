@@ -1,0 +1,29 @@
+1) Hintergrund bilder werden falsch gedreht, http://localhost:8080/age/game/play.htm?game=6amCmq3x (in der Style geändert)
+
+2) Hintergrund Bild von eine Spielwürfel wird bei ziehen nicht allen angezeigt.
+
+3) unter chorme funktioniert gar nichts
+LOG :
+INFO: Url: /age/blocking/longpolling?key=6amCmq3x&loadGame=true
+DEBUG: Erstelle eine IFRAME...
+INFO: Verbinde sich mit den Server...
+INFO: Erstelle eine Connector...
+ERROR: Setze init contener :#ageGameContener
+INFO: Setze init Parameters...
+
+4) Unter chrome funktioniert BILD Vorschau nicht
+
+5) Es werden undet einen KEY elemente von eine Andere Spiel geladen. Bei restarten der Spiel funtioniert wider
+6) Die verändertet elemente von einen Instance werden bei Spieler eintreten nicht geladen, Es wird nur die Zustand von Datenbank geladen.
+
+7) Man weisst nicht welche spieler man ist.
+8) die resourcen mussen auch nach perspektive angepasst werden.
+9) bei editieren die Farben gehen verloren
+10) bei editieren neue Spieler zugefügt , wurde aber nicht gespeichert.
+11) Löschen von elementen funktioniert nicht.
+12) eine Instance erstellt sind aber 2 zu sehen, warscheinlich durch editieren verursacht.
+
+
+
+
+http://code.google.com/p/msysgit/downloads/detail?name=Git-1.7.0.2-preview20100309.exe

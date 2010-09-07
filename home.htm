@@ -1,0 +1,26 @@
+
+<a href="./game/new.htm" class="newGame">Spiel erstellen</a>
+
+<br/><br/>
+spiele:
+<ul class="games">
+
+#foreach( $game in $games )
+ #if($game.table.style.bgImageName)
+       #set($src = "/age/images/game/"+$game.key+"/0_"+$game.table.style.bgImageName )
+ #else
+ 	#set($src = "" )
+ #end
+    <li style="background-color:$game.table.style.bgColor">
+    <a href="./game/?key=$game.key">
+    <p>$game.name</p>
+    <img width="70" src="$src"/>
+    </a>
+    
+    </li>
+#end
+
+
+</ul>
+
+

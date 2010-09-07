@@ -1,0 +1,4 @@
+ <atmosphere-handlers>
+    <atmosphere-handler context-root="/blocking/longpolling" class-name="de.tubs.age.blocking.LongPolling">
+    </atmosphere-handler>
+ </atmosphere-handlers> 

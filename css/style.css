@@ -1,0 +1,42 @@
+
+body{
+overflow-y: scroll;
+cursor:pointer;
+margin:0;
+}
+
+div#area{
+	float:left;
+height: 480px;
+width: 480px;
+background-color: #bbbbbb;
+margin: 0 auto;
+position: absolute;
+cursor: pointer;
+}
+div#info{
+float:right;
+width: 300px;
+height: 480px;
+border: 1px solid #aaaaaa;
+padding: 5px 10px;
+font-size: 12px;
+overflow-y: scroll;
+}
+div.dragable{
+height:30px;
+width:30px;
+background-color: red;
+}
+div#contener{
+   width: 840px;
+   margin: 20px auto;
+   cursor: pointer;
+
+}
+div.clear{
+clear: both;
+}
+span.label{
+color: #999999;
+}

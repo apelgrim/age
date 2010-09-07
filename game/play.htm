@@ -1,0 +1,38 @@
+#if($playGame)
+
+<div id="ageGameContener">
+
+</div>
+<table>
+<tr><td>
+<div id="ageConsole"></div>
+</td><td>
+<div id="ageChat"><div></div><INPUT type="text"/><BUTTON onclick="AgeUpdater.sendChatMessage();">send</BUTTON></div>
+</td></tr>
+</table>
+
+<script type="text/javascript">
+
+$(function() {
+	try{
+	GameManager.init({contener:'#ageGameContener',key:'$playGame.key',url:'/age/blocking/longpolling'});
+	}catch(e){
+		Log(''+e,'e');
+	}
+});
+</script>
+
+
+
+#elseif($newGame)
+
+LINK ZU SPIEL: <a href="./play.htm?game=$newGame.key">./play.htm?game=$newGame.key</a>
+
+
+<br/>
+name:$newGame.name
+
+
+#else
+NIX
+#end
