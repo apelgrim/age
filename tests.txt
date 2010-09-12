@@ -1,6 +1,6 @@
-1) Hintergrund bilder werden falsch gedreht, http://localhost:8080/age/game/play.htm?game=6amCmq3x (in der Style geändert)
+1) Hintergrund bilder werden falsch gedreht, http://localhost:8080/age/game/play.htm?game=6amCmq3x (in der Style geï¿½ndert)
 
-2) Hintergrund Bild von eine Spielwürfel wird bei ziehen nicht allen angezeigt.
+2) Hintergrund Bild von eine SpielwÃ¼rfel wird bei ziehen nicht allen angezeigt.
 
 3) unter chorme funktioniert gar nichts
 LOG :
@@ -14,13 +14,13 @@ INFO: Setze init Parameters...
 4) Unter chrome funktioniert BILD Vorschau nicht
 
 5) Es werden undet einen KEY elemente von eine Andere Spiel geladen. Bei restarten der Spiel funtioniert wider
-6) Die verändertet elemente von einen Instance werden bei Spieler eintreten nicht geladen, Es wird nur die Zustand von Datenbank geladen.
+FIXED 6) Die verÃ¤ndertet elemente von einen Instance werden bei Spieler eintreten nicht geladen, Es wird nur die Zustand von Datenbank geladen.
 
-7) Man weisst nicht welche spieler man ist.
+FIXED 7) Man weisst nicht welche spieler man ist.
 8) die resourcen mussen auch nach perspektive angepasst werden.
 9) bei editieren die Farben gehen verloren
-10) bei editieren neue Spieler zugefügt , wurde aber nicht gespeichert.
-11) Löschen von elementen funktioniert nicht.
+10) bei editieren neue Spieler zugefÃ¼gt , wurde aber nicht gespeichert.
+11) LÃ¶schen von elementen funktioniert nicht.
 12) eine Instance erstellt sind aber 2 zu sehen, warscheinlich durch editieren verursacht.
 
 

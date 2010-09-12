@@ -65,6 +65,8 @@ public class Groups extends Model{
     private boolean randomgenerator;
     private boolean ordered;
 
+    @Transient private Template template;
+
     
 
 
@@ -194,8 +196,11 @@ public class Groups extends Model{
     }
  */
     void saveAll(String path,EntityManager em) throws IOException {
+    	style.setTemplate(template);
+    	System.out.println("-------- group  saveAllstyle getBgImageName()"+style.getBgImageName());
         style.saveAll(path,em);
         for (Item item : items) {
+        	item.setTemplate(template);
         	item.setGroups(this);
             item.saveAll(path,em);
         }
@@ -254,6 +259,14 @@ public Groups copy(String key) {
 	group.setItems(_items);
 	return group;
 }
+public void setTemplate(Template template) {
+	this.template = template;
+	
+}
+public Template getTemplate() {
+	return template;
+}
+
 
 
 

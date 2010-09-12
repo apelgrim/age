@@ -85,7 +85,7 @@ public class Game extends Model{
     	return "playersSize:"+playersSize+", name:"+name;
     }
     public void saveAll(EntityManager em) throws IOException {
-        
+        System.out.println("++++ Game.saveAll() key:"+key);
        this.table.saveAll(key,em);
        
 
@@ -208,7 +208,7 @@ public class Game extends Model{
 	}
 
 	public String toJSON() {
-		if(JSONCache==null){
+	//	if(JSONCache==null){
 		StringBuffer sb = new StringBuffer();
 		sb.append("{name:'" + name + "',_public:" + _public + ",playersSize:"+playersSize+",table:"
 				+ table.toJSON() + ",resourcen:[");
@@ -224,9 +224,9 @@ public class Game extends Model{
 		
 		sb.append("],players:[");
 		first = true;
-		System.out.println("####String toJSON() this.players.size():" + this.players.size());
+	//	System.out.println("####String toJSON() this.players.size():" + this.players.size());
 		for (Player player : this.players) {
-			System.out.println("####String toJSON() for (Player player : this.players):" + player.toJSON());
+	//		System.out.println("####String toJSON() for (Player player : this.players):" + player.toJSON());
 			if (first) {
 				sb.append(player.toJSON());
 				first = false;
@@ -234,7 +234,7 @@ public class Game extends Model{
 		}
 		sb.append("]}");
 		JSONCache = sb.toString();
-		}
+//		}
 		return JSONCache;
 	}
 
@@ -366,6 +366,7 @@ public class Game extends Model{
 	}
 
 	public void setGroupPosition(int x, int y, int group_id) {
+	//	System.out.print("Game.setGroupPosition item_id:"+group_id);
 		for (Groups group : groups) {
 			if(group.getId()==group_id){
 				group.getStyle().setLeft(x);

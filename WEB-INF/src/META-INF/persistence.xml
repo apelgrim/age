@@ -10,6 +10,7 @@
 		<class>de.tubs.age.jpa.Player</class>
 		<class>de.tubs.age.jpa.Style</class>
 		<class>de.tubs.age.jpa.Table</class>
+		<class>de.tubs.age.jpa.Template</class>
 		<properties>
       <!--    <property name="hibernate.show_sql"
                       value="true"/>

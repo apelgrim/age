@@ -1,13 +1,15 @@
 #if($playGame)
 
 <div id="ageGameContener">
+<div id="ageConnectionStatus"><img src="/age/images/connect_idle.gif"/></div>
 
 </div>
+<button onclick="GameManager.leaveGame()">Verlasse das Spiel</button>
 <table>
 <tr><td>
 <div id="ageConsole"></div>
 </td><td>
-<div id="ageChat"><div></div><INPUT type="text"/><BUTTON onclick="AgeUpdater.sendChatMessage();">send</BUTTON></div>
+<div id="ageChat"><div id="ageChatMsg"></div><div id="ageChatInput"><INPUT type="text"/><BUTTON onclick="AgeUpdater.sendChatMessage();">send</BUTTON></div></div>
 </td></tr>
 </table>
 
@@ -22,7 +24,7 @@ $(function() {
 });
 </script>
 
-
+<!-- <iframe id="comet-frame" style="display: none;"></iframe> -->
 
 #elseif($newGame)
 

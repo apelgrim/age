@@ -1,9 +1,3 @@
-$msg
-<br/>
-
-$msg2
-    
-
   <div id="content">
 
   
@@ -15,7 +9,9 @@ $msg2
      </div>
   <script type="text/javascript">
      $(function() {
+    	 GameCreatorManager.templates = $templates;
           GameCreatorManager.create('#content',new Game());
+          
      });
 </script>
 <div id="ageConsole"></div>

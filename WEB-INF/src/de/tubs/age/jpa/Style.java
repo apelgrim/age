@@ -8,11 +8,14 @@ package de.tubs.age.jpa;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.persistence.Entity;
@@ -24,6 +27,8 @@ import javax.persistence.Transient;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
+
+import de.tubs.age.util.AgeUtil;
 
 /**
  *
@@ -38,21 +43,21 @@ public class Style  extends Model{
     private String bgColor;
 
     @Transient public File bgImage;
-    @Transient public InputStream  bgImageStream;
-    
+    @Transient public InputStream  bgImageStream;    
     @Transient public byte[] bgImageData;
     @Transient public FileItem bgImageFileItem;
     
     
-
-
 	private String bgImageName;
 	private String imagesPath;
     private int left;
     private int top;
+    @Transient private Template template;
 
-    public Style(){}
-    public Style(int height, int width, String bgColor, FileItem bgImageFileItem, int left, int top) {
+    public Style(){
+    }
+
+	public Style(int height, int width, String bgColor, FileItem bgImageFileItem, int left, int top) {
         this.height = height;
         this.width = width;
         this.bgColor = bgColor;
@@ -147,6 +152,7 @@ public class Style  extends Model{
     	this.setBgImageFileItem(style.getBgImageFileItem());
     	this.setLeft(style.getLeft());
     	this.setTop(style.getTop());
+    	this.setBgImageName(style.getBgImageName());
     }
     /**
      * @return the bgImageName
@@ -159,6 +165,7 @@ public class Style  extends Model{
      * @param bgImageName the bgImageName to set
      */
     public void setBgImageName(String bgImageName) {
+  //  	System.out.println("\n\n#######  setBgImageName("+bgImageName+") sec:"+sec+" #######\n\n");
         this.bgImageName = bgImageName;
     }
 
@@ -173,6 +180,7 @@ public class Style  extends Model{
      * @param left the left to set
      */
     public void setLeft(int left) {
+    //	System.out.println("Style. setLeft:"+left);
         this.left = left;
     }
 
@@ -180,6 +188,7 @@ public class Style  extends Model{
      * @return the top
      */
     public int getTop() {
+    
         return top;
     }
 
@@ -187,6 +196,7 @@ public class Style  extends Model{
      * @param top the top to set
      */
     public void setTop(int top) {
+    //	System.out.println("Style. setTop:"+top);
         this.top = top;
     }
 
@@ -205,7 +215,8 @@ public class Style  extends Model{
     }
 
     public void saveAll(String path,EntityManager em) throws IOException {
-    //    System.out.println("###### public void saveAll(String path):"+bgImage);
+  //  	System.out.println("\n\n#######  saveAll bgImageName ist ("+getBgImageName()+") sec:"+sec+" #######\n\n");
+  //      System.out.println("+#+#+#+#+ public void saveAll(String path):path ist NULL? ("+(path==null)+")");
         if(path!=null) saveImage(path);
         save(em);
       
@@ -231,45 +242,44 @@ public class Style  extends Model{
         g.drawImage(src, x, y, null);
         return rotatedImage;
     }
-    private int max(int a, int b){
-        return a>b ? a : b;
-    }
-
     private void saveImage(String path) throws IOException {
     	FileItem imageItem = getBgImageFileItem();
-        if (imageItem != null) {
-       // 	try{
-            String IMAGE_PATH = IMAGES_PATH+path+"\\";
+        if (imageItem != null){
+        	if(imageItem.getSize() > 0) createImages(ImageIO.read(imageItem.getInputStream()),path,imageItem.getName());
+        	else{
+        		if(template != null && bgImageName != null){
+        			String fileName =  extractFileNameFromURI(bgImageName);
+        			String realImagePath= AgeUtil.SERVER_CONTENT_REAL_PATH+"images"+AgeUtil.FS+"templates"+AgeUtil.FS+template.getId()+AgeUtil.FS+fileName;
+        			System.out.println("Style save Imate realImagePath= "+realImagePath+" fileName: "+fileName);
+        			File imageFromTemplate = new File(realImagePath);
+            		createImages(ImageIO.read(imageFromTemplate), path,fileName);
+            	}
+            	System.out.println("Style save Imate template is null? "+(template==null));
+        	}
+        	
+        } 
 
-
-
-            BufferedImage image = ImageIO.read(imageItem.getInputStream());
-        //    System.out.println("#################### imageItem:"+imageItem+" ###############");
-            
-            if(image!=null){
-                File dir = new File(IMAGE_PATH);
-                if(!dir.exists()) dir.mkdirs();
-                String outputFilePath = imageItem.getName();
-                this.setBgImageName(outputFilePath);
-                this.setImagesPath(path);
-                String img_ext = getImageExtension(imageItem.getName()).toLowerCase();
-            //      Logger.getAnonymousLogger().info("######## getImageExtension(bg_image.getName()):"+img_ext);
-        //    System.out.println("#################### image:"+image+", img_ext:"+img_ext+", new File(IMAGE_PATH:"+IMAGE_PATH+"  outputFilePath:"+outputFilePath+") ###############");
-            	ImageIO.write(image, img_ext, new File(IMAGE_PATH + "0_" + outputFilePath));
-            	ImageIO.write(rotateImage(image, 90.0), img_ext, new File(IMAGE_PATH + "270_" + outputFilePath));
-            	ImageIO.write(rotateImage(image, 180.0), img_ext, new File(IMAGE_PATH + "180_" + outputFilePath));
-            	ImageIO.write(rotateImage(image, 270.0), img_ext, new File(IMAGE_PATH + "90_" + outputFilePath));
-            }
-            else {
-            	
-            }
-       // 	}
-       // 	catch(IllegalArgumentException e){
-       // 		 System.out.println("#################### STYLE SAVE IMAGE ERROR:IllegalArgumentException ###############");
-       // 	}
-        }
     }
+    private String extractFileNameFromURI(String imageURI) {
+    	//System.out.println("\n\n###### extractFileNameFromURI("+imageURI+")  #######\n\n");
+		String[] tmp = imageURI.split("/");	
+		return tmp[tmp.length-1];
+	}
 
+	private void createImages(BufferedImage image,String path,String imageName) throws IOException{
+    	 if(image!=null){
+    		 String IMAGE_PATH = GAME_REAL_IMAGES_PATH +path+AgeUtil.FS;
+             File dir = new File(IMAGE_PATH);
+             if(!dir.exists()) dir.mkdirs();
+             this.setBgImageName(imageName);
+             this.setImagesPath(path);
+             String img_ext = getImageExtension(imageName).toLowerCase();
+         	 ImageIO.write(image, img_ext, new File(IMAGE_PATH + "0_" + imageName));
+         	 ImageIO.write(rotateImage(image, 90.0), img_ext, new File(IMAGE_PATH + "270_" + imageName));
+         	 ImageIO.write(rotateImage(image, 180.0), img_ext, new File(IMAGE_PATH + "180_" + imageName));
+         	 ImageIO.write(rotateImage(image, 270.0), img_ext, new File(IMAGE_PATH + "90_" + imageName));
+         }else System.out.println("Style.createImages() image is NULL.");
+    }
     private String getImageExtension(String name) {
         String[] e = name.split("\\.");
         return e.length > 0 ? e[e.length-1] : "png";
@@ -309,19 +319,20 @@ public class Style  extends Model{
 		return sb.toString();
 	}
 	public Style copy(String key) {	
-		if(key != null){
-		String toDir = IMAGES_PATH+key+"\\";
-		String fromDir = IMAGES_PATH+imagesPath+"\\";
-		File dir = new File(toDir);
-        if(!dir.exists()) dir.mkdirs();
-        copyFiles(fromDir+"0_"+bgImageName,toDir+"0_"+bgImageName);
-        copyFiles(fromDir+"90_"+bgImageName,toDir+"90_"+bgImageName);
-        copyFiles(fromDir+"180_"+bgImageName,toDir+"180_"+bgImageName);
-        copyFiles(fromDir+"270_"+bgImageName,toDir+"270_"+bgImageName);
-		}
-		Style style =  new Style(height,width,bgColor,bgImageFileItem,left,top);
-		style.setBgImageName(bgImageName);
-		style.setImagesPath(imagesPath);
+			//System.out.println("STYLE: copy key:"+key);
+			if(key != null && bgImageName!=null){
+				String toDir = GAME_REAL_IMAGES_PATH +key+AgeUtil.FS;
+				String fromDir = GAME_REAL_IMAGES_PATH +imagesPath+AgeUtil.FS;
+				File dir = new File(toDir);
+		        if(!dir.exists()) dir.mkdirs();
+		        copyFiles(fromDir+"0_"+bgImageName,toDir+"0_"+bgImageName);
+		        copyFiles(fromDir+"90_"+bgImageName,toDir+"90_"+bgImageName);
+		        copyFiles(fromDir+"180_"+bgImageName,toDir+"180_"+bgImageName);
+		        copyFiles(fromDir+"270_"+bgImageName,toDir+"270_"+bgImageName);
+			}
+			Style style =  new Style(height,width,bgColor,bgImageFileItem,left,top);
+			style.setBgImageName(bgImageName);
+			style.setImagesPath(imagesPath);
 		return style;
 	}
     private void copyFiles(String fromFileName,String toFileName){
@@ -329,11 +340,15 @@ public class Style  extends Model{
         try {
         	File fromFile = new File(fromFileName);
             File toFile = new File(toFileName);
-            System.out.println("STYLE: copy "+fromFileName+" to "+toFileName);
+     //       System.out.println("STYLE: copy "+fromFileName+" to "+toFileName);
 			FileUtils.copyFile(fromFile, toFile);
 		} catch (IOException e) {
 		//	e.printStackTrace();
 		}
     }
 
+	public void setTemplate(Template template) {
+		this.template = template;
+		
+	}
 }

@@ -39,6 +39,7 @@ public class Item extends Model{
     private boolean visibility;
     
     @Transient private int resourcen_index;
+    @Transient private Template template;
       public Item(){
     
         style = new Style();
@@ -143,11 +144,14 @@ public class Item extends Model{
     }
 
     void saveAll(String path,EntityManager em) throws IOException {
-        style.saveAll(path,em);
+    	if(style != null){ 
+    		style.setTemplate(template);
+        	style.saveAll(path,em);
+        }
         save(em);
     }
 	public void save(String path) throws IOException {
-		style.save(path);
+		if(style != null) style.save(path);
 		
 	}
 	
@@ -163,5 +167,9 @@ public class Item extends Model{
     public String toString() {
     	return "name:"+name+", visibility:"+visibility;
     }
+	public void setTemplate(Template template) {
+		this.template = template;
+		
+	}
    
 }

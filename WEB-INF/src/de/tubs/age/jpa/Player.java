@@ -29,7 +29,7 @@ public class Player extends Model{
    private Style style;
    private int angle;
    
-   @Transient private boolean alive;
+   @Transient private boolean active;
    
    @ManyToOne
     private Game game;
@@ -107,8 +107,8 @@ public class Player extends Model{
 	public String  toJSON() {
         String _name = name==null ? "null" : "'"+name+"'";
 		StringBuffer sb = new StringBuffer();
-		sb.append("{name:"+_name+",id:"+id+",angle:"+angle+",style:"+style.toJSON()+"}");
-	
+		sb.append("{name:"+_name+",active:"+active+",id:"+id+",angle:"+angle+",style:"+style.toJSON()+"}");
+	//    System.out.println("\n"+sb.toString()+"\n");
 		return sb.toString();
 	}
 
@@ -125,12 +125,14 @@ public class Player extends Model{
 		this.style = style;
 	}
 
-	public boolean isAlive() {
-		return alive;
+	public boolean isActive() {
+		return active;
 	}
 
-	public void setAlive(boolean alive) {
-		this.alive = alive;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
+
+
 	
 }

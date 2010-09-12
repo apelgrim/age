@@ -77,7 +77,7 @@ private int id;
     }
 
     void saveAll(String path,EntityManager em) throws IOException {
-       style.saveAll(path,em);
+       if(style != null) style.saveAll(path,em);
        save(em);
     }
 

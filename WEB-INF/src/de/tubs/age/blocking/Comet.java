@@ -14,9 +14,9 @@ public abstract class Comet implements
 
 AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
 	protected final static String CLUSTER = "org.atmosphere.useCluster";
-	protected final static String BEGIN_SCRIPT_TAG = "<script type='text/javascript'>";
-	protected final static String END_SCRIPT_TAG = "</script>";
-	protected final static String ON_MESSAGE_METHOD = "parent.GameManager.connector.onmessage(DATA)";
+	protected final static String BEGIN_SCRIPT_TAG = "<script type='text/javascript'>\n";
+	protected final static String END_SCRIPT_TAG = "</script>\n"; //GameManager.connector.onmessage
+	protected final static String ON_MESSAGE_METHOD = "window.parent.GameManager.connector.onmessage(DATA);";
 	public Comet() {
 	}
 	
@@ -30,6 +30,7 @@ AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
 	       res.setContentType("text/html");
 	        res.addHeader("Cache-Control", "private");
 	        res.addHeader("Pragma", "no-cache");
+	        res.setContentType("text/html;charset=ISO-8859-1");
 	}
 
 	@Override
@@ -37,8 +38,7 @@ AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
 			AtmosphereResource<HttpServletRequest, HttpServletResponse>  event)
 			throws IOException {
 		HttpServletRequest req = event.getRequest();
-    //    HttpServletResponse res = event.getResponse();
-     //   String isInit = req.getParameter("init").trim();
+		setHeader(event.getResponse());
 		 if (req.getMethod().equalsIgnoreCase("GET")) {
 			 init(event);
 		 } else if (req.getMethod().equalsIgnoreCase("POST")) {

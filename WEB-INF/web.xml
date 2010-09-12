@@ -65,9 +65,10 @@
   <session-timeout>1</session-timeout>
   </session-config>
   <listener>
-		<listener-class>
-		de.tubs.age.util.SessionListener
-		</listener-class>
+		<listener-class>de.tubs.age.util.SessionListener</listener-class>
+	</listener>
+	  <listener>
+		<listener-class>de.tubs.age.util.AgeServletContextListener</listener-class>
 	</listener>
   
 </web-app>

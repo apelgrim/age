@@ -21,6 +21,7 @@ import org.apache.click.util.ClickUtils;
 import org.apache.commons.fileupload.FileItem;
 
 import de.tubs.age.pages.LayoutPage;
+import de.tubs.age.util.AgeUtil;
 
 public class XhrPage  extends Page{
 	@Bindable public String title = "Xhr"; 
@@ -33,9 +34,7 @@ public XhrPage(){
     FileItem file= contex.getFileItem("tmp.image");
     try {	
 		msg = saveImage(file);
-		System.out.println("########f## file name : "+msg);
 	} catch (IOException e) {
-		// TODO Auto-generated catch blockjjeeejhjh
 		e.printStackTrace();
 	}
     
@@ -43,13 +42,14 @@ public XhrPage(){
 }
 private String saveImage(FileItem file) throws IOException {
     if (file != null) {
-    	System.out.println("++#getContext().getServletContext().getContextPath():"+getContext().getServletContext().getRealPath("/"));
-        String IMAGE_PATH = getContext().getServletContext().getRealPath("/")+"\\images\\tmp\\";
+        String IMAGE_PATH = AgeUtil.SERVER_CONTENT_REAL_PATH+"images"+AgeUtil.FS+"tmp"+AgeUtil.FS;
+        System.out.println("++# get TMP IMAGE PATH:"+IMAGE_PATH);
+        
         File dir = new File(IMAGE_PATH);
         BufferedImage image = ImageIO.read(file.getInputStream());
         if(image!= null){
         	if(!dir.exists()) dir.mkdirs();
-        	String outputFileName = ""+System.currentTimeMillis();
+        	String outputFileName = AgeUtil.convertToKey(getContext().getSession().getId(),16);
         	String img_ext = getImageExtension(file.getName()).toLowerCase();
         	String fileName = outputFileName+"."+img_ext;
         	ImageIO.write(image, img_ext, new File(IMAGE_PATH + "0_"+fileName));

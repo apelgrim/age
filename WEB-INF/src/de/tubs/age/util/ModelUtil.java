@@ -11,6 +11,7 @@ import de.tubs.age.jpa.Groups;
 import de.tubs.age.jpa.Item;
 import de.tubs.age.jpa.Player;
 import de.tubs.age.jpa.Style;
+import de.tubs.age.jpa.Template;
 
 public class ModelUtil {
    private static int DEFAULT_MAX_SIZE = 2000;	
@@ -100,7 +101,8 @@ private static Groups createGroupFromParams(Context c, String prefix, List<Group
 		
 		if(id>0) group = findGroup(id,groups);
 		else group = new Groups();
-		
+	
+		group.setTemplate(GameLoader.loadTemplate(convertToInt(c.getRequestParameter(prefix+".templateId"))));
 		group.setName(c.getRequestParameter(prefix+".name"));
 		group.setRandomgenerator(convertToBool(c.getRequestParameter(prefix+".randomgenerator")));
 		group.setVisibility(convertToBool(c.getRequestParameter(prefix+".visibility")));
@@ -131,12 +133,15 @@ private static Groups findGroup(int id, List<Groups> groups) {
 }
 private static Style createStyleFromParams(Context c, String prefix){
 	System.out.println("########## MedoUtil. form copy bgCOlor:"+c.getRequestParameter(prefix+".style.bgColor"));
-	return new Style(convertToInt(c.getRequestParameter(prefix+".style.height")), 
+	//bgImageName
+	Style style = new Style(convertToInt(c.getRequestParameter(prefix+".style.height")), 
 			convertToInt(c.getRequestParameter(prefix+".style.width")),
 			c.getRequestParameter(prefix+".style.bgColor"),
 			c.getFileItem(prefix+".style.bgImage"),
 			convertToInt(c.getRequestParameter(prefix+".style.left")),
 			convertToInt(c.getRequestParameter(prefix+".style.top")));
+	style.setBgImageName(c.getRequestParameter(prefix+".style.bgImageName"));
+	return style;
 }
    private static int convertToInt(String param){
 	   int i = 0;

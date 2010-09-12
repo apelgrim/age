@@ -21,6 +21,10 @@ var AgeSettings = {
 		defaultGameName:'Name',
 		pingpongPeriod:25000,
 		chatContenerId:'ageChat',
+		chatContenerMsgId:'ageChatMsg',
+		chatContenerInputId:'ageChatInput',
 		imageVisible:'sichtbar.png',
-		imageUnVisible:'unsichtbar.png'
+		imageUnVisible:'unsichtbar.png',
+		ageConnectionStatusId:'ageConnectionStatus',
+		responseTimeout:5000
 };

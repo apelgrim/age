@@ -29,4 +29,5 @@ public class InstancePlayer {
 	public void destroy(){
 		finalize();
 	}
+
 }

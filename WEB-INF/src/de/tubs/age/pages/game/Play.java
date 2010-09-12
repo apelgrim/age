@@ -26,9 +26,11 @@ public class Play extends LayoutPage{
 		else if(gameKey!= null) playGame(GameLoader.loadGame(gameKey));
 	}
 	private void playGame(Game game){
-		System.out.println("playGame game key: "+game.getKey());
-        gameJSON=game.toJSON();
-		playGame=game;
+		if(game!=null){
+			System.out.println("playGame game key: "+game.getKey());
+	        gameJSON=game.toJSON();
+			playGame=game;
+		}
 	}
 	private void createNewInstance(Game game){
 		GameManager gm = new GameManager();

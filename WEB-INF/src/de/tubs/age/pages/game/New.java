@@ -26,6 +26,7 @@ import de.tubs.age.jpa.Table;
 import de.tubs.age.jpa.manager.GameManager;
 import de.tubs.age.pages.LayoutPage;
 import de.tubs.age.util.AgeUtil;
+import de.tubs.age.util.GameLoader;
 import de.tubs.age.util.ModelUtil;
 
 public class New extends LayoutPage{
@@ -43,34 +44,35 @@ public class New extends LayoutPage{
 	@Bindable protected Form form = new Form();
     @Bindable protected String msg;
     @Bindable protected String msg2;
+    @Bindable protected String templates;
   
 	public New(){
-
-	     System.out.println("########## Ende  Construktor NEw.class");
+		File file = new File(".");
+	     System.out.println("########## Ende  Construktor NEw.class file"+file.getAbsolutePath());
 	}
 	public void onPost() {
 		submit();
 	}
+	public void onGet(){
+		templates=GameLoader.loadJSONTemplates();
+		
+	}
 	public boolean onSubmit() {
-		System.out.println("##########onSubmit NEw.class");
+	//	System.out.println("##########onSubmit NEw.class");
 		return true;
 	}
     public boolean submit() {
-    	System.out.println("#######ee### Submit");
+   // 	System.out.println("#######ee### Submit");
         if (form.isValid()) {
         	Context c = getContext();
-        	System.out.println("########## Submit form ist valid");
         	Game game = new Game();
         	ModelUtil.copyFormParamsToGame(game, c);
-        	System.out.println("########## form.copyTo(game,true); game.name:");
         	GameManager gm = new GameManager();
         	
         	game.setKey(AgeUtil.convertToKey(getContext().getSession().getId(),8));
         	game.setEditKey(AgeUtil.convertToKey(getContext().getSession().getId(),16));
-        	
         	try {
 				gm.saveGame(game);
-				msg = "Ok bez wyjatku przeszlo";
 				setRedirect("/game/?key="+game.getKey()+"&edit="+game.getEditKey());
 			} catch (IOException e) {
 				msg = "Exception: "+e;

@@ -20,13 +20,10 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
     	else return this.bgColor;
     };
     this.getImagePath = function(url){
+    //	if(debug) Log('getImagePath this.bgImage:'+this.bgImage+' imageNam:'+this.imageName,'d');
     	if(!this.isNull(this.bgImage)){ 
-    		if(debug) Log('Style.getImagePath image name is:'+this.bgImage,'d');
-    		
-    		
     		return url ? 'url('+this.bgImage+')' : this.bgImage ;}
     	if(!(this.isNull(this.imagesPath) | this.isNull(this.imageName))) {
-    		if(debug) Log('Style.getImagePath image name is:'+this.imageName,'d');
     		var path = this.imagesPath+this.angle+'_'+this.imageName;
     		if(url) return 'url('+path+')';
     		else return path; 		
@@ -52,12 +49,14 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
     	style.imagesPath=this.imagesPath;
     	style.imageName=this.imageName;
     	style.angle = this.angle;
+    	style.bgImage=this.bgImage;
     	return style;
     };
     this.setStyle = function(s){
         this.height = s.height;
 	    this.width = s.width;
 	    this.bgColor = s.bgColor;
+	    this.bgImage=s.bgImage;
 	    this.imageName = s.imageName;
 	    this.imagesPath = s.imagesPath;
 	    this.left= Math.round(s.left);
@@ -68,7 +67,8 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
 	    this.imagesPath = AgeSettings.userImagePath+GameManager.key+'/';
 	    if(s.imageName) this.bgImage = this.imagesPath+this.angle+'_'+s.imageName;
 	    else this.bgImage=null;
-	    if(debug) Log('Style.loadFromJSON: bgImage:'+this.bgImage,'d');
+	    if(s.bgImage) this.bgImage=s.bgImage;
+	 //   if(debug) Log('Style.loadFromJSON: bgImage:'+this.bgImage,'d');
     	return this;
     };
 }
@@ -80,11 +80,12 @@ function Item(id,name,count,visibility,style){
     this.actionBar=null;
     this.copies=new Array();
     this.isItem=true;
+    this.group=null;
     this.getDomIdPrefix = function(){
         return 'ageItem-';
     };
     this.getDomId=function(){
-    	if(this.id!=-1) return this.getDomIdPrefix()+this.id;
+    	if(this.id > -1) return this.getDomIdPrefix()+this.id;
     	return null;
     };
     this.name = name || _item.name;
@@ -111,12 +112,13 @@ function Item(id,name,count,visibility,style){
     };
     this.copy = function(){
         var cpItem=new Item(null,this.name,this.count,this.visibility,this.style);
+        cpItem.group=this.group;
         return cpItem;
     };
     this.setVisibility=function(vsbl){
     	this.visibility=vsbl;
     	var image_path = this.style.imagesPath+this.style.angle+'_'+this.style.imageName;
-    	if(debug) Log('Item,setVisibility() setze image path:'+image_path+' and visibility: '+vsbl,'d');
+    //	if(debug) Log('Item,setVisibility() setze image path:'+image_path+' and visibility: '+vsbl,'d');
     	this.setItemVisibilityIcon(this.visibility);
     	var img_e = this.HTMLElement.children('img').first();
     	if(img_e) img_e.attr('src',image_path);
@@ -126,14 +128,15 @@ function Item(id,name,count,visibility,style){
     	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
     };
     this.sendItemVisibilityUpdate=function(vsbl){
-    	var player_name=GameManager.instance.players[GameManager.instance.player].name;
-    	var domid=this.HTMLElement.attr('id');
-    	this.setItemVisibilityIcon(this.visibility);
-    	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
-    	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=true';
-    	if(debug) Log('Item send visibility update this.visibility:'+this.visibility+' vsbl:'+vsbl+' this.visibility ^ vsbl:'+(this.visibility ^ vsbl),'d');
-   // 	if(this.visibility ^ vsbl ) AgeUpdater.sendUpdate(update);
-    	 AgeUpdater.sendUpdate(update);
+    	try{
+	    	var player_name=GameManager.instance.players[GameManager.instance.player].name;
+	    	var domid=this.HTMLElement.attr('id');
+	    	this.setItemVisibilityIcon(this.visibility);
+	    	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
+	    	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=true';
+	    	if(debug) Log('Item send visibility update this.visibility:'+this.visibility+' vsbl:'+vsbl+' this.visibility ^ vsbl:'+(this.visibility ^ vsbl),'d');
+	    	AgeUpdater.sendUpdate(update);
+    	}catch(e){Log('Item.sendItemVisibilityUpdate() - '+e,'e');}
     };
     this.createActionBar=function(){
     	if(this.actionBar==null){
@@ -155,8 +158,6 @@ function Item(id,name,count,visibility,style){
     	if(debug) Log('Item:bindAction visibility:'+visibility,'d');
     	if(visibility=='none') this.actionBar.css({display:'block'});
     	else this.actionBar.css({display:'none'});
-    	//(1*this.HTMLElement.css('top')-16)
-   // 	this.actionBar.css({left:this.HTMLElement.css('left'),top:333});
        return this;
     };
     this.createCopies=function(){
@@ -181,12 +182,14 @@ function Player(name,id){
     this.id = id;
     this.name = name;
     this.angle = null;
+    this.HTMLElement=null;
+    this.active = false;
     this.getDomIdPrefix = function(){
         return 'agePlayer-';
     };
     this.getName=function(){
     	if(debug) Log('Player.getName() id='+this.id+', name:'+this.name,'d');
-        if(this.id == -1) return AgeSettings.playerAreaTitleNoPlayer;
+        if(this.id < 0) return AgeSettings.playerAreaTitleNoPlayer;
         else return this.name;
     };
     this.setDomId=function(_id){
@@ -198,6 +201,7 @@ function Player(name,id){
     	if(debug) Log('Player load form json angle:'+p.angle,'d');
     	this.angle = p.angle;
     	this.id = p.id;
+    	this.active=p.active;
     	this.style.left=p.style.left;
     	this.style.top=p.style.top;
     	return this;
@@ -211,10 +215,11 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
         return 'ageGroup-';
     };
     this.getDomId=function(){
-    	if(this.id!=-1) return this.getDomIdPrefix()+this.id;
+    	if(this.id > -1) return this.getDomIdPrefix()+this.id;
     	return null;
     };
     this.isItem=false;
+    this.templateId=null;
     this.HTMLElement=null;
     this.name = name || _group.name;
     this.stacked = stacked || _group.stacked;
@@ -274,6 +279,7 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
 	    this.visibility = g.visibility;
 	    this.order = g.order;
 	    this.id=g.id;
+	    if(g.templateId) this.templateId=g.templateId;
 	    this.randomgenerator = g.randomgenerator;
 	    var style = new Style();
 	    style._class = 'group';
@@ -282,6 +288,7 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
 	    var itms = g.items;
 	    for ( var i = 0; i < itms.length; i++) {
     		var item = new Item();
+    		item.group=this;
       //		item.id = this.id+'-'+i;
      		this.items.push(item.loadFromJSON(itms[i]));
 		}
@@ -325,6 +332,10 @@ function Game(name){
         }
         else Log('Game.computeGameDimension - height or width are NaN','e');
     };
+    this.getPlayerOwner=function(){
+    	if(this.player>=0) return this.players[this.player];
+    	return null;
+    };
     this.setRessourcen = function(ressourcen){
         this.ressourcen = ressourcen;
     };
@@ -336,11 +347,12 @@ function Game(name){
         }
         return this.players;
     };
-    this.getPlayer=function(player_id){
+    this.findPlayer=function(player_id){
     	for ( var i = 0; i < this.players.length; i++) {
 			var player = this.players[i];
 			if(player.id == player_id) return player;
 		}
+    	return null;
     };
     this.getTablePlayersOrder=function(){
         var _players = this.getPlayers();
@@ -420,6 +432,7 @@ function Renderer(game){
         //create game wrapper with 3 div's areas: header, content and footer
         var gameWrapper = HTMLRenderer.div({id:'ageWrapper'});
         var gameHeader = HTMLRenderer.div({id:'ageHeader'});
+     //   gameHeader.append(HTMLRenderer.div({id:AgeSettings.ageConnectionStatusId}).append('<img src="/age/images/connect_idle.gif"/>'));
         gameHeader.append(HTMLRenderer.h1({content:game.name}));
      
         var cont  = this.createElement(game.style);
@@ -487,8 +500,6 @@ function Renderer(game){
         return gameResourcenCnt;
     };
     this.renderRandomGenerator=function(grp){
-    	
-    	
     	var grps_contener = HTMLRenderer.div({_class:'randomgenerator'});
     	try{
         var itm_style = new Style();
@@ -527,13 +538,13 @@ function Renderer(game){
 
             var itm_style = new Style();
             itm_style.setStyle(itm.style);     
-            Log('### renderer copy style(itm.style.imagesPath:'+itm.style.imageName+') to style :'+itm_style.imageName,'d');
+            Log('### renderer copy style(itm.style.imagesPath:'+itm.style.imageName+' itm.style.bgName :'+itm.style.bgImage,'d');
             itm_style.bgColor= itm.style.bgColor;
             
-            if(!itm.visibility){
+            if(!(grp.visibility & itm.visibility)){
                 itm_style.bgColor = grp.style.bgColor;
                 itm_style.imageName = grp.style.imageName;
-                if(debug) Log('Renderer: renderGroup !itm.visibility grp.style.imageName: '+grp.style.imageName+' grp.style.bgColor:'+grp.style.bgColor,'d');
+                itm_style.bgImage = grp.style.bgImage;
             }
       //      itm_style.left = itm.style.left + j*itm.style.width;
       //      itm_style.top = itm.style.top;
@@ -567,7 +578,7 @@ function Renderer(game){
     this.makeDraggable = function(itemDOM,itemObject){
     	itemDOM.draggable({
     		containment :  this.gameContent,
-    		zIndex: 2700,
+    		zIndex: 999999,
     		scroll : false,
     		drag: function(event, ui) {
     			AgeUpdater.setPosition(event,ui,itemObject);
@@ -577,10 +588,9 @@ function Renderer(game){
     			}
               },
             stop: function(event, ui) {
-            	//  if(debug) Log('MAKE DRAGGABLA actio STOP itemObject.randomgenerator ist '+itemObject.randomgenerator,'d');
+            	  itemDOM.css({zIndex:GameManager.getNextLayerSeqNr(itemDOM.css('zIndex'))});
             	  if(itemObject.randomgenerator) AgeUpdater.randomizeGroup(itemObject);
-              }
-    	   
+              } 
             });
     	return itemDOM;
     };
@@ -592,9 +602,13 @@ function Renderer(game){
              var name = player.name;
              if(name == null || name =='') name ="Player - "+(i+1);
              player.name = name;
-             if(debug) Log('Renderer.renderPlayers() name is null t? :'+(typeof player.name),'d');
+            
              var playerHeader = HTMLRenderer.p({_class:'agePlayerHeader',content:name});
              playerElement.append(playerHeader);
+             if(player.active) playerElement.addClass('activePlayer');
+             else playerElement.addClass('unactivePlayer');
+          
+             player.HTMLElement=playerElement;
         	 this.gameContent.append(playerElement);
          }
     };
@@ -804,7 +818,7 @@ var Perspective={
 
 function Log(text,level) {
 	var msg;
-	if(level=='w')msg = '<span style="color:yellow;">WARNING: '+text+'</span>';
+	if(level=='w')msg = '<span style="color:#D9CC02;">WARNING: '+text+'</span>';
 	else if(level=='e') msg = '<span style="color:red;">ERROR: '+text+'</span>';
 	else if(level=='d') msg = '<span style="color:black;">DEBUG: '+text+'</span>';
 	else  msg = '<span style="color:green;">INFO: '+text+'</span>';
@@ -847,9 +861,8 @@ function CometConnector(){
         	if(data){
         		var status = data.status;
         		if(status == 0){
-        			if(debug) Log('init status 0, nachricht:'+data.msg,'d');
-        		}else if(status==1){
-        			
+        			Log(data.msg,'e');
+        		}else if(status==1){     			
         			if(data.game) GameManager.loadGame(data.game);
         			if(GameManager.instance != null) GameManager.instance.setCurrentPlayer(data.player);
         			GameManager.local=false;
@@ -860,12 +873,14 @@ function CometConnector(){
         		//	GameManager.connector.send("ping=");
         		}
         		else Log('Ich habe unbekannte Init antwort bekommen.!!! status:'+status,'e');
-        	}else Log('F�r eine Ation - init wurde keine Daten empfanden!!!','e');
+        	}else Log('Für eine Ation - init wurde keine Daten empfanden!!!','e');
+        	
+        	AgeUtil.setConnectionStatus('idle');
         }
         if(action=='j'){
         	if(data.player){
         		var player = data.player;
-        		Log('Bekomme Daten ...  Player '+player.name+' mit ID:'+player.id+' has joined.','i');
+        		GameManager.joinGame(player);
         	}
         	 
         }
@@ -878,20 +893,18 @@ function CometConnector(){
         	var cur_player = GameManager.instance.players[GameManager.instance.player];
         	
         	if(player_id!=cur_player.id){
-        		var player = GameManager.instance.getPlayer(player_id);
+        		var player = GameManager.instance.findPlayer(player_id);
                 var angle = cur_player.angle-player.angle;
-        		if(debug) Log('Bekomme Daten:move item_id '+item_id+', dom:'+pos.dom+',  pos x '+pos.x+' y:'+pos.y+', w:'+pos.w+' h:'+pos.h+' player:'+player.id,'d');
+        //		if(debug) Log('Bekomme Daten:move item_id '+item_id+', dom:'+pos.dom+',  pos x '+pos.x+' y:'+pos.y+', w:'+pos.w+' h:'+pos.h+' player:'+player.id,'d');
          		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
         		$('#'+pos.dom).css( {left : style.left,top : style.top});
         	}
-    	   }catch(e){
-    		Log('CometConnector.onmessage() action:move msg:'+e,'e');
-    	   }
+    	   }catch(e){Log('CometConnector.onmessage() action:move msg:'+e,'e'); }
         }
         if(action=='r'){
         	var grp_id = data.grp;
         	var itm_id = data.itm;
-        	if(debug) Log('CometConnector.onmessage()  action:random grp_id:'+grp_id+', itm_id:'+itm_id,'d');
+    //    	if(debug) Log('CometConnector.onmessage()  action:random grp_id:'+grp_id+', itm_id:'+itm_id,'d');
         	var groups = GameManager.instance.ressourcen;
         	for ( var i = 0; i < groups.length; i++) {
 				var grp = groups[i];
@@ -899,8 +912,10 @@ function CometConnector(){
 			}
         }
         if(action=='chat'){
-        	var text = $('#'+AgeSettings.chatContenerId).children('div').first();
-        	text.prepend('<p><span class="label">['+data.from+']<span> '+data.msg+'</p>');
+        	GameManager.chat({n:data.from,v:data.msg});
+        }
+        if(action=='leave'){
+        	GameManager.removePlayer(data);
         }
         if(action=='v'){	
         	var itm_id = data.itm;
@@ -908,13 +923,13 @@ function CometConnector(){
         	var itm_dom = data.domid;
         	var visibility = data.v;
         	var img_name = data.img;
-        	if(debug) Log('CometConnector.onmessage()  action:visibility itm_id:'+itm_id+', player_name:'+player_name+' itm_dom:'+itm_dom+' visibility'+visibility+' img_name:'+img_name ,'d');
+        //	if(debug) Log('CometConnector.onmessage()  action:visibility itm_id:'+itm_id+', player_name:'+player_name+' itm_dom:'+itm_dom+' visibility'+visibility+' img_name:'+img_name ,'d');
         	var groups = GameManager.instance.ressourcen;
         	for ( var i = 0; i < groups.length; i++) {
 				var grp = groups[i];			
 				for ( var j = 0; j < grp.items.length; j++) {
 					var itm  = grp.items[j];
-					if(debug) Log('CometConnector.onmessage()  if(itm.id==itm_id) itm.id:'+itm.id ,'d');
+					//if(debug) Log('CometConnector.onmessage()  if(itm.id==itm_id) itm.id:'+itm.id ,'d');
 		        	
 					if(itm.id==itm_id){
 						if(visibility)  itm.style.imageName = img_name;
@@ -922,29 +937,42 @@ function CometConnector(){
 						var game = GameManager.instance;
 						itm.style.angle = game.players[game.player].angle;
 						itm.setVisibility(visibility);
-						var text = $('#'+AgeSettings.chatContenerId).children('div').first();
-						if(debug) Log('itm.style.imageName: '+itm.style.imageName+' Chat MSG text_element:'+text,'d');
-			        	text.prepend('<p><span class="label">['+player_name+']<span> hat <strong>'+itm.name+'</strong> umgedreht.</p>');
+					//	if(debug) Log('itm.style.imageName: '+itm.style.imageName+' Chat MSG text_element:'+text,'d');
+			        	GameManager.chat({n:player_name,v:' hat eine Element von eine Gruppe <strong>'+grp.name+'</strong> umgedreht.'});
 			        	
 					}
 				}
 			}
         }
-      //  else  Log('Empfange undefinierte Aktion.','e');
    },function(key){
         alert("onclose"+key);
    },function(data){
-	   
-	  
+	    AgeUtil.setConnectionStatus('active');
 		$.ajax({type : "POST", url:GameManager.url, data:data,
-			success: function(data) {
-			 Log('on succses:'+data,'d');
+			success: function(data, textStatus, xhr) {
+		//	if(debug) Log('CometConnector.send() success:textStatus: '+textStatus+' data:'+data,'d');
 			GameManager.connector.onmessage(data);
-		  }	});
+			var plyr = GameManager.instance.getPlayerOwner();
+			var plyr_active = (plyr==null ? false : plyr.active);
+			if(plyr_active) AgeUtil.setConnectionStatus('idle');
+			else  AgeUtil.setConnectionStatus('disconnected');
+		  },
+		  error:function(xhr, textStatus, errorThrown) {
+			     var status = textStatus; 
+			     var errTwn = '';
+			     if(status=='timeout') status='Timeout von '+AgeSettings.responseTimeout+' ms wurde überschritten.';
+			     if(errorThrown) errTwn=', errorThrown: '+errorThrown;
+				 Log('CometConnector.send(): '+status+errTwn,'e');
+				 AgeUtil.setConnectionStatus('caution');
+		  },
+		  timeout:AgeSettings.responseTimeout
+		});
    },function(url,query){
 	 if(debug) Log(' Erstelle eine IFRAME...','d');
-	// GameManager.connector.send("init=1&"+query);
-		$('body').append('<iframe name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
+//	 $('#comet-frame').attr('src',url+'?'+query);
+//	 $('body').append($('#comet-frame').attr('src',url+'?'+query));
+	 AgeUtil.setConnectionStatus('active');
+	 $('body').append('<iframe onUnload="GameManager.leaveGame();" onLoad="GameManager.leaveGame();" name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
    });
 
 }
@@ -958,6 +986,7 @@ var GameManager = {
 	    joined:false,
 	    url:null,
 	    local:true,
+	    layerSeqNr:100,
 	    setLocal:function(local){
 			this.local=local;
         },
@@ -971,16 +1000,65 @@ var GameManager = {
 	    table:function(){
 	        return this.game().table;
 	    },
+	    getNextLayerSeqNr:function(seq){
+	    	if(this.layerSeqNr == seq) return seq;
+	    	else if(this.layerSeqNr < seq){
+	    		this.layerSeqNr = seq;
+	    		return seq;
+	    	}else{
+	    		this.layerSeqNr += 1;
+	    		return this.layerSeqNr;
+	    	} 
+	    },
+	    chat:function(data){
+	    	var text = $('#'+AgeSettings.chatContenerMsgId);
+        	text.prepend('<p><span class="label">['+data.n+']</span> '+data.v+'</p>');  	
+	    },
+	    removePlayer:function(player_id){
+	    	var player = this.instance.findPlayer(player_id);
+	    	if(player != null){
+				player.HTMLElement.removeClass('activePlayer');
+				player.HTMLElement.addClass('unactivePlayer');
+			//	player.name = _player.name;
+				player.active=false;
+				Log('Player <strong>'+player.name+'</strong> mit ID:'+player.id+' hat das Spiel verlassen.','i');
+	    	}else Log('GameManager.removePlayer(): Player mit id:'+player_id+' wurde nicht gefunden.','w');
+	    },
+	    joinGame:function(_player){
+	    	try{
+	    	var players=this.instance.players;
+	    	for ( var i = 0; i < players.length; i++) {
+				var player = players[i];
+				if(player.id == _player.id){	
+					player.HTMLElement.removeClass('unactivePlayer');
+					player.HTMLElement.addClass('activePlayer');
+					var owner_id = this.instance.getPlayerOwner()==null? -1 : this.instance.getPlayerOwner().id;
+					if(player.id == owner_id) player.HTMLElement.addClass('playerOwner');
+					player.name = _player.name;
+					player.active=true;
+					Log('Player <strong>'+player.name+'</strong> mit ID:'+player.id+' has joined.','i');
+				}
+			}
+	    	}catch(e){Log('GameManager.joinGame() '+e,'e');}
+	    },
 	    leaveGame:function(){
-	    	var cur_player = GameManager.instance.players[GameManager.instance.player].id;
-	    	AgeUpdater.sendUpdate('l=player&id='+cur_player);
+	    	try{
+		    	var cur_player = GameManager.instance.players[GameManager.instance.player];
+		    	cur_player.HTMLElement.removeClass('activePlayer');
+		    	cur_player.HTMLElement.removeClass('playerOwner');
+		    	cur_player.HTMLElement.addClass('unactivePlayer');
+		    	this.chat({n:cur_player.name,v:'*** verließ das Spiel.'});
+		    	AgeUpdater.sendUpdate('action=leave&player='+cur_player.id);
+		    	cur_player.active = false;
+		    	return false;
+	    	}catch(e){Log('GameManager.leaveGame() - '+e,'e');}
 	    },
 	    init:function(initParams){
 	    	Log('Setze init Parameters...','i');
 	    	if(initParams.key) this.key = initParams.key;
 	        this.url = initParams.url;
 	        if(initParams.contener) this.contener = initParams.contener;
-	        Log('Setze init contener :'+this.contener,'e');
+	        Log('Game contenter is :'+this.contener,'i');
 	        Log('Erstelle eine Connector...','i');
 	        this.connector = new CometConnector();
 	        Log('Verbinde sich mit den Server...','i');
@@ -1028,19 +1106,25 @@ AgeUpdater={
         }
     },
     randomizeGroup:function(grp){
-    	var cur_player = GameManager.instance.players[GameManager.instance.player];
-    	this.sendUpdate('action=random&grp='+grp.id+'&p='+cur_player.name);
+    	if(GameManager.instance){
+	    	var cur_player = GameManager.instance.players[GameManager.instance.player];
+	    	this.sendUpdate('action=random&grp='+grp.id+'&p='+cur_player.name);
+    	}
     },
     sendChatMessage:function(){
-    	var input_text = $('#'+AgeSettings.chatContenerId).children('input').first();
-    	var cur_player = GameManager.instance.players[GameManager.instance.player];
-    	this.sendUpdate('action=chat&msg='+input_text.val()+'&from='+cur_player.name);
-    	input_text.attr('value','');  	
+    	var input_text = $('#'+AgeSettings.chatContenerInputId).children('input').first();
+    	if(input_text!=null && input_text!=''){
+	    	var cur_player = GameManager.instance.players[GameManager.instance.player];
+	    	this.sendUpdate('action=chat&msg='+input_text.val()+'&from='+cur_player.name);
+	    	input_text.attr('value','');  
+    	}
     },
     sendUpdate:function(updateMsg){
         if(!GameManager.local){
-            Log('sende : '+updateMsg,'i');
-            GameManager.connector.send(updateMsg);
+            
+            var cur_player = GameManager.instance.players[GameManager.instance.player];
+        //    Log('update : '+updateMsg+' gesendet?'+cur_player.active,'d');
+            if(cur_player.active) GameManager.connector.send(updateMsg);
         }
         else{
             Log('AgeUpdater.sendUpdate(): Game ist Local.','w');
@@ -1057,7 +1141,7 @@ AgeUpdater={
         	} 	
         	var diff = _date.getTime()-this.lastUpdateTime;
         	if(diff > AgeSettings.pingpongPeriod){
-        		this.sendUpdate('action=ping');
+        	//	this.sendUpdate('action=ping');
         		this.lastUpdateTime=_date.getTime();
         	}
         }    
@@ -1114,13 +1198,26 @@ AgeUtil={
             array[j] = tempi;
         }
         return array;
+    },
+    isNull:function(e){
+    	if(e==null || e == '' || e=='null' || e == undefined) return true;
+    	return false;
+    },
+    setConnectionStatus:function(s){
+    	var status_img = AgeSettings.imagePath;
+    	if(s=='idle') status_img += 'connect_idle.gif';
+    	else if(s=='active') status_img += 'connect_active.gif';
+    	else if(s=='caution')status_img += 'connect_caution.gif';
+    	else if(s=='disconnected')status_img += 'connect_disconnected.gif';
+    	else status_img += 'connect_idle.gif';
+    	$('#'+AgeSettings.ageConnectionStatusId).html('<img  src="'+status_img+'" />');
     }
 };
 
 
 
 var DEFAULTS={
-    style:{height:30, width:30,bgColor:'transparent',_class:'',left:0,top:0, bgImage:null,id:'',position:'absolute'},
+    style:{height:90, width:72,bgColor:'transparent',_class:'',left:0,top:0,id:'',position:'absolute'},
     item:{name:AgeSettings.defaultItemName,count:1, visibility:true},
     group:{name:AgeSettings.defaultGroupName, visibility:true,stacked:false, order:true, randomgenerator:false},
     game:{name:AgeSettings.defaultGameName,_public:true}
@@ -1152,6 +1249,10 @@ var GameCreatorManager={
     _next:null,
     _back:null,
     _save:null,
+    templates:new Array(),
+    setTemplates: function(tmpls){
+	  this.templates=tmpls;
+    },
     update: function(){
        if(mColorPicker != null) mColorPicker.main();
        else Log('GameCreatorManager:update Color Picker ist nicht Verfügbar !!!','e');
@@ -1246,6 +1347,18 @@ var GameCreatorManager={
        this.update();
 
     },
+    loadTemplate: function(tmplt_id){
+    	try{
+    		
+	    	var template = this.templates[tmplt_id];
+	    	var grp = new Group();
+	    	grp.loadFromJSON(template.value);
+	    	grp.templateId=template.id;
+	    	if(debug)Log('Lade templates index:'+tmplt_id+' templates length:'+this.templates.length+' template.id:'+template.id+' grp.items[0].style.bgImage:'+grp.items[0].style.bgImage,'e');
+	    	GameCreatorManager.gameCreator.resourcenCreator.newGroup(false, grp);
+	    	this.update();
+    	}catch(e){Log('GameCreatorManager.loadTemplate(): '+e,'e');}
+    },
     edit:function(domid,gameManager,editKey){
     	this.editKey=editKey;
     	this.key = gameManager.key;
@@ -1282,7 +1395,33 @@ var GameCreatorManager={
         return wrapperDiv.append(form);
     }
 };
-
+var AgeTemplates={
+	contener:null,
+	bind:function(e,i){
+		e.bind('click', function() {
+			GameCreatorManager.loadTemplate(i);
+			if(AgeTemplates.contener!=null){
+				AgeTemplates.contener.css({display:'none'});	
+			} 			
+		});
+	return;
+    },
+    create:function(templates){
+    	_templates = templates || GameCreatorManager.templates;
+    	if(_templates.length>0){
+    		var ul = HTMLRenderer.ul({_class:'ageTemplatesList'});
+        	$.each(_templates, function(index, value) { 
+        		var li = HTMLRenderer.li({});
+        		li.append(value.name);
+        		ul.append(li);
+        		AgeTemplates.bind(li,index);
+        	});
+        	if(this.contener!=null) this.contener.append(ul);
+    	}else Log('Es stehen keine Templates zu Verfügung.','w');
+    		
+    
+    }
+};
 
 function GameCreator(game) {
 	this.gameSetting=null;
@@ -1346,7 +1485,7 @@ function GameSetting(game) {
     	for ( var i = 0; i < players.length; i++) {
 			var player = players[i];
 			this.playersInputHiddenElements.append(HTMLRenderer.inputHidden({name:'players['+i+'].angle',value:player.angle}));
-		//	this.playersInputHiddenElements.append(HTMLRenderer.inputHidden({name:'players['+i+'].name',value:player.name}));
+			this.playersInputHiddenElements.append(HTMLRenderer.inputHidden({name:'players['+i+'].name',value:player.name}));
 			this.playersInputHiddenElements.append(HTMLRenderer.inputHidden({name:'players['+i+'].style.left',value:player.style.left}));
 			this.playersInputHiddenElements.append(HTMLRenderer.inputHidden({name:'players['+i+'].style.top',value:player.style.top}));
 		}
@@ -1446,7 +1585,7 @@ function ResourcenCreator(game) {
     this.removeGroup=function(grp){
              for (var i = 0; i < this.groups.length; i++) {
                 if(grp.id == this.groups[i].id){
-                    Log('l�sche gruppe mit DOMID:'+this.groups[i].groupWrapper.attr('id'),'i');
+                    Log('Lösche Gruppe mit DOMID:'+this.groups[i].groupWrapper.attr('id'),'i');
                     this.groups[i].groupWrapper.remove();
                     this.groups[i].id = null;
              //       this.hiddenGroupsSizeComponent.value =  parseInt(this.hiddenGroupsSizeComponent.value)-1;
@@ -1518,22 +1657,32 @@ function ResourcenCreator(game) {
 	};
 	this.createResourcenFooter=function() {
 		var footer = HTMLRenderer.div( {id : 'ResourcenFooterBar',_class : 'ResourcenFooterBar'});
-
+        
+		var _template = HTMLRenderer.div({_class:'RsrcnFooterButton'});
+		var _template_show = HTMLRenderer.buttonItem({_class:'RsrcnFooter',title:'Load from template',image:'template.png'});
+		var _template_list = HTMLRenderer.div({}).css({display:'none'});
+		_template.append(_template_show);
+		_template.append(_template_list);
 		var _new = HTMLRenderer.buttonItem({_class:'RsrcnFooter',title:'Neue Group',image:'new.png'});
 		var _edit = HTMLRenderer.buttonItem({_class:'RsrcnFooter',title:'Edit Group',image:'edit.png'});
 		var _del = HTMLRenderer.buttonItem({_class:'RsrcnFooter',title:'Delete Group',image:'delete.png'});
 
 		var thisRes = this;
+		AgeTemplates.contener=_template_list;
+		AgeTemplates.create(GameCreatorManager.templates);
 
+		_template_show.bind('click', function() {_template_list.css({display:'block'});});
 		_new.bind('click', function() {GameCreatorManager.addGroup(thisRes);});
 		_del.bind('click', function() {alert('uppss.. noch nicht implementiert.');});
 		_edit.bind('click', function() {alert('uppss.. noch nicht implementiert.');});
 
+		
 		footer.append(_new);
 		footer.append(_edit);
 		footer.append(_del);
+		footer.append(_template);
 
-                return footer;
+        return footer;
 	};
 }
 function GroupCreator(id,index) {
@@ -1569,7 +1718,7 @@ function GroupCreator(id,index) {
                   
              for (var i = 0; i < this.items.length; i++) {
                 if(itm_id == this.items[i].id){
-                    Log('l�sche Element mit DOMID:'+this.items[i].itemWrapper.attr('id'),'i');
+                    Log('l�sche Element mit DOMID:'+this.items[i].itemWrapper.attr('id'),'i');
                     this.items[i].itemWrapper.remove();
                     this.items[i].id=null;                
                     //this.items.splice(i, 1);
@@ -1709,6 +1858,9 @@ function GroupCreator(id,index) {
         		this.bgImageView.append('<img src="'+image+'"/>');	
         	}
         };
+        this.getBgImageNameComponent=function(){
+        	return HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.bgImageName',value:this.group.style.bgImage});
+        };
 	this.createGroupSetting = function() {
 		this.domid ='GroupSetting-' + id;
 		var gs = HTMLRenderer.div({id :this.domid ,_class : 'GroupSetting',position:'relative'});
@@ -1717,7 +1869,13 @@ function GroupCreator(id,index) {
                 div_left.append(HTMLRenderer.checkBox({}));
 
                 var div_center = HTMLRenderer.div({_class : 'GrpSettingCntr'});
-                if(GameManager.key != null) this.setBGImage(this.group.style.imageName);
+                if(GameManager.key != null && !AgeUtil.isNull(this.group.style.imageName)) this.setBGImage(this.group.style.imageName);
+                else{
+                	if(!AgeUtil.isNull(this.group.style.bgImage)){
+                		this.bgImageView.empty();
+                		this.bgImageView.append('<img src="'+this.group.style.bgImage+'"/>');	
+                	}
+                }
                 div_center.append(this.bgImageView);
                 var ul = HTMLRenderer.ul();
                 ul.append(HTMLRenderer.li({content:this.getNameComponent()}));
@@ -1729,7 +1887,7 @@ function GroupCreator(id,index) {
                 ul.append(HTMLRenderer.li({content:this.getSizeComponent()}));
                 ul.append(HTMLRenderer.li({content:this.getBgImageComponent()}));
                 div_center.append(ul);
-               
+                div_center.append(this.getBgImageNameComponent());
                 div_center.append(HTMLRenderer.clear());
 
                 var div_right = HTMLRenderer.div({_class : 'GrpSettingRght'});
@@ -1782,6 +1940,9 @@ function GroupCreator(id,index) {
 		}
 		*/
 		this.groupContener.append(HTMLRenderer.inputHidden({name:'resourcen['+index+'].id',value:''+this.group.id}));
+		var tmpl_e = '';
+		if(this.group.templateId != null) tmpl_e  = HTMLRenderer.inputHidden({name:'resourcen['+index+'].templateId',value:this.group.templateId});
+		this.groupContener.append(tmpl_e);
 		this.groupContener.append(this.left);
 		this.groupContener.append(this.top);
 	    this.group.setPositionComponent({left:this.left,top:this.top});
@@ -1893,6 +2054,9 @@ function ItemCreator(id,index) {
     this.getHeight = function(){
         return this.item.style.height;
     };
+    this.getBgImageNameComponent=function(){
+    	return HTMLRenderer.inputHidden({name:this.namePrefix+'.style.bgImageName',value:this.item.style.bgImage});
+    };
     /*
     this.setPosition=function(pos){
     	this.top.attr('left',pos.left);
@@ -1937,7 +2101,13 @@ function ItemCreator(id,index) {
         var div_center = HTMLRenderer.div({_class : 'ItmWrpprCntr'});
 
         var div_right = HTMLRenderer.div({_class : 'ItmWrpprRght'});
-        if(GameManager.key != null) this.setBgImage(this.item.style.imageName,false);
+        if(GameManager.key != null && !AgeUtil.isNull(this.item.style.imageName)) this.setBgImage(this.item.style.imageName,false);
+        else{
+        	if(!AgeUtil.isNull(this.item.style.bgImage)){
+        		this.bgImageView.empty();
+        		this.bgImageView.append('<img src="'+this.item.style.bgImage+'"/>');	
+        	}
+        }
         div_center.append(this.bgImageView);
         var ul = HTMLRenderer.ul();
         ul.append(HTMLRenderer.li({content:this.getNameComponent(),_class : 'ItemNm'}));
@@ -1949,6 +2119,7 @@ function ItemCreator(id,index) {
         div_center.append(ul);
         div_center.append(this.left);
         div_center.append(this.top);
+        div_center.append(this.getBgImageNameComponent());
         this.item.setPositionComponent({left:this.left,top:this.top});
         div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].id',value:''+this.item.id}));
 
@@ -2136,13 +2307,11 @@ var HTMLRenderer = {
         var itm = this.div({id : style.id,_class:style._class,width: style.width, height: style.height,left: style.left,
             top:  style.top, position:style.position,backgroundColor : style.getBgColor()});
         var imagePath=style.getImagePath(false);
-        if(imagePath!=null) itm.append(this.img({src:style.getImagePath(false),width:style.width,height:style.height,title:p.title}));
-    	if(debug) Log('create element imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath:'+style.imagesPath+''
-    			 +',bgColor:'+style.bgColor+',id:'+style.id+',_class:'+style._class,'i');
+        if(imagePath!=null) itm.append(this.img({src:imagePath,width:style.width,height:style.height,title:p.title}));
+    //	if(debug) Log('** createGameItem imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath:'+imagePath+''
+    //			 +',bgColor:'+style.bgColor+',id:'+style.id+',_class:'+style._class,'d');
                      
         return itm;
     }
 
 };
-
-

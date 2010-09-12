@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +23,7 @@ import de.tubs.age.util.Instance;
 import de.tubs.age.util.InstancePlayer;
 
 public class LongPolling  extends Comet {
-	private ArrayList users;
+
 	@Override
 	protected void init(AtmosphereResource<HttpServletRequest, HttpServletResponse> event) throws IOException {
 		HttpServletRequest req = event.getRequest();
@@ -31,20 +32,20 @@ public class LongPolling  extends Comet {
     	boolean loadGame = Boolean.parseBoolean(req.getParameter("loadGame").trim());
     	 	
         if(instancePlayer == null){
-        	System.out.println("###### LongPolling  instancePlayer is NULL.");
+        	System.out.println("###### LongPolling  instancePlayer is NULL und wird in der session gespeichert.#########");
         	String key = req.getParameter("key").trim();
         	Instance instance = GameLoader.loadInstance(key);
         	if(instance != null){
-        		System.out.println("###### LongPolling  instancePlayer is NULL and instance is NOT NULL sende init data.");
+        		System.out.println("LongPolling   instance mit seq "+Instance.instance_seq+" sende init data.");
         		InstancePlayer ip = new InstancePlayer(instance);
         		req.getSession().setAttribute("InstancePlayer", ip);
         		sendInitData(ip,event,loadGame);
         		
         	}else{
-        		System.out.println("###### LongPolling instnce ist NULL (Instance mit key="+key+" wurde nicht gefunden).");
+        		System.out.println("LongPolling instnce ist NULL (Instance mit key="+key+" wurde nicht gefunden).");
         	}
         }else{
-        	System.out.println("###### LongPolling  instancePlayer is NOT NULL sende init data.");
+        	System.out.println("###### LongPolling  instancePlayer wird von session geholt  sende init data.#####");
         	sendInitData(instancePlayer,event,loadGame);
         }		
 		
@@ -70,11 +71,11 @@ public class LongPolling  extends Comet {
 			    int w = convertToInt(req.getParameter("w"));
 			    int h = convertToInt(req.getParameter("h"));
 			    String isItem = ""+req.getParameter("isItm");
-			   
+			 //   System.out.println("###### param isItem:("+isItem+")");
 				int item = convertToInt(req.getParameter("i"));
 				int  player = convertToInt(req.getParameter("p"));
 				String dom = req.getParameter("dom");
-				if(isItem.equals("false"))	game.setItemPosition(x,y,item);
+				if(isItem.equals("true")) game.setItemPosition(x,y,item);
 				else  game.setGroupPosition(x,y,item);
 				response="{n:'m',v:{i:"+item+",pos:{x:"+x+",y:"+y+",dom:'"+dom+"',w:"+w+",h:"+h+"},player:"+player+"}}";
 				event.getBroadcaster().broadcast(response);
@@ -117,6 +118,16 @@ public class LongPolling  extends Comet {
 				response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",img:'"+image_name+"'}}";
 				System.out.println("### LongPolling.onmessage visibility: response:"+response);
 				event.getBroadcaster().broadcast(response);
+				
+			}else if(action.equalsIgnoreCase("leave")){
+				int id = convertToInt(req.getParameter("player"));
+				System.out.println("### leave game action");
+				if(instancePlayer.getInstance().removePlayer(id)){
+					response="{n:'leave',v:"+id+"}";
+					System.out.println("### leave game action response:"+response);
+					event.getBroadcaster().broadcast(response);
+				//	event.getBroadcaster().destroy();
+				}
 			}
         }
 		
@@ -136,10 +147,13 @@ public class LongPolling  extends Comet {
 			String playerJSON = player.toJSON();
 			String broadcast="{n:'j',v:{player:"+playerJSON+"}}";
 			response="{n:'init',v:{status:1,player:"+playerJSON+gameJSON+"}}";
-			System.out.println("LongPoling.sendInitData: "+response);
+			//System.out.println("\n\nLongPoling.sendInitData: "+response+"\n\n");
+		//	System.out.println("\n\nLongPoling.sendInitData broadcast: "+broadcast+"\n\n");
 			event.suspend(-1);
     		Broadcaster bc = event.getBroadcaster();
+    		instancePlayer.getInstance().setBroadcaster(bc);
     		bc.broadcast(broadcast);
+    		bc.scheduleFixedBroadcast("{n:'ping',v:'pong'}", 30, TimeUnit.SECONDS);
 		}else{
 			response="{n:'init',v:{status:0,msg:'Es wurde keine Player zugewissen!!!'}}";
 		}

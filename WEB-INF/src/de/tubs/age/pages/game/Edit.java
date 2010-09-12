@@ -21,6 +21,7 @@ public class Edit   extends LayoutPage{
 	private static final long serialVersionUID = 1L;
 	@Bindable protected Game game;
 	@Bindable private String gameKey;
+	@Bindable protected String templates;
 	public Edit(){
 		Context c = getContext();
 		
@@ -30,7 +31,7 @@ public class Edit   extends LayoutPage{
 		if(game!= null) gameKey=game.getKey();
 	}
 	public void onGet(){
-		
+		templates=GameLoader.loadJSONTemplates();
 		
 	}
 	public void onPost() {
