@@ -236,6 +236,7 @@ public class Style  extends Model{
              else  y = -y;
         }
         AffineTransform affineTransform = AffineTransform.getRotateInstance(Math.toRadians(degrees),src.getWidth() / 2,src.getHeight() / 2);
+       
         BufferedImage rotatedImage = new BufferedImage(_width,_height, src.getType());
         Graphics2D g = (Graphics2D) rotatedImage.getGraphics();
         g.setTransform(affineTransform);
@@ -254,11 +255,8 @@ public class Style  extends Model{
         			File imageFromTemplate = new File(realImagePath);
             		createImages(ImageIO.read(imageFromTemplate), path,fileName);
             	}
-            	System.out.println("Style save Imate template is null? "+(template==null));
-        	}
-        	
-        } 
-
+        	}	
+        }
     }
     private String extractFileNameFromURI(String imageURI) {
     	//System.out.println("\n\n###### extractFileNameFromURI("+imageURI+")  #######\n\n");
@@ -273,6 +271,7 @@ public class Style  extends Model{
              if(!dir.exists()) dir.mkdirs();
              this.setBgImageName(imageName);
              this.setImagesPath(path);
+             System.out.println("createImages src.getType():"+image.getType());
              String img_ext = getImageExtension(imageName).toLowerCase();
          	 ImageIO.write(image, img_ext, new File(IMAGE_PATH + "0_" + imageName));
          	 ImageIO.write(rotateImage(image, 90.0), img_ext, new File(IMAGE_PATH + "270_" + imageName));
