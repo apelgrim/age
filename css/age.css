@@ -59,8 +59,13 @@ div.stacked{
 div#ageConsole {
     width: 800px;
     height: 400px;
-    border: 1px solid gray;
+    border:1px solid #CCCCCC;
+    padding:5px;
     overflow:auto;
+    font-size: 12px;
+}
+div#ageConsole p{
+	margin:3px 0;
 }
 div#header{
 	padding:5px;
@@ -452,32 +457,67 @@ img.GrpBgImg{
 	height: 20px;
 }*/
 div#ageChatMsg{
-	width: 300px;
-height: 130px;
+
+height: 110px;
 overflow:auto;
 }
 div#ageChatInput input{
 	border:1px solid #DDDDDD;
 height:12px;
-width:65%;
+width:71%;
 }
 div#ageChatInput button{
 	margin-left:5px;
 border: 1px solid #dddddd;
 }
 div#ageChatMsg p{
-	margin:0 2px;
+	font-size:11px;
+margin:2px 3px;
 }
 div#ageChat .label{
 color:#888888;
 }
+/*div#ageFooterBar{
+	position:fixed;
+	width: 100%;
+	height: 10px;
+	bottom:0;
+}*/
 div#ageChat{
 background-color:#FFFFFF;
 border:1px solid #DDDDDD;
 bottom:0;
 position:fixed;
+width:200px;
 }
-
+span.ageWarning{
+    color:#dfba00;
+}
+span.ageWarning > span.label{
+color:#ffef77;
+font-size: 10px;
+}
+span.ageError{
+ color:#e40000;
+}
+span.ageError > span.label{
+color:#ff6565;
+font-size: 10px;
+}
+span.ageDebug{
+ color:#333333;
+}
+span.ageDebug > span.label{
+color:#848484;
+font-size: 10px;
+}
+span.ageInfo{
+   color:#008000;
+}
+span.ageInfo > span.label{
+color:#77ff77;
+font-size: 10px;
+}
 /* #####################   CREATE GAME   /netbeans/webaplication/age/web/images /eclipse/workspaces/helios/age/age/images #################*/
 input[type=checkbox].ElmntVsblt {
     display: none;

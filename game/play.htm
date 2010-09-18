@@ -1,26 +1,29 @@
-#if($playGame)
-
+ #if($playGame)
+$gameJSON
 <div id="ageGameContener">
 <div id="ageConnectionStatus"><img src="/age/images/connect_idle.gif"/></div>
 
 </div>
 <button onclick="GameManager.leaveGame()">Verlasse das Spiel</button>
-<table>
-<tr><td>
+
+
 <div id="ageConsole"></div>
-</td><td>
+
 <div id="ageChat"><div id="ageChatMsg"></div><div id="ageChatInput"><INPUT type="text"/><BUTTON onclick="AgeUpdater.sendChatMessage();">send</BUTTON></div></div>
-</td></tr>
-</table>
+<div id="ageFooterBar"></div>
 
 <script type="text/javascript">
 
 $(function() {
 	try{
-	GameManager.init({contener:'#ageGameContener',key:'$playGame.key',url:'/age/blocking/longpolling'});
+	GameManager.init({contener:'#ageGameContener',key:'$playGame.key',url:'/age/blocking/httpstreaming'});
 	}catch(e){
 		Log(''+e,'e');
 	}
+	$('#ageChatInput > input').keydown(function(event) {
+		  if (event.keyCode == '13') {
+			  AgeUpdater.sendChatMessage();
+		   }});
 });
 </script>
 

@@ -15,7 +15,7 @@ public abstract class Model {
 	public abstract int getId();
 	public abstract String toJSON();
 	protected void save(EntityManager em) throws IOException{
-		System.out.println(" ########### EntityManager persitst class:"+this.getClass()+", "+this.toString()+",\n###Entity ID:"+this.getId()); 	
+		System.out.println("EntityManager persitst class:"+this.getClass()+" ID:"+this.getId()); 	
 		if(getId() > 0 ) em.merge(this);
 		else  em.persist(this);
 	}

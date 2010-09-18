@@ -1,8 +1,5 @@
 package de.tubs.age.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.atmosphere.cpr.Broadcaster;
 
 import de.tubs.age.jpa.Game;
@@ -31,7 +28,7 @@ public class Instance {
 	public int getCurrentPlayersSize(){
 		return inactivePlayers-game.getPlayers().size();
 	}
-	public synchronized Player newPlayer(){
+	public  Player newPlayer(){
 		if(inactivePlayers>0){
 			Player newPlayer = getFreePlayer();
 			if(newPlayer!=null){
@@ -49,10 +46,11 @@ public class Instance {
 		}
 		return null;
 	}
-	public synchronized boolean removePlayer(Player player){
-		return removePlayer(player.getId());
+	public boolean removePlayer(Player player){
+		if(player != null) return removePlayer(player.getId());
+		else return false;
 	}
-	public synchronized boolean removePlayer(int player_id){
+	public  boolean removePlayer(int player_id){
 		boolean success=false;
 
 		for (int i = 0; i < game.getPlayers().size(); i++) {

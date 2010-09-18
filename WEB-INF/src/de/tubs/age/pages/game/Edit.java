@@ -8,6 +8,8 @@ import org.apache.click.Context;
 import org.apache.click.util.Bindable;
 
 import de.tubs.age.jpa.Game;
+import de.tubs.age.jpa.Groups;
+import de.tubs.age.jpa.Item;
 import de.tubs.age.jpa.manager.EntityManagerUtil;
 import de.tubs.age.jpa.manager.GameManager;
 import de.tubs.age.pages.LayoutPage;
@@ -24,10 +26,7 @@ public class Edit   extends LayoutPage{
 	@Bindable protected String templates;
 	public Edit(){
 		Context c = getContext();
-		
-		//key=c.getRequestParameter("key");
 		game = loadToEdit(c.getRequestParameter("editKey"));
-		System.out.println("#### game = loadToEdit(c.getRequestAttribute('editKey')):"+c.getRequestParameter("editKey"));
 		if(game!= null) gameKey=game.getKey();
 	}
 	public void onGet(){
@@ -39,15 +38,30 @@ public class Edit   extends LayoutPage{
 	}
 	 public boolean submit() {
 		Context c = getContext();
-	//	System.out.println("########## form.copyTo(game,true); game:" + game+ ", key:" + key);
 		if (game != null) {
 			ModelUtil.copyFormParamsToGame(game, c);
+			
+			
+			System.out.println("\n\n#### START ModelUtil.copyFormParamsToGame(game, c) ####");
+        	System.out.println("game:"+game);
+        	for (Groups group : game.getResourcen()) {
+        		System.out.println("   group:"+group+" items size:"+group.getItems().size());
+        		for (Item item : group.getItems()) {
+        			System.out.println("      item:"+item);
+				}
+        		System.out.println();
+			}
+        	System.out.println("#### END ModelUtil.copyFormParamsToGame(game, c) ####\n\n");
+        	
+			
+			
+			
 			try {
 				EntityManager em = EntityManagerUtil.getEntityManager();
 				em.getTransaction().begin();
-			//	game.setEditKey(key);
 				game.saveAll(em);
 				em.getTransaction().commit();
+				setRedirect("/game/?key="+game.getKey()+"&edit="+game.getEditKey());
 			} catch (IOException e) {
 
 			}

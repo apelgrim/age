@@ -1,7 +1,7 @@
 #if($game)
 
 #set($gameJSON=$game.toJSON())
-key:($key) <br/>
+gameJSON:($gameJSON) <br/>
 
 
  <div id="content">
@@ -26,52 +26,4 @@ key:($key) <br/>
 #else
 keine Spiel zu editieren
 #end
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-     $(function() {
-    	  GameManager.loadGame({resourcen:[]});  
-           
-     });
-    // bgImage:'/age/images/templates/2/    bgImage:'/age/images/templates/2/
-     {id:-1,name:'Karten',visibility:true,stacked:false,randomgenerator:false,order:true,style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/karte.jpg',left:0,top:0},items:[{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/as-herz.jpg',left:0,top:0},name:'As Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/as-karo.jpg',left:0,top:0},name:'As Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/as-treff.jpg',left:0,top:0},name:'As Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/as-pik.jpg',left:0,top:0},name:'As Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/koenig-herz.jpg',left:0,top:0},name:'König Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/bube-karo.jpg',left:0,top:0},name:'König Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/koenig-treff.jpg',left:0,top:0},name:'König Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/koenig-pik.jpg',left:0,top:0},name:'König Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/dame-herz.jpg',left:0,top:0},name:'Dame Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/dame-karo.jpg',left:0,top:0},name:'Dame Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/dame-treff.jpg',left:0,top:0},name:'Dame Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/dame-pik.jpg',left:0,top:0},name:'Dame Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/bube-herz.jpg',left:0,top:0},name:'Bube Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/bube-karo.jpg',left:0,top:0},name:'Bube Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/bube-treff.jpg',left:0,top:0},name:'Bube Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/bube-pik.jpg',left:0,top:0},name:'Bube Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/10-herz.jpg',left:0,top:0},name:'10 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/10-karo.jpg',left:0,top:0},name:'10 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/10-treff.jpg',left:0,top:0},name:'10 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/10-pik.jpg',left:0,top:0},name:'10 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/9-herz.jpg',left:0,top:0},name:'9 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/9-karo.jpg',left:0,top:0},name:'9 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/9-treff.jpg',left:0,top:0},name:'9 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/9-pik.jpg',left:0,top:0},name:'9 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/8-herz.jpg',left:0,top:0},name:'8 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/8-karo.jpg',left:0,top:0},name:'8 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/8-treff.jpg',left:0,top:0},name:'8 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/8-pik.jpg',left:0,top:0},name:'8 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/7-herz.jpg',left:0,top:0},name:'7 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/7-karo.jpg',left:0,top:0},name:'7 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/7-treff.jpg',left:0,top:0},name:'7 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/7-pik.jpg',left:0,top:0},name:'7 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/6-herz.jpg',left:0,top:0},name:'6 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/6-karo.jpg',left:0,top:0},name:'6 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/6-treff.jpg',left:0,top:0},name:'6 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/6-pik.jpg',left:0,top:0},name:'6 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/5-herz.jpg',left:0,top:0},name:'5 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/5-karo.jpg',left:0,top:0},name:'5 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/5-treff.jpg',left:0,top:0},name:'5 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/5-pik.jpg',left:0,top:0},name:'5 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/4-herz.jpg',left:0,top:0},name:'4 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/4-karo.jpg',left:0,top:0},name:'4 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/4-treff.jpg',left:0,top:0},name:'4 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/4-pik.jpg',left:0,top:0},name:'4 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/3-herz.jpg',left:0,top:0},name:'3 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/3-karo.jpg',left:0,top:0},name:'3 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/3-treff.jpg',left:0,top:0},name:'3 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/3-pik.jpg',left:0,top:0},name:'3 Pik',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/2-herz.jpg',left:0,top:0},name:'2 Herz',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/2-karo.jpg',left:0,top:0},name:'2 Karo',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/2-treff.jpg',left:0,top:0},name:'2 Treff',size:1,visibility:true,id:-1},{style:{height:90,width:72,bgColor:'transparent',bgImage:'/age/images/templates/2/2-pik.jpg',left:0,top:0},name:'2 Pik',size:1,visibility:true,id:-1}]}     
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

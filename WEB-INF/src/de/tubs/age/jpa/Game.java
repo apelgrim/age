@@ -341,14 +341,18 @@ public class Game extends Model{
 	public void setAcitve(boolean acitve) {
 		this.acitve = acitve;
 	}
-    public Item getItem(int id){
+    public Item findItem(int id){
     	for (Groups group : groups) {
 			for (Item item : group.getItems()) {
-				if(item.getId()==id){
-					return item;
-				}
+				if(item.getId()==id) return item;
 			}
     	}
+    	return null;
+    }
+    public Groups findGroup(int id){
+    	for (Groups group : groups) {
+			if(group.getId()==id) return group;
+		}
     	return null;
     }
 	public void setItemPosition(int x, int y, int item_id) {

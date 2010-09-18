@@ -19,7 +19,7 @@ public class SessionListener implements HttpSessionListener {
 	public void sessionDestroyed(HttpSessionEvent event) {
 		InstancePlayer instancePlayer = (InstancePlayer)event.getSession().getAttribute("InstancePlayer");
 		if(instancePlayer!=null){
-			instancePlayer.getInstance().getBroadcaster().broadcast("{n:'leave',v:"+instancePlayer.getPlayer().getId()+"}");
+		//	instancePlayer.getInstance().getBroadcaster().broadcast("{n:'leave',v:"+instancePlayer.getPlayer().getId()+"}");
 			instancePlayer.destroy();		
 		}
 		System.out.println("#AGE SessionListener.sessionDestroyed");

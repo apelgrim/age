@@ -42,9 +42,9 @@ public class ModelUtil {
 
 		item.setName(c.getRequestParameter(prefix+".name"));
 		item.setVisibility(convertToBool(c.getRequestParameter(prefix+".visibility")));
-		item.setSize(1);
+		item.setSize(convertToInt(c.getRequestParameter(prefix+".size")));
 		item.getStyle().assignStyle(style);
-		System.out.println("#-----## ModelUtil.createItemFromParams name:"+item.getName()+", style.left: "+style.getLeft()+"  style.top: "+style.getTop()+" :###############");
+		System.out.println("#-----## ModelUtil.createItemFromParams name:"+item.getName()+", style.left: "+style.getLeft()+"  style.top: "+style.getTop()+" item.getSize():"+item.getSize()+"###############");
 		
 		return item;
 	}
@@ -57,7 +57,6 @@ private static Item findItem(int id, List<Item> items) {
 	return new Item();
 }
 private static List<Player> createPlayers(Context c,Game game, int playersSize){
-	System.out.println("#################### ModelUtil.createPlayers playersSize:"+playersSize);
 	List<Player> players = new ArrayList<Player>();
 	for (int i = 0; i < playersSize; i++) {
 		Player player = new Player();
@@ -75,13 +74,11 @@ private static List<Groups> createResourcen(Context c,Game game, int resourcenSi
 	 List<Groups> groups = new ArrayList<Groups>();
 	   for (int i = 0; i < resourcenSize; i++) {
 			int itm_size = AgeUtil.min(convertToInt(c.getRequestParameter("resourcen[" + i+ "].items")), DEFAULT_MAX_SIZE);
-//			System.out.println("#################### ModelUtil.copyFormParamsToGame itm_size: "+itm_size+" ###############");
 			if(itm_size>0){			
 				Groups grp = createGroupFromParams(c,"resourcen[" + i+ "]",game.getResourcen());
 				if(grp!=null){
 					if(grp.getItems().size()>0){ 
 						if(game.getResourcen().size() < GameLoader.MAX_GROUPS){
-//							 System.out.println("#################### ModelUtil.copyFormParamsToGame game.getResourcen().add(grp): "+game.getResourcen().size()+" ###############");							   
 							 groups.add(grp);
 						}
 						else System.out.println("#################### ModelUtil.copyFormParamsToGame MAX_GROUPS ERROR !!!! ###############");
@@ -115,11 +112,25 @@ private static Groups createGroupFromParams(Context c, String prefix, List<Group
 		for (int j = 0; j < itm_size; j++) {
 			Item item = createItemFromParams(c,prefix+".items["+j+"]",group.getItems());
 			if(item != null){
-				if(group.getItems().size() < GameLoader.MAX_ITEMS_PER_GROUP) items.add(item);
+				if(group.getItems().size() < GameLoader.MAX_ITEMS_PER_GROUP){ 
+					
+					int w = group.getStyle().getWidth();
+					int h = group.getStyle().getHeight();
+					if(w > 0) item.getStyle().setWidth(w);
+					if(h > 0) item.getStyle().setHeight(h);	
+					
+					int itm_copies= item.getSize();
+					item.setSize(1);
+					items.add(item);
+					if(itm_copies>1){
+						System.out.println("model util : itm_copies:"+itm_copies);
+						for(int k=1;k<itm_copies;k++) items.add(item.copy());
+					}
+				
+				}
 				else System.out.println("#################### ModelUtil.copyFormParamsToGame MAX_ITEMS_PER_GROUP ERROR !!!! ###############");
 			}
 		}
-		System.out.println("## Groups createGroupFromParams items,size:"+items.size());
 		group.setItems(items);
 		return group;
 	}
@@ -132,8 +143,6 @@ private static Groups findGroup(int id, List<Groups> groups) {
 	return new Groups();
 }
 private static Style createStyleFromParams(Context c, String prefix){
-	System.out.println("########## MedoUtil. form copy bgCOlor:"+c.getRequestParameter(prefix+".style.bgColor"));
-	//bgImageName
 	Style style = new Style(convertToInt(c.getRequestParameter(prefix+".style.height")), 
 			convertToInt(c.getRequestParameter(prefix+".style.width")),
 			c.getRequestParameter(prefix+".style.bgColor"),
@@ -143,6 +152,9 @@ private static Style createStyleFromParams(Context c, String prefix){
 	style.setBgImageName(c.getRequestParameter(prefix+".style.bgImageName"));
 	return style;
 }
+
+
+
    private static int convertToInt(String param){
 	   int i = 0;
 	   try{ i = Integer.parseInt(param);}
@@ -150,7 +162,6 @@ private static Style createStyleFromParams(Context c, String prefix){
 	   return i;
    }
    private static boolean convertToBool(String param){
-//	   System.out.println("#################### ModelUtil.copyFormParamsToGame convertToBool("+param+")="+Boolean.parseBoolean(param)+" ###############");
 	  return Boolean.parseBoolean(param);
    }
 }

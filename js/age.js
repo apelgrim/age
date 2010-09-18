@@ -1,5 +1,5 @@
 
-var debug = true;
+var debug = false;
 
 //document.write('<script src="/age/js/age_settings.js" type="text/javascript"></script>');
 function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
@@ -11,6 +11,7 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
     this.imagesPath = '';
     this.imageName = '';
     this.angle='0';
+    this.zIndex=0;
     this.isNull=function(e){
     	if(e==null | e == '' | e=='null') return true;
     	return false;
@@ -35,7 +36,6 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
     this._class = _class || _style._class;
     this.left= left || 0;
     this.top= top || 0;
-    //position: absolute or relative
     this.position = position || _style.position;
     this.setPosition = function(pos){
         this.left = Math.round(pos.left);
@@ -45,11 +45,11 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
         this.id = domid;
     };
     this.copy = function(){
-    	var style = new Style(this.height, this.width,this.bgColor,null,this.id,this._class,this.left,this.top,this.position);
+    	var style = new Style(this.height, this.width,this.bgColor,this.bgImage,this.id,this._class,this.left,this.top,this.position);
     	style.imagesPath=this.imagesPath;
     	style.imageName=this.imageName;
     	style.angle = this.angle;
-    	style.bgImage=this.bgImage;
+    	style.zIndex = this.zIndex;
     	return style;
     };
     this.setStyle = function(s){
@@ -61,6 +61,7 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
 	    this.imagesPath = s.imagesPath;
 	    this.left= Math.round(s.left);
 	    this.top= Math.round(s.top);
+	    this.zIndex = s.zIndex;
     };
    this.loadFromJSON = function(s){
         this.setStyle(s);
@@ -68,7 +69,6 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
 	    if(s.imageName) this.bgImage = this.imagesPath+this.angle+'_'+s.imageName;
 	    else this.bgImage=null;
 	    if(s.bgImage) this.bgImage=s.bgImage;
-	 //   if(debug) Log('Style.loadFromJSON: bgImage:'+this.bgImage,'d');
     	return this;
     };
 }
@@ -78,14 +78,14 @@ function Item(id,name,count,visibility,style){
     this.domid=null;
     this.HTMLElement=null;
     this.actionBar=null;
-    this.copies=new Array();
     this.isItem=true;
     this.group=null;
+    this.groupBy=-1;
     this.getDomIdPrefix = function(){
-        return 'ageItem-';
+        return 'ageItem';
     };
     this.getDomId=function(){
-    	if(this.id > -1) return this.getDomIdPrefix()+this.id;
+    	if(this.id > -1) return this.getDomIdPrefix()+'-'+this.id;
     	return null;
     };
     this.name = name || _item.name;
@@ -93,7 +93,7 @@ function Item(id,name,count,visibility,style){
 //    this.styleInstancen = new Array(this.count);
     this.visibility = visibility || _item.visibility;
     this.style=style || new Style();
-    this.positionComponent={left:null,top:null};
+    this.positionComponent={left:null,top:null,zIndex:null};
     this.setPositionComponent=function(pos){
     	this.positionComponent = pos;
     };
@@ -110,15 +110,21 @@ function Item(id,name,count,visibility,style){
     	this.style.top = _top;
     	if(this.positionComponent.top != null) this.positionComponent.top.attr('value',_top);
     };
+    this.setZIndex=function(zIndex){
+    //	if(debug) Log('Item.setZIndex:'+zIndex,'d')
+    	this.style.zIndex = zIndex;
+    	if(this.positionComponent.zIndex != null) this.positionComponent.zIndex.attr('value',zIndex);
+    };
     this.copy = function(){
         var cpItem=new Item(null,this.name,this.count,this.visibility,this.style);
         cpItem.group=this.group;
+        cpItem.groupBy = this.groupBy;
         return cpItem;
     };
+    
     this.setVisibility=function(vsbl){
     	this.visibility=vsbl;
     	var image_path = this.style.imagesPath+this.style.angle+'_'+this.style.imageName;
-    //	if(debug) Log('Item,setVisibility() setze image path:'+image_path+' and visibility: '+vsbl,'d');
     	this.setItemVisibilityIcon(this.visibility);
     	var img_e = this.HTMLElement.children('img').first();
     	if(img_e) img_e.attr('src',image_path);
@@ -143,8 +149,8 @@ function Item(id,name,count,visibility,style){
     		
     		this.actionBar=HTMLRenderer.div({_class:'ItemActionBar'}).css('display','none');
     		var _item = this;
-    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
-    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
+    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
+    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
     		img.bind('click', function () {_item.sendItemVisibilityUpdate(_item.visibility); });
     		this.actionBar.append(img);
     		this.HTMLElement.append(this.actionBar);
@@ -160,21 +166,17 @@ function Item(id,name,count,visibility,style){
     	else this.actionBar.css({display:'none'});
        return this;
     };
-    this.createCopies=function(){
-        for (var i = 1; i < count; i++) {
-            this.copies.push(this.copy());
-        }
-    };
-    this.loadFromJSON = function(i){
-	 this.name = i.name;
-	 this.count = i.size;
-	 this.id = i.id;
-	 this.visibility = i.visibility;
-	 var style = new Style();
-	 style.id = this.getDomIdPrefix()+this.id;
-	 style._class = 'item';
-	 this.style=style.loadFromJSON(i.style);
-	 return this;
+     this.loadFromJSON = function(i){
+		 this.name = i.name;
+		 this.count = i.count;
+		 this.id = i.id;
+		 this.groupBy=i.groupBy;
+		 this.visibility = i.visibility;
+		 var style = new Style();
+		 style.id = this.getDomId();
+		 style._class = this.getDomIdPrefix();
+		 this.style=style.loadFromJSON(i.style);
+		 return this;
     };
 }
 
@@ -185,7 +187,11 @@ function Player(name,id){
     this.HTMLElement=null;
     this.active = false;
     this.getDomIdPrefix = function(){
-        return 'agePlayer-';
+        return 'agePlayer';
+    };
+    this.getDomId=function(){
+    	if(this.id > -1) return this.getDomIdPrefix()+'-'+this.id;
+    	return null;
     };
     this.getName=function(){
     	if(debug) Log('Player.getName() id='+this.id+', name:'+this.name,'d');
@@ -193,9 +199,9 @@ function Player(name,id){
         else return this.name;
     };
     this.setDomId=function(_id){
-        this.style.setDomId(this.getDomIdPrefix()+_id);
+        this.style.setDomId(this.getDomIdPrefix()+'-'+_id);
     };
-    this.style = new Style(130, 150,'transparent',null,this.getDomIdPrefix()+id,'agePlayer',-1,-1,'absolute');
+    this.style = new Style(130, 150,'transparent',null,this.getDomId(),this.getDomIdPrefix(),-1,-1,'absolute');
     this.loadFromJSON = function(p){
     	this.name = p.name;
     	if(debug) Log('Player load form json angle:'+p.angle,'d');
@@ -212,12 +218,13 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     var _group = DEFAULTS.group;
     this.id = -1;
     this.getDomIdPrefix = function(){
-        return 'ageGroup-';
+        return 'ageGroup';
     };
     this.getDomId=function(){
-    	if(this.id > -1) return this.getDomIdPrefix()+this.id;
+    	if(this.id > -1) return this.getDomIdPrefix()+'-'+this.id;
     	return null;
     };
+    this.actionBar=null;
     this.isItem=false;
     this.templateId=null;
     this.HTMLElement=null;
@@ -237,7 +244,6 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     			var itm = this.items[i];
     			if(itm.id==item_id) item_image = itm.HTMLElement.children('img').first();
     		}
-    	//	Log('Timeout = '+(150*(i+1)),'e');
 			image.attr('src',item_image.attr('src'));
     		
     	}else Log('Group.animateRandom() randomgenerator is false.','e');
@@ -254,12 +260,16 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
             return HTMLRenderer.createGameItem(item.style,{});
     };
     
-    this.positionComponent={left:null,top:null};
+    this.positionComponent={left:null,top:null,zIndex:null};
     this.setPositionComponent=function(pos){
     	this.positionComponent = pos;
     };
     this.getPositionComponent = function(){
     	return this.positionComponent;
+    };
+    this.setZIndex=function(zIndex){
+    	this.style.zIndex = zIndex;
+    	if(this.positionComponent.zIndex != null) this.positionComponent.zIndex.attr('value',zIndex);
     };
     this.setLeft = function(left){
     	var _left = Math.round(left);
@@ -271,8 +281,52 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     	this.style.top = _top;
     	if(this.positionComponent.top != null) this.positionComponent.top.attr('value',_top);
     };
-    
-    
+    this.bindAction = function(){
+    	if(this.actionBar==null) this.createActionBar();
+    	var visibility = this.actionBar.css('display');
+    	if(debug) Log('Group:bindAction visibility:'+visibility,'d');
+    	if(visibility=='none') this.actionBar.css({display:'block'});
+    	else this.actionBar.css({display:'none'});
+       return this;
+    };
+    this.createActionBar=function(){
+       if(this.actionBar==null){
+    		
+    		this.actionBar=HTMLRenderer.div({_class:'GroupActionBar'}).css('display','none');
+    		var _group = this;
+    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
+    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		img.bind('click', function () {_group.sendVisibilityUpdate(_group.visibility); });
+    		this.actionBar.append(img);
+    		this.HTMLElement.append(this.actionBar);
+    		
+    	}
+    };
+    this.sendVisibilityUpdate=function(vsbl){
+    	try{
+    		/*
+	    	var player_name=GameManager.instance.players[GameManager.instance.player].name;
+	    	var domid=this.HTMLElement.attr('id');
+	    	this.setItemVisibilityIcon(this.visibility);
+	    	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
+	    	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=true';
+	    	if(debug) Log('Item send visibility update this.visibility:'+this.visibility+' vsbl:'+vsbl+' this.visibility ^ vsbl:'+(this.visibility ^ vsbl),'d');
+	    	AgeUpdater.sendUpdate(update);
+	    	*/
+    		if(debug) Log('Group. sendVisibilityUpdate: vsbl-'+vsbl,'d');
+    	}catch(e){Log('Group.sendItemVisibilityUpdate() - '+e,'e');}
+    };
+    this.setVisibility=function(vsbl){
+    	this.visibility=vsbl;
+    	var image_path = this.style.imagesPath+this.style.angle+'_'+this.style.imageName;
+    	this.setItemVisibilityIcon(this.visibility);
+    	var img_e = this.HTMLElement.children('img').first();
+    	if(img_e) img_e.attr('src',image_path);
+    };
+    this.setItemVisibilityIcon=function(vsbl){
+    	if(vsbl) this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageUnVisible);
+    	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
+    };
    this.loadFromJSON = function(g){
 	    this.name = g.name;
 	    this.stacked = g.stacked;
@@ -282,17 +336,15 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
 	    if(g.templateId) this.templateId=g.templateId;
 	    this.randomgenerator = g.randomgenerator;
 	    var style = new Style();
-	    style._class = 'group';
-	    style.id = this.getDomIdPrefix()+this.id;
+	    style._class = this.getDomIdPrefix();
+	    style.id = this.getDomId();
 	    this.style=style.loadFromJSON(g.style);
 	    var itms = g.items;
 	    for ( var i = 0; i < itms.length; i++) {
     		var item = new Item();
     		item.group=this;
-      //		item.id = this.id+'-'+i;
      		this.items.push(item.loadFromJSON(itms[i]));
 		}
-//	    Log('Erstelle Group:'+g.name,'i');
 	    return this;
 
     };
@@ -424,7 +476,8 @@ function Renderer(game){
     this.start = function(contener_id){
     	try{
    // 	Log('Renderer.start: angle '+game.players[game.player].angle,'d');
-    	if(game.player >= 0 && game.players.length > game.player) this.degree = game.players[game.player].angle;
+    	var cur_player = game.getPlayerOwner();	
+    	if(cur_player != null) this.degree =  cur_player.angle;
         var contener = $(contener_id);
     	Log('Starte Rendering in '+contener,'i');
     	Perspective.gamePosition=contener.position();
@@ -469,20 +522,18 @@ function Renderer(game){
     };
     this.getStyle = function(style){	
     	if(this.degree==0) return style;
-    	var _style = style.copy();
-    	if(debug) Log('Renderer.setStyle _style:'+_style+' _style.degree:'+_style.angle,'d');
-    	var newPos = Perspective.rotateElement(this.degree, _style);
-    	_style.left=newPos.left;
-    	_style.top=newPos.top;
-    	_style.width=newPos.width;
-    	_style.height=newPos.height;
-    	_style.angle = ''+this.degree;
-    	return _style;
+    	var newPos = Perspective.rotateElement(this.degree, style);
+    	style.left = newPos.left;
+    	style.top = newPos.top;
+    	style.width = newPos.width;
+    	style.height = newPos.height;
+    	style.angle = ''+this.degree;
+    	return style;
     };
     this.createElement = function(style){
 
-    	 Log('create element imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath():'+style.getImagePath(true)+''
-    			 +',bgColor():'+style.getBgColor()+',id:'+style.id+',_class:'+style._class+' pos:'+style.position+' pos:'+style.top+' pos:'+style.left,'i');
+    	if(debug) Log('(depracted) create element imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath():'+style.getImagePath(true)+''
+    			 +',bgColor():'+style.getBgColor()+',id:'+style.id+',_class:'+style._class+' pos:'+style.position+' pos:'+style.top+' pos:'+style.left,'d');
         var imagePath = style.getImagePath(true);
         if(imagePath==null) imagePath=undefined;
         return $(document.createElement('div')).css( {backgroundColor : style.getBgColor(),backgroundImage: imagePath,width: style.width, height:style.height,left: style.left,top:style.top,position:style.position}).attr( {id : style.id}).addClass(style._class);
@@ -492,7 +543,6 @@ function Renderer(game){
         var gameResourcenCnt = HTMLRenderer.div({id:'ageResourcenCnt'});
         for (var i = 0; i < resourcen.length;  i++) {
         	var grp = resourcen[i];
-        	 if(debug) Log('########### ##### this.renderResourcen grp.randomgenerator:'+grp.randomgenerator,'e');
         	 if(grp.randomgenerator)  gameResourcenCnt.append(this.renderRandomGenerator(grp));        	
              else gameResourcenCnt.append(this.renderGroup(grp));
             
@@ -524,63 +574,69 @@ function Renderer(game){
     	return grps_contener;
     };
     this.renderGroup = function(grp){
-        var grps_contener = HTMLRenderer.div({});
+        
+    	
         var items = grp.items;
-       
-        if(!grp.order){
+       if(debug) Log('Renderer.renderGroup() <b>grp.order:'+grp.order+', GameManager.local:'+GameManager.local+', items.length:'+items.length+' grp.visibility:'+grp.visibility+' items[0].visibility:'+items[0].visibility+'/<b>','d');
+        if(!grp.order && GameManager.local){
                items=AgeUtil.randomShuffle(items);
                items=AgeUtil.randomShuffle(items);
-        }
-            
-         for (var j = 0; j < items.length;  j++) {
-            var itm = items[j];
-            if(debug) Log('Renderer: renderGroup itm.visibility:'+itm.visibility,'d');
-
-            var itm_style = new Style();
-            itm_style.setStyle(itm.style);     
-            Log('### renderer copy style(itm.style.imagesPath:'+itm.style.imageName+' itm.style.bgName :'+itm.style.bgImage,'d');
-            itm_style.bgColor= itm.style.bgColor;
-            
-            if(!(grp.visibility & itm.visibility)){
-                itm_style.bgColor = grp.style.bgColor;
-                itm_style.imageName = grp.style.imageName;
-                itm_style.bgImage = grp.style.bgImage;
-            }
-      //      itm_style.left = itm.style.left + j*itm.style.width;
-      //      itm_style.top = itm.style.top;
-            if(debug) Log('Renderer: renderGroup itm_style.left:'+itm_style.left+', itm_style.top:'+itm_style.top,'d');
-            if(grp.stacked){
-       //        itm_style.left = itm.style.left + (j+1);
-       //        itm_style._class=itm.style._class+' stacked';
-            }
-
-
-        	itm_style.id = itm.getDomIdPrefix()+itm.id;
-                
-            if(debug) Log('Renderer: renderGroup itm_style.id:'+itm_style.id,'d');
-      //  	if(game.player>0) itm.style.angle='180';
-        	
-        	var item = HTMLRenderer.createGameItem(this.getStyle(itm_style),{title:(grp.name+'-'+itm.name)});
-            var HTMLElement = this.makeDraggable(item,itm);
-            itm.HTMLElement=this.bindItemAction(HTMLElement,itm);
-            itm.createActionBar();
-        	grps_contener.append(itm.HTMLElement);
-       }
-      return grps_contener;
+        }     
+        if(grp.stacked){
+        	var grp_style = grp.style.copy();
+        	grp_style._class=grp_style._class+' stacked';
+        	if(items.length > 0){
+        		if(grp.visibility && items[0].visibility) {
+        			grp_style.imagesPath = items[0].style.imagesPath;
+        			grp_style.imageName = items[0].style.imageName;
+        			grp_style.bgImage = items[0].style.bgImage;
+        		}
+        	}
+        	var groupDOM = HTMLRenderer.createGameItem(this.getStyle(grp_style),{title:(grp.name)});
+        	this.makeDraggable(groupDOM,grp);
+        	grp.HTMLElement=this.bindItemAction(groupDOM,grp);
+        	grp.createActionBar();
+        	return grp.HTMLElement; 	
+        }else{
+        	var grps_contener = HTMLRenderer.div({id:grp.style.id,_class:grp.style._class});
+        	for (var j = 0; j < items.length;  j++) {
+        		grps_contener.append(this.renderItem(grp,items[j]));
+        	}
+        	return grps_contener;
+        }  
+      
     };
-    this.renderItem = function(grp,item_index){
-
+    this.renderItem = function(grp,itm){
+    	
+        var itm_style = itm.style.copy();
+        
+        if(grp.style.width > 0) itm_style.width = grp.style.width;
+        if(grp.style.height > 0) itm_style.height = grp.style.height;
+        
+        if(!(grp.visibility & itm.visibility)){
+            itm_style.bgColor = grp.style.bgColor;
+            itm_style.imageName = grp.style.imageName;
+            itm_style.bgImage = grp.style.bgImage;
+        }
+        
+       	var itemDOM = HTMLRenderer.createGameItem(this.getStyle(itm_style),{title:(grp.name)});
+        itm.HTMLElement=this.bindItemAction(this.makeDraggable(itemDOM,itm),itm);
+        itm.createActionBar();
+        
+    	return itm.HTMLElement;
     };
     this.bindItemAction=function(HTMLElement,itm){	
-    	if(debug) Log('BINDE ACTION DBCLICK for itm.id:'+itm.id,'d');
+    	if(debug) Log('BINDE ACTION DBCLICK for element.id:'+itm.getDomId(),'d');
     	return HTMLElement.bind('dblclick', function () {itm.bindAction(); });
     };
     this.makeDraggable = function(itemDOM,itemObject){
     	itemDOM.draggable({
     		containment :  this.gameContent,
-    		zIndex: 999999,
     		scroll : false,
     		drag: function(event, ui) {
+    		    var zIndex = GameManager.getNextLayerSeqNr(ui.helper.css('zIndex'));
+    		    itemDOM.css({zIndex:zIndex});
+    		    itemObject.style.zIndex = zIndex;
     			AgeUpdater.setPosition(event,ui,itemObject);
     			if(itemObject.randomgenerator){
     				var image = itemDOM.children('img').first();
@@ -588,7 +644,7 @@ function Renderer(game){
     			}
               },
             stop: function(event, ui) {
-            	  itemDOM.css({zIndex:GameManager.getNextLayerSeqNr(itemDOM.css('zIndex'))});
+            	  itemDOM.css({zIndex:ui.helper.css('zIndex')});
             	  if(itemObject.randomgenerator) AgeUpdater.randomizeGroup(itemObject);
               } 
             });
@@ -596,6 +652,7 @@ function Renderer(game){
     };
     this.renderPlayers=function(){
     	 var players = game.getPlayers();
+    	 if(debug) Log('Renderer.renderPlayers: players.length:'+players.length,'d');
     	 for (i = 0; i < players.length;  i++) {
              var player = players[i];
              var playerElement = this.createElement(this.getStyle(player.style));
@@ -818,11 +875,11 @@ var Perspective={
 
 function Log(text,level) {
 	var msg;
-	if(level=='w')msg = '<span style="color:#D9CC02;">WARNING: '+text+'</span>';
-	else if(level=='e') msg = '<span style="color:red;">ERROR: '+text+'</span>';
-	else if(level=='d') msg = '<span style="color:black;">DEBUG: '+text+'</span>';
-	else  msg = '<span style="color:green;">INFO: '+text+'</span>';
-	$('#ageConsole').prepend(msg + '<br>');
+	if(level=='w')msg = '<p><span class="ageWarning"><span class="label">[W]:</span> '+text+'</span></p>';
+	else if(level=='e') msg = '<p><span class="ageError"><span class="label">[E]:</span> '+text+'</span></p>';
+	else if(level=='d') msg = '<p><span class="ageDebug"><span class="label">[D]:</span> '+text+'</span></p>';
+	else  msg = '<p><span class="ageInfo"><span class="label">[I]:</span> '+text+'</span></p>';
+	$('#ageConsole').prepend(msg);
 
 }
 
@@ -853,24 +910,32 @@ function CometConnector(){
    this.base(function(){
         alert("onopen");
    },function(msg){
-	//   var data = eval('(' + msg.v + ')');
-        var action = msg.n;
+	    var action = msg.n;
         var data = msg.v;
-    //    Log('Bekomme Daten...action:'+action,'i');
+     //   if(debug) Log('Bekomme Daten action:'+action+' data:'+data,'d');
         if(action=='init'){
         	if(data){
         		var status = data.status;
         		if(status == 0){
         			Log(data.msg,'e');
-        		}else if(status==1){     			
-        			if(data.game) GameManager.loadGame(data.game);
-        			if(GameManager.instance != null) GameManager.instance.setCurrentPlayer(data.player);
+        			GameManager.chat({n:'ageSystem',v:'<span class="ageSystem">*** keine Spieler zugewissen.</span>'});
+        		}else if(status==1){  
+        			try{
+        			if(data.game){
+        				Log('Comet.init loadGame:'+data.game,'i');
+        				GameManager.loadGame(data.game);
+        				
+        				Log('Comet.init setze curren Player'+data.player.id,'i');
+        				GameManager.instance.setCurrentPlayer(data.player);
+        				
+        				Log('Comet.init rendere Game.','i');
+        				GameManager.renderGame();
+        			}
         			GameManager.local=false;
-        			if(data.player) GameManager.joined = true;
-        			GameManager.renderGame();
-        			setInterval("AgeUpdater.listenForUpdate()", 70);
+        			setInterval("AgeUpdater.listenForUpdate()", AgeSettings.updatePeriod);
         			$(window).unload( function () { GameManager.leaveGame(); } );
-        		//	GameManager.connector.send("ping=");
+        			}catch(e){Log('CometConnector.init() - '+e,'e');}
+        		
         		}
         		else Log('Ich habe unbekannte Init antwort bekommen.!!! status:'+status,'e');
         	}else Log('Für eine Ation - init wurde keine Daten empfanden!!!','e');
@@ -885,7 +950,6 @@ function CometConnector(){
         	 
         }
         if(action=='m'){
-        //	var data = eval('(' + msg.v + ')');')
          try{
         	var item_id=data.i;
         	var pos=data.pos;
@@ -895,9 +959,10 @@ function CometConnector(){
         	if(player_id!=cur_player.id){
         		var player = GameManager.instance.findPlayer(player_id);
                 var angle = cur_player.angle-player.angle;
-        //		if(debug) Log('Bekomme Daten:move item_id '+item_id+', dom:'+pos.dom+',  pos x '+pos.x+' y:'+pos.y+', w:'+pos.w+' h:'+pos.h+' player:'+player.id,'d');
-         		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
-        		$('#'+pos.dom).css( {left : style.left,top : style.top});
+        		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
+        //		var isItm=data.isItm;
+        //		var groupTyp=data.groupTyp;
+        		$('#'+pos.dom).css( {left : style.left,top : style.top,zIndex:data.zIndex});
         	}
     	   }catch(e){Log('CometConnector.onmessage() action:move msg:'+e,'e'); }
         }
@@ -947,6 +1012,7 @@ function CometConnector(){
    },function(key){
         alert("onclose"+key);
    },function(data){
+	   if(debug) Log('CometConnector.send() data:'+data,'d');
 	    AgeUtil.setConnectionStatus('active');
 		$.ajax({type : "POST", url:GameManager.url, data:data,
 			success: function(data, textStatus, xhr) {
@@ -972,7 +1038,7 @@ function CometConnector(){
 //	 $('#comet-frame').attr('src',url+'?'+query);
 //	 $('body').append($('#comet-frame').attr('src',url+'?'+query));
 	 AgeUtil.setConnectionStatus('active');
-	 $('body').append('<iframe onUnload="GameManager.leaveGame();" onLoad="GameManager.leaveGame();" name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
+	 $('body').append('<iframe name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
    });
 
 }
@@ -1012,7 +1078,7 @@ var GameManager = {
 	    },
 	    chat:function(data){
 	    	var text = $('#'+AgeSettings.chatContenerMsgId);
-        	text.prepend('<p><span class="label">['+data.n+']</span> '+data.v+'</p>');  	
+        	text.prepend('<p><span class="label">'+data.n+':</span> '+data.v+'</p>');  	
 	    },
 	    removePlayer:function(player_id){
 	    	var player = this.instance.findPlayer(player_id);
@@ -1021,21 +1087,25 @@ var GameManager = {
 				player.HTMLElement.addClass('unactivePlayer');
 			//	player.name = _player.name;
 				player.active=false;
-				Log('Player <strong>'+player.name+'</strong> mit ID:'+player.id+' hat das Spiel verlassen.','i');
+				this.chat({n:player.name,v:'<span class="ageSystem">*** verließ das Spiel.</span>'});
+			//	Log('Player <strong>'+player.name+'</strong> mit ID:'+player.id+' hat das Spiel verlassen.','i');
 	    	}else Log('GameManager.removePlayer(): Player mit id:'+player_id+' wurde nicht gefunden.','w');
 	    },
 	    joinGame:function(_player){
+	    	if(debug) Log('GameManagar.join game player:'+_player.id,'d');
 	    	try{
 	    	var players=this.instance.players;
 	    	for ( var i = 0; i < players.length; i++) {
 				var player = players[i];
 				if(player.id == _player.id){	
+					if(debug) Log('player.id == _player.id player.HTMLElement:'+player.HTMLElement,'d');
 					player.HTMLElement.removeClass('unactivePlayer');
 					player.HTMLElement.addClass('activePlayer');
 					var owner_id = this.instance.getPlayerOwner()==null? -1 : this.instance.getPlayerOwner().id;
 					if(player.id == owner_id) player.HTMLElement.addClass('playerOwner');
 					player.name = _player.name;
 					player.active=true;
+					this.chat({n:player.name,v:'<span class="ageSystem">*** has joined.</span>'});
 					Log('Player <strong>'+player.name+'</strong> mit ID:'+player.id+' has joined.','i');
 				}
 			}
@@ -1047,40 +1117,42 @@ var GameManager = {
 		    	cur_player.HTMLElement.removeClass('activePlayer');
 		    	cur_player.HTMLElement.removeClass('playerOwner');
 		    	cur_player.HTMLElement.addClass('unactivePlayer');
-		    	this.chat({n:cur_player.name,v:'*** verließ das Spiel.'});
+		    	
 		    	AgeUpdater.sendUpdate('action=leave&player='+cur_player.id);
+		    	this.joined=false;
 		    	cur_player.active = false;
 		    	return false;
 	    	}catch(e){Log('GameManager.leaveGame() - '+e,'e');}
 	    },
-	    init:function(initParams){
+	    init:function(data){
 	    	Log('Setze init Parameters...','i');
-	    	if(initParams.key) this.key = initParams.key;
-	        this.url = initParams.url;
-	        if(initParams.contener) this.contener = initParams.contener;
-	        Log('Game contenter is :'+this.contener,'i');
-	        Log('Erstelle eine Connector...','i');
-	        this.connector = new CometConnector();
-	        Log('Verbinde sich mit den Server...','i');
-	       
-	        var query='key='+this.key;
-	        if(this.instance==null) query += '&loadGame=true'; 
-	        
-	        this.connector.join(this.url,query);
-	        Log('Url: '+this.url+'?'+query,'i');
+	    	if(data.key && data.url && data.contener){
+	    		this.key = data.key;
+	    		this.url = data.url;
+	    		this.contener = data.contener;
+	    		Log('Game contenter is :'+this.contener,'i');
+	    		Log('Erstelle eine Connector...','i');
+	 	        this.connector = new CometConnector();
+	 	        Log('Verbinde sich mit den Server...','i');
+	 	        var query='key='+this.key;
+//	 	        if(data.game){
+//	 	        	this.loadGame(data.game);
+//	 	        	this.renderGame();
+//	 	        }
+	 	      //  if(this.instance==null) query += '&loadGame=true'; 	        
+		        this.connector.join(this.url,query);
+		        Log('Url: '+this.url+'?'+query,'i');
+	    		
+	    	}else Log('GameManager.init() key, url oder contener ist nicht defieniert.','e');
+
 	    },
 	    loadGame:function(gameparams){
 	    	var game = new Game();
 	    	Log('loadGame '+gameparams,'i');
 	    	this.instance = game.loadFromJSON(gameparams);
-
-	    //	this.instance.setCurrentPlayer(player_id);
-	    //    Log('Rendere the Game  in '+this.contener,'i');
-	    //	this.instance.render($(this.contener));
-	    //	setInterval("AgeUpdater.listenForUpdate()", 2000);
 	    },
 	    renderGame:function(){
-	    	if(debug) Log('GameManager.renderGame this.contener:'+this.contener,'e');
+	    	if(debug) Log('GameManager.renderGame this.contener:'+this.contener,'d');
 	    	this.instance.render($(this.contener));
 	    }
 	   
@@ -1089,21 +1161,26 @@ AgeUpdater={
     update:{r:'',c:[],l:''},
     lastUpdateTime:null,
     setPosition:function(event, ui,itm){
+    	if(debug) Log('setPos GameManager.local?'+GameManager.local,'d');
         if(!GameManager.local){
-            var cur_player = GameManager.instance.players[GameManager.instance.player];
-            var dom = itm.getDomIdPrefix()+itm.id;
-            var groupTyp='norm';
-            if(itm.randomgenerator) groupTyp='random';
-            if(itm.isItem) var isItm = 'true';
-            else isItm = 'false';
-            var _update = "action=m&isItm="+isItm+"&groupTyp="+groupTyp+"&p=" + cur_player.id + "&i="+itm.id+"&dom="+dom+"&x=" + Math.round(ui.position.left) + "&y=" + Math.round(ui.position.top)+"&h="+Math.round(itm.style.height)+"&w="+Math.round(itm.style.width);
-            this.update.r = _update;
+        	try{
+	            var cur_player = GameManager.instance.players[GameManager.instance.player];
+	            var dom = itm.getDomId();
+	            var groupTyp='norm';
+	            if(itm.randomgenerator) groupTyp='random';
+	            if(itm.isItem) var isItm = 'true';
+	            else isItm = 'false';
+	            var _update = "action=m&zindex="+itm.style.zIndex+"&isItm="+isItm+"&groupTyp="+groupTyp+"&p=" + cur_player.id + "&i="+itm.id+"&dom="+dom+"&x=" + Math.round(ui.position.left) + "&y=" + Math.round(ui.position.top)+"&h="+Math.round(itm.style.height)+"&w="+Math.round(itm.style.width);
+	            this.update.r = _update;
+        	}catch(e){Log('AgeUpdater.setPosition() - '+e,'e');}
         }
         else{
             itm.setLeft(ui.position.left);
-            itm.setTop(ui.position.top);  
+            itm.setTop(ui.position.top); 
+            itm.setZIndex(itm.style.zIndex);
             return;
         }
+        
     },
     randomizeGroup:function(grp){
     	if(GameManager.instance){
@@ -1112,23 +1189,27 @@ AgeUpdater={
     	}
     },
     sendChatMessage:function(){
+    	
+    //	if(debug) Log('','d');
     	var input_text = $('#'+AgeSettings.chatContenerInputId).children('input').first();
-    	if(input_text!=null && input_text!=''){
+    	if(input_text!=null && input_text!='' && GameManager.instance.player >= 0){
 	    	var cur_player = GameManager.instance.players[GameManager.instance.player];
 	    	this.sendUpdate('action=chat&msg='+input_text.val()+'&from='+cur_player.name);
 	    	input_text.attr('value','');  
     	}
+    	return;
     },
     sendUpdate:function(updateMsg){
         if(!GameManager.local){
             
             var cur_player = GameManager.instance.players[GameManager.instance.player];
-        //    Log('update : '+updateMsg+' gesendet?'+cur_player.active,'d');
+       //     if(debug) Log('update : '+updateMsg+' gesendet?'+cur_player.active,'d');
             if(cur_player.active) GameManager.connector.send(updateMsg);
         }
         else{
             Log('AgeUpdater.sendUpdate(): Game ist Local.','w');
         }
+        return;
     },
     listenForUpdate:function(){
     	var _date = new Date();
@@ -1354,7 +1435,7 @@ var GameCreatorManager={
 	    	var grp = new Group();
 	    	grp.loadFromJSON(template.value);
 	    	grp.templateId=template.id;
-	    	if(debug)Log('Lade templates index:'+tmplt_id+' templates length:'+this.templates.length+' template.id:'+template.id+' grp.items[0].style.bgImage:'+grp.items[0].style.bgImage,'e');
+	    	if(debug)Log('Lade templates template.value:'+template.value,'d');
 	    	GameCreatorManager.gameCreator.resourcenCreator.newGroup(false, grp);
 	    	this.update();
     	}catch(e){Log('GameCreatorManager.loadTemplate(): '+e,'e');}
@@ -1697,6 +1778,7 @@ function GroupCreator(id,index) {
 	this.bgImageView=HTMLRenderer.div({_class:'bgImageView'});
 	this.items = null;
     this.itemIdSec=0;
+    this.zIndex=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.zIndex',value:this.group.style.zIndex});
     this.top=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.top',value:this.group.style.top});
     this.left=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.left',value:this.group.style.left});
     this.setGroup=function(grp){
@@ -1718,7 +1800,7 @@ function GroupCreator(id,index) {
                   
              for (var i = 0; i < this.items.length; i++) {
                 if(itm_id == this.items[i].id){
-                    Log('l�sche Element mit DOMID:'+this.items[i].itemWrapper.attr('id'),'i');
+                    Log('Lösche Element mit DOMID:'+this.items[i].itemWrapper.attr('id'),'i');
                     this.items[i].itemWrapper.remove();
                     this.items[i].id=null;                
                     //this.items.splice(i, 1);
@@ -1863,6 +1945,7 @@ function GroupCreator(id,index) {
         };
 	this.createGroupSetting = function() {
 		this.domid ='GroupSetting-' + id;
+		this.group.style._class=this.group.getDomIdPrefix();
 		var gs = HTMLRenderer.div({id :this.domid ,_class : 'GroupSetting',position:'relative'});
 
 		var div_left = HTMLRenderer.div({_class : 'GrpSettingLft'});
@@ -1945,7 +2028,7 @@ function GroupCreator(id,index) {
 		this.groupContener.append(tmpl_e);
 		this.groupContener.append(this.left);
 		this.groupContener.append(this.top);
-	    this.group.setPositionComponent({left:this.left,top:this.top});
+	    this.group.setPositionComponent({left:this.left,top:this.top,zIndex:this.zIndex});
 		this.groupWrapper.append(this.groupContener);
 		this.groupWrapper.append(this.hiddenItemsSizeComponent);
 		this.groupWrapper.append(this.createGroupFooterBar());
@@ -1989,6 +2072,7 @@ function ItemCreator(id,index) {
     this.componentBind = 'GameCreatorManager.gameCreator.resourcenCreator.groups['+index[0]+'].items['+index[1]+']';
     this.namePrefix='resourcen['+index[0]+'].items['+index[1]+']';
     this.bgImageView=HTMLRenderer.div({_class:'bgImageView'});
+    this.zIndex=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.zIndex',value:this.item.style.zIndex});
     this.top=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.top',value:this.item.style.top});
     this.left=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.left',value:this.item.style.left});
     this.getItem = function(){
@@ -2018,6 +2102,7 @@ function ItemCreator(id,index) {
         	name : this.namePrefix+'.size',id:'ItemStInput-' + id,value :  this.item.count,size : '5'});
     };
     this.setCount = function(count){
+    	if(debug) Log('ItemCreator.setCount:'+count,'d');
         var _c = parseInt(count);
         if(!isNaN(_c)) this.item.count=_c;
     };
@@ -2093,6 +2178,7 @@ function ItemCreator(id,index) {
     	
     };
     this.render = function() {
+    	this.item.style._class=this.item.getDomIdPrefix();
         this.itemWrapper = this.createItemWrapper();
         var div_left = HTMLRenderer.div({_class : 'ItmWrpprLft'});
         div_left.append(HTMLRenderer.checkBox({}));
@@ -2120,8 +2206,9 @@ function ItemCreator(id,index) {
         div_center.append(this.left);
         div_center.append(this.top);
         div_center.append(this.getBgImageNameComponent());
-        this.item.setPositionComponent({left:this.left,top:this.top});
+        this.item.setPositionComponent({left:this.left,top:this.top,zIndex:this.zIndex}); //groupBy
         div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].id',value:''+this.item.id}));
+    //    div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].groupBy',value:''+this.item.groupBy}));
 
         var _close = HTMLRenderer.buttonItem({image:'closed.png',_class:'closebttn'});
         div_right.append(_close);
@@ -2269,7 +2356,7 @@ var HTMLRenderer = {
     },
 
     div : function(style) {
-	return $(document.createElement('div')).css( {width : style.width,height : style.height,left : style.left,top : style.top,
+	return $(document.createElement('div')).css( {zIndex:style.zIndex,width : style.width,height : style.height,left : style.left,top : style.top,
             backgroundImage:style.backgroundImage,backgroundColor:style.backgroundColor,position : style.position}).attr( {id : style.id}).addClass(style._class);
     },
 
@@ -2302,14 +2389,13 @@ var HTMLRenderer = {
         return $(document.createElement('h1')).attr( {id : p.id}).addClass(p._class).append(p.content);
     },
 
-    createGameItem : function(_style,p){
-        var style = _style;
+    createGameItem : function(style,p){
         var itm = this.div({id : style.id,_class:style._class,width: style.width, height: style.height,left: style.left,
-            top:  style.top, position:style.position,backgroundColor : style.getBgColor()});
+            top:  style.top,zIndex:style.zIndex,position:style.position,backgroundColor : style.getBgColor()});
         var imagePath=style.getImagePath(false);
         if(imagePath!=null) itm.append(this.img({src:imagePath,width:style.width,height:style.height,title:p.title}));
-    //	if(debug) Log('** createGameItem imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath:'+imagePath+''
-    //			 +',bgColor:'+style.bgColor+',id:'+style.id+',_class:'+style._class,'d');
+    	if(debug) Log('** createGameItem imageName'+style.imageName+', width:'+style.width+', height:'+style.height+',imagesPath:'+imagePath+''
+    			 +',bgColor:'+style.bgColor+',id:'+style.id+',_class:'+style._class,'d');
                      
         return itm;
     }

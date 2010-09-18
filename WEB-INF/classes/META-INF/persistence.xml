@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
 	<persistence-unit name="ageclick"  transaction-type="RESOURCE_LOCAL">
 	 	<provider>org.hibernate.ejb.HibernatePersistence</provider> 
-		<class>de.tubs.age.jpa.Game</class>
+	    <class>de.tubs.age.jpa.Game</class>
 		<class>de.tubs.age.jpa.Groups</class>
 		<class>de.tubs.age.jpa.Item</class>
 		<class>de.tubs.age.jpa.Player</class>
@@ -12,10 +12,11 @@
 		<class>de.tubs.age.jpa.Table</class>
 		<class>de.tubs.age.jpa.Template</class>
 		<properties>
-      <!--    <property name="hibernate.show_sql"
+		<!-- 
+        <property name="hibernate.show_sql"
                       value="true"/>
        <property name="hibernate.format_sql"
-                      value="true"/> --> 
+                      value="true"/>  -->
 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
 			<property name="hibernate.connection.url"
 				value="jdbc:hsqldb:file:C:\jetty7_0_2\webapps\age\WEB-INF\db\age" />

@@ -67,11 +67,24 @@ public class New extends LayoutPage{
         	Context c = getContext();
         	Game game = new Game();
         	ModelUtil.copyFormParamsToGame(game, c);
-        	GameManager gm = new GameManager();
         	
+        	System.out.println("\n\n#### START ModelUtil.copyFormParamsToGame(game, c) ####");
+        	System.out.println("game:"+game);
+        	for (Groups group : game.getResourcen()) {
+        		System.out.println("   group:"+group+" items size:"+group.getItems().size());
+        		for (Item item : group.getItems()) {
+        			System.out.println("      item:"+item);
+				}
+        		System.out.println();
+			}
+        	System.out.println("#### END ModelUtil.copyFormParamsToGame(game, c) ####\n\n");
+        	
+    
+        	GameManager gm = new GameManager();
         	game.setKey(AgeUtil.convertToKey(getContext().getSession().getId(),8));
+   
         	game.setEditKey(AgeUtil.convertToKey(getContext().getSession().getId(),16));
-        	try {
+        	try {     
 				gm.saveGame(game);
 				setRedirect("/game/?key="+game.getKey()+"&edit="+game.getEditKey());
 			} catch (IOException e) {

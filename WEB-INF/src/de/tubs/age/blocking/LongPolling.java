@@ -2,22 +2,20 @@ package de.tubs.age.blocking;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.Request;
+
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.atmosphere.cpr.BroadcastFilter;
 import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.plugin.cluster.jgroups.JGroupsFilter;
 
-import de.tubs.age.jpa.Game;
-import de.tubs.age.jpa.Groups;
-import de.tubs.age.jpa.Item;
-import de.tubs.age.jpa.Player;
+
+import de.tubs.age.util.AgeActionHandler;
 import de.tubs.age.util.GameLoader;
 import de.tubs.age.util.Instance;
 import de.tubs.age.util.InstancePlayer;
@@ -26,27 +24,30 @@ public class LongPolling  extends Comet {
 
 	@Override
 	protected void init(AtmosphereResource<HttpServletRequest, HttpServletResponse> event) throws IOException {
-		HttpServletRequest req = event.getRequest();
 		
+		HttpServletRequest req = event.getRequest();
+		String key = (""+req.getParameter("key")).trim();
+		System.out.println("\n\n\n#### GET START key:"+key+" ###");
         InstancePlayer instancePlayer = (InstancePlayer) req.getSession().getAttribute("InstancePlayer");
-    	boolean loadGame = Boolean.parseBoolean(req.getParameter("loadGame").trim());
-    	 	
+        Instance instance = GameLoader.loadInstance(key);
+        System.out.println("LongPolling.init instancePlayer null?"+(instancePlayer==null)+" ");	
         if(instancePlayer == null){
-        	System.out.println("###### LongPolling  instancePlayer is NULL und wird in der session gespeichert.#########");
-        	String key = req.getParameter("key").trim();
-        	Instance instance = GameLoader.loadInstance(key);
+        //	System.out.println("###### LongPolling  instancePlayer is NULL und wird in der session gespeichert.#########");
+        	
+        	
         	if(instance != null){
-        		System.out.println("LongPolling   instance mit seq "+Instance.instance_seq+" sende init data.");
+        	//	System.out.println("LongPolling   instance mit seq "+Instance.instance_seq+" sende init data.");
         		InstancePlayer ip = new InstancePlayer(instance);
         		req.getSession().setAttribute("InstancePlayer", ip);
-        		sendInitData(ip,event,loadGame);
+        		sendInitData(ip,event);
         		
         	}else{
         		System.out.println("LongPolling instnce ist NULL (Instance mit key="+key+" wurde nicht gefunden).");
         	}
         }else{
-        	System.out.println("###### LongPolling  instancePlayer wird von session geholt  sende init data.#####");
-        	sendInitData(instancePlayer,event,loadGame);
+        //	System.out.println("###### LongPolling  instancePlayer wird von session geholt  sende init data.#####");
+        	instancePlayer.setInstance(instance);
+        	sendInitData(instancePlayer,event);
         }		
 		
 	}
@@ -56,125 +57,36 @@ public class LongPolling  extends Comet {
 		HttpServletRequest req = event.getRequest();
         HttpServletResponse res = event.getResponse();
 		InstancePlayer instancePlayer = (InstancePlayer) req.getSession().getAttribute("InstancePlayer");
+		System.out.print("onMessage instancePlayer null?"+(instancePlayer==null)+" ");
         if(instancePlayer!=null){
-			String action = ""+req.getParameter("action");
-			String response="";
-			if(action.equalsIgnoreCase("chat")){
-				String msg = req.getParameter("msg");
-				String from = req.getParameter("from");
-				response="{n:'chat',v:{from:'"+from+"',msg:'"+msg+"'}}";
-				event.getBroadcaster().broadcast(response);
-			}else if(action.equalsIgnoreCase("m")){
-				Game game = instancePlayer.getInstance().getGame();
-				int x = convertToInt(req.getParameter("x"));
-			    int y = convertToInt(req.getParameter("y"));
-			    int w = convertToInt(req.getParameter("w"));
-			    int h = convertToInt(req.getParameter("h"));
-			    String isItem = ""+req.getParameter("isItm");
-			 //   System.out.println("###### param isItem:("+isItem+")");
-				int item = convertToInt(req.getParameter("i"));
-				int  player = convertToInt(req.getParameter("p"));
-				String dom = req.getParameter("dom");
-				if(isItem.equals("true")) game.setItemPosition(x,y,item);
-				else  game.setGroupPosition(x,y,item);
-				response="{n:'m',v:{i:"+item+",pos:{x:"+x+",y:"+y+",dom:'"+dom+"',w:"+w+",h:"+h+"},player:"+player+"}}";
-				event.getBroadcaster().broadcast(response);
-			}else if(action.equalsIgnoreCase("ping")){
-				response="{n:'pong'}";
-				PrintWriter writer = res.getWriter();
-				writer.write(getResponse(response));
+            AgeActionHandler ageAction = new AgeActionHandler(req, instancePlayer);
+            if(ageAction.getType() == AgeActionHandler.TYPE_BROADCAST) event.getBroadcaster().broadcast(ageAction.getResponse());
+            else if(ageAction.getType() == AgeActionHandler.TYPE_RESPONSE){
+            	PrintWriter writer = res.getWriter();
+				writer.write(getResponse(ageAction.getResponse()));
 				writer.flush();
-				System.out.println("###### LongPolling.onMessage(ping).");
-			}else if(action.equalsIgnoreCase("random")){
-				int id = convertToInt(req.getParameter("grp"));
-			//	String plyer_name = req.getParameter("p");
-				System.out.println("###### LongPolling.onMessage(random). id:"+id);
-				if(id>0){
-					Game game = instancePlayer.getInstance().getGame();
-					List<Groups> groups = game.getResourcen();
-					for (Groups group : groups) {
-						System.out.println("###### LongPolling.onMessage(random). group id"+group.getId());
-						if(group.getId()==id && group.isRandomgenerator()){
-							List<Item> items = group.getItems();
-							int item_index = (int)(Math.floor(Math.random()*1000000))%items.size();
-							Item item = items.get(item_index);
-							response="{n:'r',v:{grp:"+id+",itm:"+item.getId()+"}}";
-							event.getBroadcaster().broadcast(response);
-						}
-					}
-				}
-			}else if(action.equalsIgnoreCase("v")){
-				//'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=true'
-				Game game = instancePlayer.getInstance().getGame();
-				boolean visibility = Boolean.parseBoolean(req.getParameter("v"));
-				int id = convertToInt(req.getParameter("i"));
-				String domid = req.getParameter("dom");
-				String player = req.getParameter("player");				
-				String image_name="";
-				if(visibility){
-					Item item = game.getItem(id);
-					if(item != null) image_name=item.getStyle().getBgImageName();
-				}			
-				response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",img:'"+image_name+"'}}";
-				System.out.println("### LongPolling.onmessage visibility: response:"+response);
-				event.getBroadcaster().broadcast(response);
-				
-			}else if(action.equalsIgnoreCase("leave")){
-				int id = convertToInt(req.getParameter("player"));
-				System.out.println("### leave game action");
-				if(instancePlayer.getInstance().removePlayer(id)){
-					response="{n:'leave',v:"+id+"}";
-					System.out.println("### leave game action response:"+response);
-					event.getBroadcaster().broadcast(response);
-				//	event.getBroadcaster().destroy();
-				}
-			}
-        }
-		
-		
+            }
+            
+            if(ageAction.getPhase()==AgeActionHandler.PHASE_CLOSE) event.getBroadcaster().destroy();
+        }		
 	}
-	private void sendInitData(InstancePlayer instancePlayer, AtmosphereResource<HttpServletRequest, HttpServletResponse> event, boolean loadGame) throws IOException{
+	private void sendInitData(InstancePlayer instancePlayer, AtmosphereResource<HttpServletRequest, HttpServletResponse> event) throws IOException{
 
 		HttpServletResponse res = event.getResponse();	
-		String gameJSON = "";
-		if(loadGame) gameJSON = ",game:"+instancePlayer.getInstance().getGame().toJSON();
-		
-		Player player = instancePlayer.getPlayer();		
 		PrintWriter writer = res.getWriter();
-		String response = "";
-
-		if(player != null){
-			String playerJSON = player.toJSON();
-			String broadcast="{n:'j',v:{player:"+playerJSON+"}}";
-			response="{n:'init',v:{status:1,player:"+playerJSON+gameJSON+"}}";
-			//System.out.println("\n\nLongPoling.sendInitData: "+response+"\n\n");
-		//	System.out.println("\n\nLongPoling.sendInitData broadcast: "+broadcast+"\n\n");
-			event.suspend(-1);
-    		Broadcaster bc = event.getBroadcaster();
-    		instancePlayer.getInstance().setBroadcaster(bc);
-    		bc.broadcast(broadcast);
-    		bc.scheduleFixedBroadcast("{n:'ping',v:'pong'}", 30, TimeUnit.SECONDS);
-		}else{
-			response="{n:'init',v:{status:0,msg:'Es wurde keine Player zugewissen!!!'}}";
-		}
-		writer.write(getResponse(response));
+		AgeActionHandler ageAction = new AgeActionHandler(instancePlayer);
+		ageAction.actionJoin(event.getRequest());
+		writer.write(getResponse(ageAction.getResponse()));
 		writer.flush();
+		
+		if(ageAction.getType()==AgeActionHandler.TYPE_BROADCAST_RESPONSE){
+            event.suspend(-1);
+    		Broadcaster bc = event.getBroadcaster();
+    	//	bc.getBroadcasterConfig().addFilter((BroadcastFilter)(new JGroupsFilter(bc, event.getRequest().getParameter("key").trim())));
+    		instancePlayer.getInstance().setBroadcaster(bc);
+    		bc.broadcast(ageAction.getrBroadcast());
+    		bc.scheduleFixedBroadcast("{n:'ping',v:'pong'}", 30, TimeUnit.SECONDS);
+		}	
+		
 	}
-	
-	
-	/*
-	@Override
-    protected String getBeginScriptTag(){
-    	return "";
-    }
-    @Override
-    protected String getEndScriptTag(){
-    	return "";
-    }
-    @Override
-    protected String getOnMessageMethod(String data){
-    	
-    	return  data;
-    }
-*/
 }

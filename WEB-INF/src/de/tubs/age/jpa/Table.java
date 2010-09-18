@@ -17,12 +17,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import de.tubs.age.util.IAgeGameElement;
+
 /**
  *
  * @author Maciej Apelgrim
  */
 @Entity
-public class Table extends Model{
+public class Table extends Model implements IAgeGameElement{
 /*
     @OneToMany(mappedBy="table", cascade=CascadeType.ALL)
     private List<Item> items;

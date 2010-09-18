@@ -25,5 +25,22 @@ FIXED 7) Man weisst nicht welche spieler man ist.
 
 
 
-
+13) Mishen von elementen muss auch zIndex beinhalten nicht nur reihenfolge
 http://code.google.com/p/msysgit/downloads/detail?name=Git-1.7.0.2-preview20100309.exe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.tubs.age.jpa;
 
 import java.io.IOException;
@@ -17,14 +13,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import de.tubs.age.util.IAgeGameElement;
+
 /**
  *
  * @author Maciej Apelgrim
  */
 @Entity
-public class Item extends Model{
+public class Item extends Model implements IAgeGameElement{
+	
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
+    
     private String name;
 
     @OneToOne
@@ -34,22 +34,22 @@ public class Item extends Model{
     @JoinColumn(name="GROUPS_ID")
     private Groups groups;
 
-
+    private int group_by;
     private int size;
     private boolean visibility;
     
     @Transient private int resourcen_index;
     @Transient private Template template;
-      public Item(){
+    
+    public Item(){
     
         style = new Style();
-      }
-       public Item(String name, Style style, int size, boolean visibility) {
+    }
+    public Item(String name, Style style, int size, boolean visibility) {
         this.name = name;
         this.style = style;
         this.size = size;
         this.visibility = visibility;
-//        this.resourcen_index = resourcen_index;
     }
        
     public int getId() {
@@ -65,59 +65,27 @@ public class Item extends Model{
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
+   
     public void setName(String name) {
-   //     System.out.println("##### Item  setName(String name):"+name);
         this.name = name;
     }
 
-    /**
-     * @return the style
-     */
+  
     public Style getStyle() {
         return style;
     }
-
-    /**
-     * @param style the style to set
-     */
     public void setStyle(Style style) {
         this.style = style;
     }
 
-    /**
-     * @return the group
-     */
     public Groups getGroups() {
         return groups;
     }
 
-    /**
-     * @param group the group to set
-     */
     public void setGroups(Groups groups) {
         this.groups = groups;
     }
 
-    /**
-     * @return the size
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * @param size the size to set
-     */
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    /**
-     * @return the visibility
-     */
     public boolean isVisibility() {
         return visibility;
     }
@@ -157,7 +125,7 @@ public class Item extends Model{
 	
 	public String toJSON() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("{style:"+style.toJSON()+",name:'"+name+"',size:"+size+",visibility:"+visibility+",id:"+id+"}");
+		sb.append("{style:"+style.toJSON()+",name:'"+name+"',count:"+size+",visibility:"+visibility+",id:"+id+",groupBy:"+group_by+"}");
 		return sb.toString();
 	}
 	public Item copy(String key) {
@@ -171,5 +139,28 @@ public class Item extends Model{
 		this.template = template;
 		
 	}
+
+	public Item copy() {
+		Item itm = new Item(name,style,size,visibility);
+		itm.setId(0);
+		itm.setStyle(style.copy());
+		itm.setGroup_by(group_by);
+		return itm;
+	}
+	public int getGroup_by() {
+		return group_by;
+	}
+	public void setGroup_by(int group_by) {
+		this.group_by = group_by;
+	}
+	public int getSize() {
+		return size;
+	}
+	public void setSize(int size) {
+		this.size = size;
+	}
+	
+	
+	
    
 }

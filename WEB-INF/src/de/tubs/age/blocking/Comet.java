@@ -2,7 +2,13 @@ package de.tubs.age.blocking;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.atmosphere.cpr.Broadcaster;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,6 +23,7 @@ AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
 	protected final static String BEGIN_SCRIPT_TAG = "<script type='text/javascript'>\n";
 	protected final static String END_SCRIPT_TAG = "</script>\n"; //GameManager.connector.onmessage
 	protected final static String ON_MESSAGE_METHOD = "window.parent.GameManager.connector.onmessage(DATA);";
+	protected AtomicBoolean filterAdded = new AtomicBoolean(false);
 	public Comet() {
 	}
 	
@@ -69,7 +76,17 @@ AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
         }
         if (!event.isResumedOnTimeout()) {
             String response = (String) event.getMessage();
-            response = getResponse(response);
+           /* 
+            String _key = "";
+    		String msg = "";
+
+    		if (response.indexOf("**")> 0){
+    			_key = response.substring(0,response.indexOf("**"));
+    			msg = response.substring(response.indexOf("**")+2);
+    		     }
+    		System.out.println("asfasdfadfasdf msg:"+msg);
+    		*/
+    		response = getResponse(response);
          //   System.out.println("Response:"+response);
             PrintWriter writer = event.getResource().getResponse().getWriter();
             writer.write(response);
@@ -96,4 +113,25 @@ AtmosphereHandler<HttpServletRequest, HttpServletResponse>{
 		   catch(Exception e){}  
 		   return i;
 	   }
+	protected void broadcast(Broadcaster bc, String msg){
+	//	System.out.println("\n###bc SCOPE:"+bc.getScope().toString()+" ID:"+bc.getID()+"\n");
+	//	Future<Object> f = bc.delayBroadcast(msg, 50, TimeUnit.MILLISECONDS);
+		Future<Object> f = bc.broadcast(msg);
+		System.out.println("Comet.broadcast - "+msg);
+		try {
+			f.get();
+		} catch (InterruptedException e) {
+			System.out.println("ERROR: Comet.broadcast() -InterruptedException");
+	//		e.printStackTrace();
+		} catch (ExecutionException e) {
+		//	e.printStackTrace();
+			System.out.println("ERROR: Comet.broadcast() -ExecutionException");
+		}catch(CancellationException e){
+			System.out.println("ERROR: Comet.broadcast() -CancellationException");
+		}catch(NullPointerException e){
+			System.out.println("ERROR: Comet.broadcast() -NullPointerException");
+		}
+		
+		
+	}
 }

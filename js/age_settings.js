@@ -18,7 +18,7 @@ var AgeSettings = {
 		gameSettingTitle:'Algemeineinstellungen',
 		defaultItemName:'Name',
 		defaultGroupName:'Name',
-		defaultGameName:'Name',
+		defaultGameName:'Age Name',
 		pingpongPeriod:25000,
 		chatContenerId:'ageChat',
 		chatContenerMsgId:'ageChatMsg',
@@ -26,5 +26,7 @@ var AgeSettings = {
 		imageVisible:'sichtbar.png',
 		imageUnVisible:'unsichtbar.png',
 		ageConnectionStatusId:'ageConnectionStatus',
-		responseTimeout:5000
+		responseTimeout:5000,
+		dragZIndex:999999,
+		updatePeriod:70
 };
