@@ -14,19 +14,25 @@ Spiel:
 laufende spiele:
 <ul class="games">
 
-#foreach( $instance in $game.children )
- #if( $instance.table.style.bgImageName)
-       #set($src = "../images/game/"+ $instance.key+"/0_"+ $instance.table.style.bgImageName )
+#foreach( $_game in $game.children )
+ #if( $_game.table.style.bgImageName)
+       #set($src = "../images/game/"+ $_game.key+"/0_"+ $_game.table.style.bgImageName )
  #else
  	#set($src="")
  #end
-    <li style="background-color:$game.table.style.bgColor">
-    <a href="./play.htm?game=$instance.key">
-    <p> $instance.name</p>
-    <img width="70" src="$src"/>
+    <li>
+    <a href="./play.htm?game=$_game.key"  style="background-color:$game.table.style.bgColor">
+    <p> $_game.name</p>
+     #if($src!="")
+    	<img width="70" src="$src" style="background-color:$game.table.style.bgColor"/>
+    #else
+    	<img width="70" src="/age/images/image-bg.png"/>
+    #end
+    
     </a>
-   Players: $instance.playersSize
+   <span> $_game.activePlayersSize / $_game.playersSize</span>
     </li>
+     #set($src = "")
 #end
 
 

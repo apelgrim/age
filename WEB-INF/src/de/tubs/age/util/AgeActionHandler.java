@@ -4,6 +4,9 @@ package de.tubs.age.util;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.atmosphere.cpr.AtmosphereResource;
 
 
 import de.tubs.age.jpa.Game;
@@ -17,18 +20,19 @@ public class AgeActionHandler {
     private InstancePlayer instancePlayer;
     private int phase;
     private int type;
+    private AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource;
 	private String rBroadcast;
-	public AgeActionHandler(InstancePlayer instancePlayer) {
+
+	public AgeActionHandler(AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource,InstancePlayer instancePlayer) {
 		this.instancePlayer=instancePlayer;
-		this.phase=AgeActionHandler.PHASE_JOIN;
-		this.type=AgeActionHandler.TYPE_BROADCAST;
-	}
-	public AgeActionHandler(HttpServletRequest req,InstancePlayer instancePlayer) {
-		this.instancePlayer=instancePlayer;
-		invokeAction(req);
+		this.atmoResource = atmoResource;
+		this.type=AgeActionHandler.TYPE_NO_RESPONSE;
+		invokeAction(atmoResource.getRequest());
 	}
    
    private void actionChat(HttpServletRequest req){
+	   this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+	   this.type=AgeActionHandler.TYPE_BROADCAST;
 	   String msg = req.getParameter("msg");
 	   String from = req.getParameter("from");
 	   this.response="{n:'chat',v:{from:'"+from+"',msg:'"+msg+"'}}";
@@ -37,21 +41,19 @@ public class AgeActionHandler {
 		this.phase=AgeActionHandler.PHASE_JOIN;
 		Player player = this.instancePlayer.getPlayer();
 		if(player != null){
-		//	boolean loadGame = Boolean.parseBoolean(req.getParameter("loadGame"));
-		//	String gameJSON = "";
-		//	if(loadGame) gameJSON = ",game:"+this.instancePlayer.getInstance().getGame().toJSON();
 			String playerJSON = player.toJSON();
 			this.rBroadcast="{n:'j',v:{player:"+playerJSON+"}}";
 			this.response="{n:'init',v:{status:1,player:"+playerJSON+",game:"+this.instancePlayer.getInstance().getGame().toJSON()+"}}";
 			this.type=AgeActionHandler.TYPE_BROADCAST_RESPONSE;
 			
 		}else{
-			this.response=this.instancePlayer.getKey()+"**"+"{n:'init',v:{status:0,msg:'Es wurde keine Player zugewissen!!!'}}";
+			this.response="{n:'init',v:{status:0,msg:'Es wurde keine Player zugewissen!!!'}}";
 			this.type=AgeActionHandler.TYPE_RESPONSE;
 		}
-	//	System.out.println("AgeActionHandler.actionJoin() responcse: "+response+" rBroadcast:"+rBroadcast);
    }
    private void actionMove(HttpServletRequest req){
+	   this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+	   this.type=AgeActionHandler.TYPE_BROADCAST;
 		Game game = this.instancePlayer.getInstance().getGame();
 		int x = convertToInt(req.getParameter("x"));
 	    int y = convertToInt(req.getParameter("y"));
@@ -75,11 +77,17 @@ public class AgeActionHandler {
 	}
 
 	private void actionPing(HttpServletRequest req) {
+		this.instancePlayer.getInstance().checkIfPlayersAlive();
+		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
 		this.type=AgeActionHandler.TYPE_RESPONSE;
-		this.response ="{n:'pong'}";
+		this.response="{n:'pong',v:''}";
+		int player_id = convertToInt(req.getParameter("from"));
+		if(player_id>0) this.instancePlayer.getInstance().notifyPongTime(player_id);
+		
 	}
 
 	private void actionRandom(HttpServletRequest req) {
+		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
 		this.type=AgeActionHandler.TYPE_NO_RESPONSE;
 		int id = convertToInt(req.getParameter("grp"));
 			if(id>0){
@@ -98,6 +106,8 @@ public class AgeActionHandler {
 	}
 
 	private void actionVisibility(HttpServletRequest req) {
+		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+		this.type=AgeActionHandler.TYPE_BROADCAST;
 		Game game = this.instancePlayer.getInstance().getGame();
 		boolean visibility = Boolean.parseBoolean(req.getParameter("v"));
 		int id = convertToInt(req.getParameter("i"));
@@ -115,33 +125,53 @@ public class AgeActionHandler {
 	private void actionLeave(HttpServletRequest req) {
 		this.type=AgeActionHandler.TYPE_NO_RESPONSE;
 		int id = convertToInt(req.getParameter("player"));
-		if(this.instancePlayer.getInstance().removePlayer(id)){
+		if(this.instancePlayer.getInstance().removeInstancePlayer(id)){
 			this.response="{n:'leave',v:"+id+"}";
 			this.phase=AgeActionHandler.PHASE_CLOSE;
-			this.type=AgeActionHandler.TYPE_BROADCAST;
+			this.type=AgeActionHandler.TYPE_NO_RESPONSE;
 		}
 	}
 
 	private void invokeAction(HttpServletRequest req) {
-		String action = ""+req.getParameter("action");
-		if(action.equalsIgnoreCase("chat")){
-			actionChat(req);
-		}else if(action.equalsIgnoreCase("m")){
-			actionMove(req);
-		}else if(action.equalsIgnoreCase("ping")){
-			actionPing(req);
-		}else if(action.equalsIgnoreCase("random")){
-			actionRandom(req);
-		}else if(action.equalsIgnoreCase("v")){
-			actionVisibility(req);
-		}else if(action.equalsIgnoreCase("leave")){
-			actionLeave(req);
-		}else if(action.equalsIgnoreCase("join")){
-			actionJoin(req);
-		}
-		System.out.println("+++ AgeActionHandler.invokeAction() action:"+action+" response : "+response);
+		if(this.instancePlayer!=null){
+			String action = ""+req.getParameter("action");
+			if(action.equalsIgnoreCase("chat")){
+				actionChat(req);
+			}else if(action.equalsIgnoreCase("m")){
+				actionMove(req);
+			}else if(action.equalsIgnoreCase("ping")){
+				actionPing(req);
+			}else if(action.equalsIgnoreCase("random")){
+				actionRandom(req);
+			}else if(action.equalsIgnoreCase("v")){
+				actionVisibility(req);
+			}else if(action.equalsIgnoreCase("leave")){
+				actionLeave(req);
+			}else if(action.equalsIgnoreCase("join")){
+				actionJoin(req);
+			}else if(action.equalsIgnoreCase("playerName")){
+				actionChangePlayerName(req);
+			} 
+			
+			
+		//	if(!action.equalsIgnoreCase("m")) System.out.println("+++ AgeActionHandler.invokeAction() action:"+action+" response : "+response);
+		}else System.out.println("+++ AgeActionHandler.invokeAction() instance player is NULL");
 	}
 	
+	private void actionChangePlayerName(HttpServletRequest req) {
+		int id = convertToInt(req.getParameter("player"));
+		String name = req.getParameter("name");
+		Player player = this.instancePlayer.getInstance().findPlayer(id);
+		System.out.println("name:"+name+" player:"+player+" id:"+id+" instanceplayer.id:"+this.instancePlayer.getPlayer().getId());
+		if(player != null && player.getId() == this.instancePlayer.getPlayer().getId()){
+			this.type=AgeActionHandler.TYPE_BROADCAST;
+			this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+			player.setName(name);
+			this.response="{n:'playerName',v:{name:'"+name+"',id:"+player.getId()+"}}";
+		}
+		
+	}
+
 	protected  int convertToInt(String param){
 		   int i = 0;
 		   try{ i = Integer.parseInt(param);}
@@ -150,7 +180,6 @@ public class AgeActionHandler {
 	   }
 
 	public String getResponse() {
-	//	if(this.type==AgeActionHandler.TYPE_BROADCAST) return this.instancePlayer.getKey()+"**"+response;
 		return response;
 	}
 
@@ -176,12 +205,28 @@ public class AgeActionHandler {
 	}
 
 	public String getrBroadcast() {
-//		return this.instancePlayer.getKey()+"**"+rBroadcast;
 		return rBroadcast;
 	}
 
 	public void setrBroadcast(String rBroadcast) {
 		this.rBroadcast = rBroadcast;
+	}
+
+	public InstancePlayer getInstancePlayer() {
+		return instancePlayer;
+	}
+
+	public void setInstancePlayer(InstancePlayer instancePlayer) {
+		this.instancePlayer = instancePlayer;
+	}
+
+	public AtmosphereResource<HttpServletRequest, HttpServletResponse> getAtmosphereResource() {
+		return atmoResource;
+	}
+
+	public void setAtmosphereResource(
+			AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource) {
+		this.atmoResource = atmoResource;
 	}
 
 }

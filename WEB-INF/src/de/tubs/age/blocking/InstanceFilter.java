@@ -8,16 +8,16 @@ import org.atmosphere.cpr.ClusterBroadcastFilter;
 
 public class InstanceFilter implements ClusterBroadcastFilter{
 
-	private String key;
 	private String name;
 	private AgeBroadcaster bc;
 	public InstanceFilter(){
 		System.out.println("InstanceFilter. CONSTRUCTOR ()");
 	}
-    public InstanceFilter(AgeBroadcaster bc, String key){
-    	System.out.println("InstanceFilter. CONSTRUCTOR (bc:"+bc+" key:"+key+")");
-		this.key=key;
+    public InstanceFilter(AgeBroadcaster bc,String name){
+    	System.out.println("InstanceFilter. CONSTRUCTOR (bc:"+bc+"  id:"+bc.getID()+")");
 		this.bc=bc;
+		
+		this.name = name;
 	}
 
 	@Override
@@ -31,10 +31,10 @@ public class InstanceFilter implements ClusterBroadcastFilter{
 				_key=s[0];
 				 msg=s[1];
 			}else msg=s[0];
-			System.out.println("\n\n####InstanceFilter. bc.key:"+bc.getKey()+" msg:"+msg+" \n_key:"+_key+" key:"+key+"\n#####\n\n");
-			if(_key.equals(this.bc.getKey())) return new BroadcastAction(msg);
+	//		System.out.println("\n\n####InstanceFilter. bc.id():"+bc.getID()+" msg:"+msg+" \n_key:"+_key+"\n#####\n\n");
+		//	if(_key.equals(bc.getID())) return new BroadcastAction(msg);
         }
-		return new BroadcastAction(ACTION.ABORT,null);
+		return new BroadcastAction(o);
 	}
 
 
@@ -42,7 +42,7 @@ public class InstanceFilter implements ClusterBroadcastFilter{
 	@Override
 	public void init() {
 		System.out.println("InstanceFilter.init()");
-		
+	//	bc.printEvents();
 	}
 	@Override
 	public void destroy() {

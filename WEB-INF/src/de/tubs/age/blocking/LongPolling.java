@@ -22,7 +22,7 @@ import de.tubs.age.util.InstancePlayer;
 
 public class LongPolling  extends Comet {
 
-	@Override
+	
 	protected void init(AtmosphereResource<HttpServletRequest, HttpServletResponse> event) throws IOException {
 		
 		HttpServletRequest req = event.getRequest();
@@ -83,10 +83,18 @@ public class LongPolling  extends Comet {
             event.suspend(-1);
     		Broadcaster bc = event.getBroadcaster();
     	//	bc.getBroadcasterConfig().addFilter((BroadcastFilter)(new JGroupsFilter(bc, event.getRequest().getParameter("key").trim())));
-    		instancePlayer.getInstance().setBroadcaster(bc);
+    	//	instancePlayer.getInstance().setBroadcaster(bc);
     		bc.broadcast(ageAction.getrBroadcast());
     		bc.scheduleFixedBroadcast("{n:'ping',v:'pong'}", 30, TimeUnit.SECONDS);
 		}	
+		
+	}
+
+	@Override
+	public void onRequest(
+			AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource)
+			throws IOException {
+		// TODO Auto-generated method stub
 		
 	}
 }

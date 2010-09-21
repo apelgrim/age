@@ -2,9 +2,9 @@
 $gameJSON
 <div id="ageGameContener">
 <div id="ageConnectionStatus"><img src="/age/images/connect_idle.gif"/></div>
-
+<div style="text-align:right;"><a href="javascript:GameManager.leaveGame();" id="leaveGameButton">Verlasse das Spiel</a></div>
 </div>
-<button onclick="GameManager.leaveGame()">Verlasse das Spiel</button>
+
 
 
 <div id="ageConsole"></div>
@@ -23,7 +23,7 @@ $(function() {
 	$('#ageChatInput > input').keydown(function(event) {
 		  if (event.keyCode == '13') {
 			  AgeUpdater.sendChatMessage();
-		   }});
+	}});
 });
 </script>
 

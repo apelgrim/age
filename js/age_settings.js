@@ -19,7 +19,7 @@ var AgeSettings = {
 		defaultItemName:'Name',
 		defaultGroupName:'Name',
 		defaultGameName:'Age Name',
-		pingpongPeriod:25000,
+		pingpongPeriod:20000,
 		chatContenerId:'ageChat',
 		chatContenerMsgId:'ageChatMsg',
 		chatContenerInputId:'ageChatInput',

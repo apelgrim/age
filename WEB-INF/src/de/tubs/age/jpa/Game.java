@@ -59,6 +59,7 @@ public class Game extends Model{
 
     @Transient private Style style;
     @Transient private String JSONCache;
+    @Transient private int activePlayersSize;
 
 
     public Game() {
@@ -379,6 +380,18 @@ public class Game extends Model{
 		}
 		
 	}
+
+	public int getActivePlayersSize() {
+		System.out.println("game getActivePlayersSize() - "+activePlayersSize);
+		return activePlayersSize;
+	}
+
+	public void setActivePlayersSize(int activePlayersSize) {
+		System.out.println("game setActivePlayersSize(int activePlayersSize) - "+activePlayersSize);
+		this.activePlayersSize = activePlayersSize;
+	}
+
+
 
 
 

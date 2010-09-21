@@ -39,7 +39,7 @@ div.player {
 
 #ageHeader h1{
     text-align: center;
-    color: #1669AD;
+    color: #fff;
     font-family:Arial;
 }
 div#wrapper{
@@ -69,6 +69,7 @@ div#ageConsole p{
 }
 div#header{
 	padding:5px;
+	color:#efefef;
 height:60px;
 margin-bottom:42px;
  background-color: #5F9EA0;
@@ -107,6 +108,20 @@ div.activePlayer{
 div.unactivePlayer{
     border: 1px solid #dddddd;
 }
+div.agePlayer > p img{
+	display: inline;
+	height:16px;
+margin-left:3px;
+}
+div.agePlayer > p input{
+background-color:#000000;
+border:1px solid #FFFFFF;
+color:#FFFFFF;
+font-weight:bold;
+margin-left:15px;
+text-align:center;
+width:69%;
+}
 div.agePlayer > p{
 
     color:white;
@@ -120,6 +135,7 @@ div.agePlayer > p{
 }
 div.playerOwner > p {
 background-color: #000000;
+font-family:verdana;
 }
 div.playerOwner  {
 border: 1px solid #000000;
@@ -239,6 +255,13 @@ background-color:#F0F0F0;
     margin-top: 10px;
     text-align:right;
     position: relative;
+}
+a#leaveGameButton{
+text-decoration: none;
+color:#ffffff;
+font-weight: bold;
+background-color: red;
+padding: 10px 20px;
 }
 ul.ageTemplatesList{
 bottom:0;
@@ -414,22 +437,36 @@ div#ResourcenContent div.bgImageView img{
 ul.games{
 }
 ul.games li p{
-margin:0px;
-text-align: center;
+background-color:#BBBBBB;
+margin:2px auto 4px;
+padding:2px 0;
+text-align:center;
+}
+ul.games li span{
+color:#777777;
+font-size:10px;
 }
 ul.games li img{
 	margin: 0 auto;
 	border:none;
+	display: block;
 }
 div#ageConnectionStatus{
 
 }
 ul.games li{
-border:1px solid #AAAAAA;
+float:left;
+height:100px;
+background-color:#EEEEEE;
 list-style-type:none;
 margin:10px;
-padding:4px;
-width:80px;
+width:100px;
+}
+ul.games li a{
+color:#444444;
+font-family:verdana;
+font-size:12px;
+
 }
 /*
 input.GrpBgInpt{
@@ -487,6 +524,7 @@ div#ageChat{
 background-color:#FFFFFF;
 border:1px solid #DDDDDD;
 bottom:0;
+left:3px;
 position:fixed;
 width:200px;
 }

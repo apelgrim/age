@@ -21,7 +21,7 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
     	else return this.bgColor;
     };
     this.getImagePath = function(url){
-    //	if(debug) Log('getImagePath this.bgImage:'+this.bgImage+' imageNam:'+this.imageName,'d');
+    	if(debug) Log('getImagePath this.bgImage:'+this.bgImage+' imageNam:'+this.imageName+' this.angle:'+this.angle+' this.imagesPath:'+this.imagesPath,'d');
     	if(!this.isNull(this.bgImage)){ 
     		return url ? 'url('+this.bgImage+')' : this.bgImage ;}
     	if(!(this.isNull(this.imagesPath) | this.isNull(this.imageName))) {
@@ -66,8 +66,8 @@ function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
    this.loadFromJSON = function(s){
         this.setStyle(s);
 	    this.imagesPath = AgeSettings.userImagePath+GameManager.key+'/';
-	    if(s.imageName) this.bgImage = this.imagesPath+this.angle+'_'+s.imageName;
-	    else this.bgImage=null;
+	 //   if(s.imageName) this.bgImage = this.imagesPath+this.angle+'_'+s.imageName;
+	 //   else this.bgImage=null;
 	    if(s.bgImage) this.bgImage=s.bgImage;
     	return this;
     };
@@ -189,6 +189,39 @@ function Player(name,id){
     this.getDomIdPrefix = function(){
         return 'agePlayer';
     };
+    this.addActionInPlaceEditor = function(){
+    	var header_name = this.HTMLElement.children('p').first();
+    	var name = this.name;
+    	var id = this.id;
+    	header_name.bind('dblclick', function() {
+    	//	  header_name.unbind('dblclick');
+    		  var input_txt = HTMLRenderer.inputText({name:'playerName',value:name});
+    		  header_name.html(input_txt);
+    		  var img = HTMLRenderer.img({src:AgeSettings.imagePath+'ok.png'});
+    		  img.bind('click', function() {
+    			  if(input_txt.val() != name){
+    				  AgeUpdater.sendUpdate('action=playerName&name='+input_txt.val()+'&player='+id);
+        			  header_name.html(input_txt.val());
+    			  }
+    			  
+    		  });
+    		  input_txt.bind('blur', function() {
+    			  if(input_txt.val() != name){
+    				  AgeUpdater.sendUpdate('action=playerName&name='+input_txt.val()+'&player='+id);
+        			  header_name.html(input_txt.val());
+    			  }
+    			  
+    		  });
+    		  header_name.append(img);
+    	});
+    };
+    this.setName=function(name){
+    	this.name=name;
+    	var header_name = this.HTMLElement.children('p').first();
+    	header_name.html(name);
+    	header_name.unbind('dblclick');
+    	this.addActionInPlaceEditor();
+    };
     this.getDomId=function(){
     	if(this.id > -1) return this.getDomIdPrefix()+'-'+this.id;
     	return null;
@@ -244,8 +277,10 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     			var itm = this.items[i];
     			if(itm.id==item_id) item_image = itm.HTMLElement.children('img').first();
     		}
-			image.attr('src',item_image.attr('src'));
-    		
+    		setTimeout(function(){ 
+    			image.attr('src',item_image.attr('src')); 
+    		  }, 500 ); 
+			
     	}else Log('Group.animateRandom() randomgenerator is false.','e');
     };
     this.findItem=function(item_id){
@@ -399,6 +434,14 @@ function Game(name){
         }
         return this.players;
     };
+    this.findGroup=function(grp_id){
+    	for ( var i = 0; i < this.ressourcen.length; i++) {
+    		var group = this.ressourcen[i];
+    		if(group.id == grp_id && group.randomgenerator) return group;
+		}
+    	if(debug) Log('findGroup return NULL','d');
+    	return null;
+    };
     this.findPlayer=function(player_id){
     	for ( var i = 0; i < this.players.length; i++) {
 			var player = this.players[i];
@@ -521,6 +564,7 @@ function Renderer(game){
 
     };
     this.getStyle = function(style){	
+    	if(debug) Log('<b> renderer: setStyle angle:'+this.degree+' style.bgImage:'+style.bgImage+'</b>','d');
     	if(this.degree==0) return style;
     	var newPos = Perspective.rotateElement(this.degree, style);
     	style.left = newPos.left;
@@ -740,57 +784,6 @@ function Renderer(game){
     };
      }
 
-function RandomGenerator(){
-
-}
-
-
-/*
-var app={
-		update: function(msg){
-//	Log('app update ...','i');
-	var action = msg.n;
- 	var data = eval('(' + msg.v + ')');
- 	if(action=='j'){
- 		Log('app update join...','i');
-
- 	}
- 	if(action=='m'){
-
-   	var id = data.id;
-   	var pos = data.pos;
-   	var cur_player = GameManager.instance.players[GameManager.instance.player];
-   	if(id!=cur_player.id){
-   	//	Log('cccBekomme Daten cur_player: '+cur_player.id+'...  pos id #'+pos.id+' id:'+id+' pos.x:'+pos.x+',pos.y:'+pos.y+
-   	//			' verschiebie: '+$('#'+pos.id),'i');
-   		//rotatePoint
-   		//left und top
-   		//var raltive_position = Perspective.translateToRelativePosition([parseInt(pos.x),parseInt(pos.y)],{width:43,height:37});
-
-
-   		var leftTop = Perspective.shiftRightBottom({left:parseInt(pos.x),top:parseInt(pos.y)},{width:43,height:37});
-
-   		var x = Perspective.getX(leftTop.left);
-   		var y = Perspective.getY(leftTop.top);
-   		var angle = Perspective.getAngle(x,y);
-   		var new_point = Perspective.rotatePoint([x-43/2,y-37/2],angle+Math.PI);
-   		var left = Perspective.getLeft(new_point[0]);
-   		var top = Perspective.getTop(new_point[1]);
-   		var newleftTop = Perspective.shiftLeftTop({left:left,top:top},{width:43,height:37});
-
-   		//ende
-   		Log('9xxx x:'+x+' y:'+y+' new_point: ['+new_point[0]+','+new_point[1]+'] left:'+left+' top:'+top);
-   		$('#'+pos.id).css( {
-   			left : newleftTop.left,
-   			top : newleftTop.top
-   		});
-   	}
- 	}
-}
-};
-
-*/
-
 var Perspective={
     PLAYERS: -1,
     WIDTH: -1,
@@ -912,7 +905,7 @@ function CometConnector(){
    },function(msg){
 	    var action = msg.n;
         var data = msg.v;
-     //   if(debug) Log('Bekomme Daten action:'+action+' data:'+data,'d');
+        if(debug) Log('Bekomme Daten action:'+action+' data:'+data,'d');
         if(action=='init'){
         	if(data){
         		var status = data.status;
@@ -925,7 +918,7 @@ function CometConnector(){
         				Log('Comet.init loadGame:'+data.game,'i');
         				GameManager.loadGame(data.game);
         				
-        				Log('Comet.init setze curren Player'+data.player.id,'i');
+        				Log('Comet.init setze curren Player:'+data.player.id+' winkel:'+data.player.angle,'i');
         				GameManager.instance.setCurrentPlayer(data.player);
         				
         				Log('Comet.init rendere Game.','i');
@@ -949,20 +942,32 @@ function CometConnector(){
         	}
         	 
         }
+        if(action=='pong'){
+        	if(debug) Log('Connector: Bekome PONG','d');
+        	
+        }
         if(action=='m'){
          try{
         	var item_id=data.i;
         	var pos=data.pos;
         	var player_id=data.player;
         	var cur_player = GameManager.instance.players[GameManager.instance.player];
-        	
-        	if(player_id!=cur_player.id){
+         	if(player_id!=cur_player.id){
         		var player = GameManager.instance.findPlayer(player_id);
                 var angle = cur_player.angle-player.angle;
         		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
-        //		var isItm=data.isItm;
-        //		var groupTyp=data.groupTyp;
+        		var isItem=data.isItem;
+        		var groupTyp=data.groupTyp;
+        		if(!isItem && groupTyp=='random'){
+        			var grp = GameManager.instance.findGroup(item_id);
+        			if(grp != null) var bgImage = grp.style.getImagePath(false);
+        		}  
         		$('#'+pos.dom).css( {left : style.left,top : style.top,zIndex:data.zIndex});
+        		if(bgImage){
+        			var image = $('#'+pos.dom).children('img').first();
+    				image.attr('src',bgImage);
+        			
+        		} 
         	}
     	   }catch(e){Log('CometConnector.onmessage() action:move msg:'+e,'e'); }
         }
@@ -978,6 +983,14 @@ function CometConnector(){
         }
         if(action=='chat'){
         	GameManager.chat({n:data.from,v:data.msg});
+        }
+        if(action=='playerName'){
+        	var player = GameManager.instance.findPlayer(data.id);
+        	if(player != null && data.name && data.name != ''){
+        		GameManager.chat({n:player.name+':',v:'*** hat die Name auf <b>'+data.name+'</b> geändert.'});
+        		player.setName(data.name);
+        		
+        	}  	
         }
         if(action=='leave'){
         	GameManager.removePlayer(data);
@@ -1014,7 +1027,7 @@ function CometConnector(){
    },function(data){
 	   if(debug) Log('CometConnector.send() data:'+data,'d');
 	    AgeUtil.setConnectionStatus('active');
-		$.ajax({type : "POST", url:GameManager.url, data:data,
+		$.ajax({type : "POST", url:GameManager.url+'?key='+GameManager.key, data:data,
 			success: function(data, textStatus, xhr) {
 		//	if(debug) Log('CometConnector.send() success:textStatus: '+textStatus+' data:'+data,'d');
 			GameManager.connector.onmessage(data);
@@ -1084,6 +1097,7 @@ var GameManager = {
 	    	var player = this.instance.findPlayer(player_id);
 	    	if(player != null){
 				player.HTMLElement.removeClass('activePlayer');
+				player.HTMLElement.removeClass('playerOwner');
 				player.HTMLElement.addClass('unactivePlayer');
 			//	player.name = _player.name;
 				player.active=false;
@@ -1098,11 +1112,15 @@ var GameManager = {
 	    	for ( var i = 0; i < players.length; i++) {
 				var player = players[i];
 				if(player.id == _player.id){	
-					if(debug) Log('player.id == _player.id player.HTMLElement:'+player.HTMLElement,'d');
+					if(debug) Log('player.id == _player.id:'+_player.id,'d');
 					player.HTMLElement.removeClass('unactivePlayer');
 					player.HTMLElement.addClass('activePlayer');
 					var owner_id = this.instance.getPlayerOwner()==null? -1 : this.instance.getPlayerOwner().id;
-					if(player.id == owner_id) player.HTMLElement.addClass('playerOwner');
+					if(player.id == owner_id){
+						player.HTMLElement.addClass('playerOwner');
+						player.addActionInPlaceEditor();
+						this.joined=true;
+					}
 					player.name = _player.name;
 					player.active=true;
 					this.chat({n:player.name,v:'<span class="ageSystem">*** has joined.</span>'});
@@ -1113,16 +1131,18 @@ var GameManager = {
 	    },
 	    leaveGame:function(){
 	    	try{
+	    		if(debug) Log('<strong>GameManager.leaveGame()</strong>','d');
 		    	var cur_player = GameManager.instance.players[GameManager.instance.player];
 		    	cur_player.HTMLElement.removeClass('activePlayer');
 		    	cur_player.HTMLElement.removeClass('playerOwner');
-		    	cur_player.HTMLElement.addClass('unactivePlayer');
-		    	
+		    	cur_player.HTMLElement.addClass('unactivePlayer');	    	
 		    	AgeUpdater.sendUpdate('action=leave&player='+cur_player.id);
 		    	this.joined=false;
 		    	cur_player.active = false;
-		    	return false;
+		    //	alert('leaveGame');
+		    	
 	    	}catch(e){Log('GameManager.leaveGame() - '+e,'e');}
+	    //	return false;
 	    },
 	    init:function(data){
 	    	Log('Setze init Parameters...','i');
@@ -1134,7 +1154,7 @@ var GameManager = {
 	    		Log('Erstelle eine Connector...','i');
 	 	        this.connector = new CometConnector();
 	 	        Log('Verbinde sich mit den Server...','i');
-	 	        var query='key='+this.key;
+	 	        var query='key='+this.key+'&action=join';
 //	 	        if(data.game){
 //	 	        	this.loadGame(data.game);
 //	 	        	this.renderGame();
@@ -1189,15 +1209,17 @@ AgeUpdater={
     	}
     },
     sendChatMessage:function(){
+    	try{
     	
-    //	if(debug) Log('','d');
     	var input_text = $('#'+AgeSettings.chatContenerInputId).children('input').first();
-    	if(input_text!=null && input_text!='' && GameManager.instance.player >= 0){
+    	var msg = $.trim(input_text.val());
+    	if(msg!=null && msg!='' && GameManager.instance.player >= 0){
 	    	var cur_player = GameManager.instance.players[GameManager.instance.player];
-	    	this.sendUpdate('action=chat&msg='+input_text.val()+'&from='+cur_player.name);
+	    	this.sendUpdate('action=chat&msg='+msg+'&from='+cur_player.name);
 	    	input_text.attr('value','');  
     	}
     	return;
+    	}catch(e){Log('AgeUpdater.sendChatMessage() - '+e,'e');}
     },
     sendUpdate:function(updateMsg){
         if(!GameManager.local){
@@ -1222,7 +1244,13 @@ AgeUpdater={
         	} 	
         	var diff = _date.getTime()-this.lastUpdateTime;
         	if(diff > AgeSettings.pingpongPeriod){
-        	//	this.sendUpdate('action=ping');
+        		if(GameManager.instance.player >=0){
+            		var cur_player = GameManager.instance.players[GameManager.instance.player];
+            		
+            		this.sendUpdate('action=ping&from='+cur_player.id);
+            //		Log('send PING','d');
+            	} 
+        		
         		this.lastUpdateTime=_date.getTime();
         	}
         }    

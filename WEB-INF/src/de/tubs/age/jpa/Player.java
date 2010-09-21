@@ -15,6 +15,10 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.atmosphere.cpr.AtmosphereResource;
 
 /**
  *
@@ -30,9 +34,12 @@ public class Player extends Model{
    private int angle;
    
    @Transient private boolean active;
+   @Transient private AtmosphereResource<HttpServletRequest, HttpServletResponse> atmosphereResource;
+   @Transient private long lastPongTime;
    
    @ManyToOne
     private Game game;
+    
  //  @Transient private int _id;
     public Player() {
     }
@@ -131,6 +138,23 @@ public class Player extends Model{
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public void setAtmosphereResource(
+			AtmosphereResource<HttpServletRequest, HttpServletResponse> r) {
+		this.atmosphereResource = r;
+		
+	}public AtmosphereResource<HttpServletRequest, HttpServletResponse> getAtmosphereResource(){
+		return this.atmosphereResource;
+	}
+
+	public synchronized void notifyPongTime() {
+		
+		 lastPongTime = System.currentTimeMillis();
+	//	 System.out.println("Player.notifyPongTime():"+lastPongTime);
+	}
+	public synchronized  long getPongTime(){
+		return lastPongTime;
 	}
 
 
