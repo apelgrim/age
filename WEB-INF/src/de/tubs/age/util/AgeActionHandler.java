@@ -114,12 +114,18 @@ public class AgeActionHandler {
 		String domid = req.getParameter("dom");
 		String player = req.getParameter("player");				
 		String image_name="";
+		String bgColor="";
 		Item item = game.findItem(id);
 		if(item != null) {
-			if(visibility) image_name=item.getStyle().getBgImageName();
+			if(visibility) {
+				image_name=item.getStyle().getBgImageName();
+				bgColor=item.getStyle().getBgColor();
+			}
+			
+			
 			item.setVisibility(visibility);
 		}				
-		this.response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",img:'"+image_name+"'}}";
+		this.response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",bgColor:'"+bgColor+"',img:'"+image_name+"'}}";
 	}
 
 	private void actionLeave(HttpServletRequest req) {
@@ -151,13 +157,35 @@ public class AgeActionHandler {
 				actionJoin(req);
 			}else if(action.equalsIgnoreCase("playerName")){
 				actionChangePlayerName(req);
+			}else if(action.equalsIgnoreCase("stack")){
+				actionStack(req);
 			} 
 			
+			//action=stack&id='+this.id+'&atItem='+atItem+'&playerName='+player_name+'&stacked='+stacked;
 			
 		//	if(!action.equalsIgnoreCase("m")) System.out.println("+++ AgeActionHandler.invokeAction() action:"+action+" response : "+response);
 		}else System.out.println("+++ AgeActionHandler.invokeAction() instance player is NULL");
 	}
 	
+	private void actionStack(HttpServletRequest req) {
+		int id = convertToInt(req.getParameter("id"));
+		int atItem = convertToInt(req.getParameter("atItem"));
+		String playerName = req.getParameter("playerName");
+		String stacked = req.getParameter("stacked");
+		Groups grp = this.instancePlayer.getInstance().getGame().findGroup(id);
+		if(grp != null){
+			Item item = grp.findItem(atItem);
+			if(item != null){
+				grp.getStyle().setLeft(item.getStyle().getLeft());
+				grp.getStyle().setTop(item.getStyle().getTop());	
+				grp.setStacked(Boolean.parseBoolean(stacked));
+				this.type=AgeActionHandler.TYPE_BROADCAST;
+				this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+				this.response="{n:'stack',v:{id:"+id+",atItem:"+atItem+",playerName='"+playerName+"',stacked="+stacked+"}}";
+			}		
+		}	
+	}
+
 	private void actionChangePlayerName(HttpServletRequest req) {
 		int id = convertToInt(req.getParameter("player"));
 		String name = req.getParameter("name");

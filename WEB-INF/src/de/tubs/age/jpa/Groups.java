@@ -139,7 +139,12 @@ public class Groups extends Model implements IAgeGameElement{
     public void setVisibility(boolean visibility) {
         this.visibility = visibility;
     }
-
+   public Item findItem(int id){
+	   for (Item item : items) {
+		if(item.getId()==id) return item;
+	}
+	   return null;
+   }
     /**
      * @return the stacked
      */

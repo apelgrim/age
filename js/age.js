@@ -1,5 +1,5 @@
 
-var debug = false;
+var debug = true;
 
 //document.write('<script src="/age/js/age_settings.js" type="text/javascript"></script>');
 function Style(height, width,bgColor,bgImage,id,_class,left,top,position) {
@@ -126,6 +126,7 @@ function Item(id,name,count,visibility,style){
     	this.visibility=vsbl;
     	var image_path = this.style.imagesPath+this.style.angle+'_'+this.style.imageName;
     	this.setItemVisibilityIcon(this.visibility);
+    	this.HTMLElement.css({backgroundColor:this.style.bgColor});
     	var img_e = this.HTMLElement.children('img').first();
     	if(img_e) img_e.attr('src',image_path);
     };
@@ -149,10 +150,19 @@ function Item(id,name,count,visibility,style){
     		
     		this.actionBar=HTMLRenderer.div({_class:'ItemActionBar'}).css('display','none');
     		var _item = this;
+    		
     		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
     		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		Log('this.group.stacked:'+this.group.stacked,'d');
+    		if(this.group.stacked) var img_s = HTMLRenderer.img({src:AgeSettings.imagePath+'stacked0.png'});
+    		else img_s = HTMLRenderer.img({src:AgeSettings.imagePath+'stacked1.png'});
+    		
     		img.bind('click', function () {_item.sendItemVisibilityUpdate(_item.visibility); });
+    		img_s.bind('click', function () {_item.group.sendGroupStackedUpdate(!_item.group.stacked,_item.id); });
+    		
     		this.actionBar.append(img);
+    		this.actionBar.append(img_s);
+    		
     		this.HTMLElement.append(this.actionBar);
     		
     	}
@@ -290,6 +300,15 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
 			
 		}
     	return null;
+    };
+    this.sendGroupStackedUpdate=function(stacked,atItem){
+    	try{
+    		Log('XXXXXXXX sendGroupStackedUpdate=function(stacked:'+stacked,'d');
+	    	var player_name=GameManager.instance.players[GameManager.instance.player].name;
+	    	var update = 'action=stack&id='+this.id+'&atItem='+atItem+'&playerName='+player_name+'&stacked='+stacked;	
+	    	AgeUpdater.sendUpdate(update);
+	    	
+    	}catch(e){Log('Group.sendGroupStackedUpdate() - '+e,'e');}
     };
     this.renderItem=function(item){
             return HTMLRenderer.createGameItem(item.style,{});
@@ -664,6 +683,7 @@ function Renderer(game){
         }
         
        	var itemDOM = HTMLRenderer.createGameItem(this.getStyle(itm_style),{title:(grp.name)});
+       	itemDOM.addClass(grp.getDomId());
         itm.HTMLElement=this.bindItemAction(this.makeDraggable(itemDOM,itm),itm);
         itm.createActionBar();
         
@@ -849,17 +869,19 @@ var Perspective={
     	return (degree * Math.PI)/180;
     },
     rotateElement:function(degree,style){
-    	var leftTop = Perspective.shiftRightBottom({left:style.left,top:style.top},{width:style.width,height:style.height});
-    	var x = Perspective.getX(leftTop.left);
-   		var y = Perspective.getY(leftTop.top);
-   		var angle = Perspective.getAngle(x,y);
-   		var new_point = Perspective.rotatePoint([x,y],angle+this.degreeToRad(degree));
-   		var left = Perspective.getLeft(new_point[0]);
-   		var top = Perspective.getTop(new_point[1]);
-   		var dim = {width:style.width,height:style.height};
-   		if(degree == 90 | degree==270) dim = {width:style.height,height:style.width};
-   		var newleftTop = Perspective.shiftLeftTop({left:left,top:top},{width:dim.width,height:dim.height});
-   		return {left:newleftTop.left,top:newleftTop.top,width:dim.width,height:dim.height};  		
+    	if(degree != 0){
+	    	var leftTop = Perspective.shiftRightBottom({left:style.left,top:style.top},{width:style.width,height:style.height});
+	    	var x = Perspective.getX(leftTop.left);
+	   		var y = Perspective.getY(leftTop.top);
+	   		var angle = Perspective.getAngle(x,y);
+	   		var new_point = Perspective.rotatePoint([x,y],angle+this.degreeToRad(degree));
+	   		var left = Perspective.getLeft(new_point[0]);
+	   		var top = Perspective.getTop(new_point[1]);
+	   		var dim = {width:style.width,height:style.height};
+	   		if(degree == 90 | degree==270) dim = {width:style.height,height:style.width};
+	   		var newleftTop = Perspective.shiftLeftTop({left:left,top:top},{width:dim.width,height:dim.height});
+	   		return {left:newleftTop.left,top:newleftTop.top,width:dim.width,height:dim.height};  	
+    	}else return style;
     },
     gamePosition:null
 
@@ -953,8 +975,9 @@ function CometConnector(){
         	var player_id=data.player;
         	var cur_player = GameManager.instance.players[GameManager.instance.player];
          	if(player_id!=cur_player.id){
-        		var player = GameManager.instance.findPlayer(player_id);
-                var angle = cur_player.angle-player.angle;
+         		var cur_player = GameManager.instance.players[GameManager.instance.player];
+        	//	var player = GameManager.instance.findPlayer(player_id);
+                var angle = cur_player.angle;//-player.angle;
         		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
         		var isItem=data.isItem;
         		var groupTyp=data.groupTyp;
@@ -984,6 +1007,24 @@ function CometConnector(){
         if(action=='chat'){
         	GameManager.chat({n:data.from,v:data.msg});
         }
+        if(action=='stack'){
+        	var grp_id = data.id;
+            var atItem = data.atItem;
+            var playerName = data.playerName;
+            var stacked = data.stacked;
+            var grp = GameManager.instance.findGroup(grp_id);
+            if(grp != null && grp.stacked != stacked){
+            	var item = grp.findItem(atItem);
+            	if(item != null){
+            		grp.style.left = item.style.left;
+            		grp.style.top = item.style.top;
+            		grp.stacked=stacked;
+            		var renderer = GameManager.instance.renderer;
+            		renderer.renderGroup(grp);
+            	}
+            }
+        	//GameManager.chat({n:data.from,v:data.msg});
+        }
         if(action=='playerName'){
         	var player = GameManager.instance.findPlayer(data.id);
         	if(player != null && data.name && data.name != ''){
@@ -1010,8 +1051,14 @@ function CometConnector(){
 					//if(debug) Log('CometConnector.onmessage()  if(itm.id==itm_id) itm.id:'+itm.id ,'d');
 		        	
 					if(itm.id==itm_id){
-						if(visibility)  itm.style.imageName = img_name;
-						else itm.style.imageName=grp.style.imageName;
+						if(visibility){
+							itm.style.bgColor = data.bgColor;
+							itm.style.imageName = img_name;
+						}
+						else{
+							itm.style.bgColor = grp.style.bgColor;
+							itm.style.imageName=grp.style.imageName;
+						}
 						var game = GameManager.instance;
 						itm.style.angle = game.players[game.player].angle;
 						itm.setVisibility(visibility);
@@ -1183,14 +1230,15 @@ AgeUpdater={
     setPosition:function(event, ui,itm){
     	if(debug) Log('setPos GameManager.local?'+GameManager.local,'d');
         if(!GameManager.local){
-        	try{
-	            var cur_player = GameManager.instance.players[GameManager.instance.player];
-	            var dom = itm.getDomId();
+        	try{		
+        		var cur_player = GameManager.instance.players[GameManager.instance.player];
+        		var style = Perspective.rotateElement(-cur_player.angle,{left:ui.position.left,top:ui.position.top,width:itm.style.width,height:itm.style.height});
+                var dom = itm.getDomId();
 	            var groupTyp='norm';
 	            if(itm.randomgenerator) groupTyp='random';
 	            if(itm.isItem) var isItm = 'true';
 	            else isItm = 'false';
-	            var _update = "action=m&zindex="+itm.style.zIndex+"&isItm="+isItm+"&groupTyp="+groupTyp+"&p=" + cur_player.id + "&i="+itm.id+"&dom="+dom+"&x=" + Math.round(ui.position.left) + "&y=" + Math.round(ui.position.top)+"&h="+Math.round(itm.style.height)+"&w="+Math.round(itm.style.width);
+	            var _update = "action=m&zindex="+itm.style.zIndex+"&isItm="+isItm+"&groupTyp="+groupTyp+"&p=" + cur_player.id + "&i="+itm.id+"&dom="+dom+"&x=" + Math.round(style.left) + "&y=" + Math.round(style.top)+"&h="+Math.round(style.height)+"&w="+Math.round(style.width); 
 	            this.update.r = _update;
         	}catch(e){Log('AgeUpdater.setPosition() - '+e,'e');}
         }
@@ -1366,9 +1414,11 @@ var GameCreatorManager={
        if(mColorPicker != null) mColorPicker.main();
        else Log('GameCreatorManager:update Color Picker ist nicht Verfügbar !!!','e');
        
+       if(debug) Log('GameCreatorManager.update()','d');
        this.bindActions();
     },
     bind:function(p){
+    	if(debug) Log('GameCreatorManager. bind: p.domid'+p.domid,'d');
         $('#'+p.domid).bind('colorpicked', function () {
             (p.object).setBgColor($(this).val());
             if(debug) Log('Color picked: '+$(this).val(),'d');
@@ -1457,8 +1507,7 @@ var GameCreatorManager={
 
     },
     loadTemplate: function(tmplt_id){
-    	try{
-    		
+    	try{		
 	    	var template = this.templates[tmplt_id];
 	    	var grp = new Group();
 	    	grp.loadFromJSON(template.value);
@@ -1692,17 +1741,17 @@ function ResourcenCreator(game) {
 	this.groups = null;
     this.groupIdSec=0;
     this.removeGroup=function(grp){
-             for (var i = 0; i < this.groups.length; i++) {
-                if(grp.id == this.groups[i].id){
-                    Log('Lösche Gruppe mit DOMID:'+this.groups[i].groupWrapper.attr('id'),'i');
-                    this.groups[i].groupWrapper.remove();
-                    this.groups[i].id = null;
+    	for (var i = 0; i < this.groups.length; i++) {
+    		if(grp.id == this.groups[i].id){
+    			Log('Lösche Gruppe mit DOMID:'+this.groups[i].groupWrapper.attr('id'),'i');
+                this.groups[i].groupWrapper.remove();
+                this.groups[i].id = null;
              //       this.hiddenGroupsSizeComponent.value =  parseInt(this.hiddenGroupsSizeComponent.value)-1;
              //       this.groups.splice(i, 1);
              //       break;
-                }
-             }  
-        };
+            }
+       }  
+    };
 	this.newGroup=function(action,grp) {
 		var _action = action || false;
 		var _grp = grp || null;
@@ -1819,7 +1868,9 @@ function GroupCreator(id,index) {
         var itm = this.items[i];
     	if(itm.id != null){
             if(debug) Log('--GroupCreator.getItems - itms.push(itm.item)','d');
-            itms.push(itm.getItem());
+            var _item=itm.getItem();
+            _item.group=this.group;
+            itms.push(_item);
         }
 	}
     return itms;
@@ -1950,6 +2001,7 @@ function GroupCreator(id,index) {
             return HTMLRenderer.inputColorField( {name : 'resourcen['+index+'].style.bgColor',id:this.getBgColorComponentId(),value : this.group.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
         };
         this.setBgColor = function(bgcolor){
+        	Log('setBgColor:'+bgcolor,'d');
             this.group.style.bgColor=bgcolor;
         };
         this.getBgImageComponent = function(){

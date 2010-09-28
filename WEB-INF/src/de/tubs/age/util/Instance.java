@@ -204,12 +204,12 @@ public class Instance {
 		
 	}
 	public synchronized void checkIfPlayersAlive() {
-		System.out.println("Instance.checkIfPlayersAlive() this.ip.size():"+this.ip.size());
+//		System.out.println("Instance.checkIfPlayersAlive() this.ip.size():"+this.ip.size());
 		long curr_time = System.currentTimeMillis();
 		for (InstancePlayer p : this.ip) {
 			if(p != null){
 				try{
-					System.out.println(" ----  checkIfPlayersAlive()destroy (curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT:"+(curr_time-p.getPlayer().getPongTime()) +" > "+ Comet.PING_PONG_TIMEOUT);
+			//		System.out.println(" ----  checkIfPlayersAlive()destroy (curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT:"+(curr_time-p.getPlayer().getPongTime()) +" > "+ Comet.PING_PONG_TIMEOUT);
 					
 					if((curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT){
 					   this.ip.remove(p);
@@ -218,7 +218,7 @@ public class Instance {
 					}
 				}catch(NullPointerException e){
 					this.ip.remove(p);
-					System.out.println("checkIfPlayersAlive() Null pointer exception");
+			//		System.out.println("checkIfPlayersAlive() Null pointer exception");
 				}
 				//System.out.println("Instance.checkIfPlayersAlive()(curr_time-p.getPlayer().getPongTime()):"+(curr_time-p.getPlayer().getPongTime()));
 				

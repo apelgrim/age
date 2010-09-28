@@ -13,461 +13,515 @@
    
    
 */
-
-
 root {
-    display: block;
+	display: block;
 }
 
 div {
-    font-size: 14px;
+	font-size: 14px;
 }
 
 div.item {
-    position: absolute;
-    z-index: 100;
-    border: 1px solid black;
+	position: absolute;
+	z-index: 100;
+	border: 1px solid black;
 }
 
 div.player {
-    height: 150px;
-    width: 150px;
-    background-color: green;
-    position: absolute;
-    z-index: 5;
+	height: 150px;
+	width: 150px;
+	background-color: green;
+	position: absolute;
+	z-index: 5;
 }
 
-#ageHeader h1{
-    text-align: center;
-    color: #fff;
-    font-family:Arial;
+#ageHeader h1 {
+	text-align: center;
+	color: #fff;
+	font-family: Arial;
 }
-div#wrapper{
-	margin:0 auto;
-width: 90%;
+
+div#wrapper {
+	margin: 0 auto;
+	width: 90%;
 }
-#ageContent{
-    margin:0 auto;
+
+#ageContent {
+	margin: 0 auto;
 }
+
 div#game {
- 
-    font-size: 10px;
+	font-size: 10px;
 }
-div.stacked{
-    border: 1px solid black;
+
+div.stacked {
+	border: 1px solid black;
 }
+
 div#ageConsole {
-    width: 800px;
-    height: 400px;
-    border:1px solid #CCCCCC;
-    padding:5px;
-    overflow:auto;
-    font-size: 12px;
-}
-div#ageConsole p{
-	margin:3px 0;
-}
-div#header{
-	padding:5px;
-	color:#efefef;
-height:60px;
-margin-bottom:42px;
- background-color: #5F9EA0;
-}
-div#header h1{
-	font-family:Arial;
-margin:0;
-}
- a.newGame{
-background-color:#A9A9A9;
-color:#FFFFFF;
-font-family:Arial;
-font-size:15px;
-font-weight:bold;
-padding:10px;
-text-decoration:none;
+	width: 800px;
+	height: 400px;
+	border: 1px solid #CCCCCC;
+	padding: 5px;
+	overflow: auto;
+	font-size: 12px;
 }
 
-
-div#table {
-    position: absolute;
-    z-index: 5;
+.stacked:after {
+	content: "|||";
+	background-color: white;
+	padding: 1px;
+	margin-left: -9px;
+	font-size: 12px;
+	/*content:url(/age/images/stacked_sign.png);*/
 }
-div.activePlayer > p{
+
+div#ageConsole p {
+	margin: 3px 0;
+}
+
+div#header {
+	padding: 5px;
+	color: #efefef;
+	height: 60px;
+	margin-bottom: 42px;
 	background-color: #5F9EA0;
 }
 
+div#header h1 {
+	font-family: Arial;
+	margin: 0;
+}
 
-div.unactivePlayer > p{
+a.newGame {
+	background-color: #A9A9A9;
+	color: #FFFFFF;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	padding: 10px;
+	text-decoration: none;
+}
+
+div#table {
+	position: absolute;
+	z-index: 5;
+}
+
+div.activePlayer>p {
+	background-color: #5F9EA0;
+}
+
+div.unactivePlayer>p {
 	background-color: #dddddd;
 }
-div.activePlayer{
-    border: 1px solid #5F9EA0;
+
+div.activePlayer {
+	border: 1px solid #5F9EA0;
 }
 
-div.unactivePlayer{
-    border: 1px solid #dddddd;
+div.unactivePlayer {
+	border: 1px solid #dddddd;
 }
-div.agePlayer > p img{
+
+div.agePlayer>p img {
 	display: inline;
-	height:16px;
-margin-left:3px;
-}
-div.agePlayer > p input{
-background-color:#000000;
-border:1px solid #FFFFFF;
-color:#FFFFFF;
-font-weight:bold;
-margin-left:15px;
-text-align:center;
-width:69%;
-}
-div.agePlayer > p{
-
-    color:white;
-    font-weight:bold;
-    margin:0;
-    padding:0;
-    text-align:center;
-    
-    margin:-20px 0 0;
-
-}
-div.playerOwner > p {
-background-color: #000000;
-font-family:verdana;
-}
-div.playerOwner  {
-border: 1px solid #000000;
-}
-div#ageResourcen{
-    height: 200px;
-    width: 180px;
-    border: 1px solid Gainsboro;
-}
-div#ageResourcenHdr p{
-    margin:0px;
-    padding:0px;
-    font-weight: bold;
-    text-align: center;
+	height: 16px;
+	margin-left: 3px;
 }
 
+div.agePlayer>p input {
+	background-color: #000000;
+	border: 1px solid #FFFFFF;
+	color: #FFFFFF;
+	font-weight: bold;
+	margin-left: 15px;
+	text-align: center;
+	width: 69%;
+}
 
+div.agePlayer>p {
+	color: white;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	margin: -20px 0 0;
+}
+
+div.playerOwner>p {
+	background-color: #000000;
+	font-family: verdana;
+}
+
+div.playerOwner {
+	border: 1px solid #000000;
+}
+
+div#ageResourcen {
+	height: 200px;
+	width: 180px;
+	border: 1px solid Gainsboro;
+}
+
+div#ageResourcenHdr p {
+	margin: 0px;
+	padding: 0px;
+	font-weight: bold;
+	text-align: center;
+}
 
 div.GroupWrapper {
-    background-color: #F0F0F0;
-    width:280px;
-    border: 2px dashed #A0A0A0;
-    float:left;
-    margin:10px;
-    color:#999999;
-
+	background-color: #F0F0F0;
+	width: 280px;
+	border: 2px dashed #A0A0A0;
+	float: left;
+	margin: 10px;
+	color: #999999;
 }
 
 div.GroupContener {
-	border-bottom:2px solid #DDDDDD;
-border-top:2px solid #DDDDDD;
-    background-color: #ffffff;
-    min-height: 20px;
-    padding:2px 0;
-  max-height:197px;
-overflow-y:scroll;
+	border-bottom: 2px solid #DDDDDD;
+	border-top: 2px solid #DDDDDD;
+	background-color: #ffffff;
+	min-height: 20px;
+	padding: 2px 0;
+	max-height: 197px;
+	overflow-y: scroll;
 }
 
 div.GroupFooterBar {
-    height: 23px;
-    text-align:right;
-}
-div.CreatorWrapper{
-  /*  border: 2px solid #D4D0C8;*/
-    padding:10px;
-    
-}
-div#GameCreatorManagerWrapper{
-	width:750px;
-}
-p.creatorFooter{
-text-align: right;
-}
-p.creatorFooter button{
-border:1px solid gray;
-font-size:24px;
-font-weight:bold;
-padding:0 18px;
-}
-div.CreatorWrapper h2{
-background-color:#DCDCDC;
-font-family:sans-serif;
-font-size:18px;
-margin-top:0;
-padding:2px;
-text-align:center;
-}
-div#GameSettingWrapper{
-    border-bottom: 2px solid #D4D0C8;
-    margin-bottom: 17px;
-}
-div#GameSetting{
-    width:360px;
-    float: left;
-    padding-left:14px;
-}
-div#GameSetting p{
- color:#999999;
-
-}
-div#GameSetting label{
-background-color:#F6F6F6;
-display:inline-table;
-margin-right:20px;
-padding:3px 4px;
-width:109px;
+	height: 23px;
+	text-align: right;
 }
 
-div#GameSettingView img{
-margin-left:9px;
-margin-top:5px;
+div.CreatorWrapper { /*  border: 2px solid #D4D0C8;*/
+	padding: 10px;
 }
-div#GameSettingView{
-	 background: url(/age/images/image-bg.png) top left no-repeat;
-	 border:3px solid #EFEFEF;
-float:right;
-height:190px;
-margin-right:36px;
-margin-top:18px;
-width:190px;
+
+div#GameCreatorManagerWrapper {
+	width: 750px;
 }
-button.grpFooter, button.RsrcnFooter{
-    border: 1px solid #F0F0F0;
-    padding: 0px;
-    cursor: pointer;
+
+p.creatorFooter {
+	text-align: right;
 }
-div.RsrcnFooterButton{
+
+p.creatorFooter button {
+	border: 1px solid gray;
+	font-size: 24px;
+	font-weight: bold;
+	padding: 0 18px;
+}
+
+div.CreatorWrapper h2 {
+	background-color: #DCDCDC;
+	font-family: sans-serif;
+	font-size: 18px;
+	margin-top: 0;
+	padding: 2px;
+	text-align: center;
+}
+
+div#GameSettingWrapper {
+	border-bottom: 2px solid #D4D0C8;
+	margin-bottom: 17px;
+}
+
+div#GameSetting {
+	width: 360px;
+	float: left;
+	padding-left: 14px;
+}
+
+div#GameSetting p {
+	color: #999999;
+}
+
+div#GameSetting label {
+	background-color: #F6F6F6;
+	display: inline-table;
+	margin-right: 20px;
+	padding: 3px 4px;
+	width: 109px;
+}
+
+div#GameSettingView img {
+	margin-left: 9px;
+	margin-top: 5px;
+}
+
+div#GameSettingView {
+	background: url(/age/images/image-bg.png) top left no-repeat;
+	border: 3px solid #EFEFEF;
+	float: right;
+	height: 190px;
+	margin-right: 36px;
+	margin-top: 18px;
+	width: 190px;
+}
+
+button.grpFooter,button.RsrcnFooter {
+	border: 1px solid #F0F0F0;
+	padding: 0px;
+	cursor: pointer;
+}
+
+div.RsrcnFooterButton {
 	width: 16px;
 	height: 16px;
-	float:right;
+	float: right;
 }
-button.grpFooter:hover, button.RsrcnFooter:hover{
-    border: 1px solid #aaaaaa;
-}
-div.ResourcenFooterBar{
-background-color:#F0F0F0;
-    margin-top: 10px;
-    text-align:right;
-    position: relative;
-}
-a#leaveGameButton{
-text-decoration: none;
-color:#ffffff;
-font-weight: bold;
-background-color: red;
-padding: 10px 20px;
-}
-ul.ageTemplatesList{
-bottom:0;
-padding:0;
-position:absolute;
-z-index:9999;
-margin-bottom:0;
-margin-left:24px;
-width:92px;
-}
-ul.ageTemplatesList li{
-	background-color:#FFFFFF;
-border:1px solid #DDDDDD;
 
-height:15px;
-list-style-type:none;
-padding:3px;
-text-align:left;
-width:84px;
-color:#444444;
-font-size:11px;
+button.grpFooter:hover,button.RsrcnFooter:hover {
+	border: 1px solid #aaaaaa;
 }
-ul.ageTemplatesList li:hover{
+
+div.ResourcenFooterBar {
+	background-color: #F0F0F0;
+	margin-top: 10px;
+	text-align: right;
+	position: relative;
+}
+
+a#leaveGameButton {
+	text-decoration: none;
+	color: #ffffff;
+	font-weight: bold;
+	background-color: red;
+	padding: 10px 20px;
+}
+
+ul.ageTemplatesList {
+	bottom: 0;
+	padding: 0;
+	position: absolute;
+	z-index: 9999;
+	margin-bottom: 0;
+	margin-left: 24px;
+	width: 92px;
+}
+
+ul.ageTemplatesList li {
+	background-color: #FFFFFF;
+	border: 1px solid #DDDDDD;
+	height: 15px;
+	list-style-type: none;
+	padding: 3px;
+	text-align: left;
+	width: 84px;
+	color: #444444;
+	font-size: 11px;
+}
+
+ul.ageTemplatesList li:hover {
 	background-color: #eeeeee;
 	cursor: pointer;
 }
 
-label.test{
-    display: block;
-    width: 22px;
-    height: 20px;
-    z-index: 100;
-
+label.test {
+	display: block;
+	width: 22px;
+	height: 20px;
+	z-index: 100;
 }
 
-
-br.clear{
-    clear:both;
+br.clear {
+	clear: both;
 }
 
-div.GroupWrapper ul{
-    padding: 0px;
-    margin: 0px;
-}
-div.GroupWrapper ul li{
-    float: left;
-    list-style-type: none;
-}
-div.GroupSetting ul{
-
-
-    float:right;
-    width:85%;
-
-}
-div.GroupSetting ul li{
-
-
-}
-div.GroupSetting input{
-    font-size:11px;
-    margin:0;
-    padding:0;
-
-
-}
-.left{
-    float:left;
-}
-button.closebttn{
-    padding: 0px;
-    margin: 0px;
-    border: none;
-    cursor: pointer;
-    background-color: transparent;
-    height:14px;
-    width:14px;
-}
-button.closebttn img{
-    width: 13px;
-    height: 13px;
-
-}
-div.GroupWrapper p{
-    padding: 0px;
-    margin: 0px;
-}
-div.GrpSettingLft{
-    width: 8%;
-    float:left;
-}
-div.GrpSettingCntr{
-    width: 82%;
-    float:left;
-}
-div.GrpSettingRght{
-    width: 8%;
-    float:right;
-}
-p.GrpSttngNm{
-
-    width: 71px;
-    float:left;
-}
-p.GrpSttngNm input{
-    font-weight: bold;
-    width: 60px;
-}
-div.ItemWrapper{
-    background-color: #F6FFD5;
-    margin:7px 5px;
-}
-div.ItmWrpprLft{
-    width: 8%;
-    float: left;
-}
-div.ItmWrpprLft input{
-    width: 10px;
-}
-div.ItmWrpprCntr{
-    float: left;
-    width: 82%;
-}
-div.ItmWrpprRght{
-    width: 8%;
-    float: right;
-}
-div.ItmWrpprRght img{
-    width: 10px;
-    height: 10px;
-}
-input#GameSettingImageInput{
-position: relative;
-}
-/* ##### ITEMS ############*/
-
-.ItemNm input{
-  width: 50px;
-  	font-size: 12px;
-}
-.ItemSt input{
-	width: 16px;
-		font-size: 11px;
-}
-.ItemSz input{
-	width: 20px;
-		font-size: 11px;
-}
-div.ItemActionBar{
-display:block;
-position:absolute;
-top:-21px;}
-.GroupContener input{
+div.GroupWrapper ul {
+	padding: 0px;
 	margin: 0px;
-	padding:2px 1px;
+}
 
+div.GroupWrapper ul li {
+	float: left;
+	list-style-type: none;
 }
-div#GameViewResultsWrapper{
 
-min-height: 200px;
+div.GroupSetting ul {
+	float: right;
+	width: 85%;
 }
-div#ResourcenContent div.bgImageView{
-height:30px;
-width:30px;
-background-color:threedface;
-float: right;
-overflow: hidden;
+
+div.GroupSetting ul li {
+	
 }
-div#ResourcenContent div.bgImageView img{
-	height:30px;
-   width:30px;
+
+div.GroupSetting input {
+	font-size: 11px;
+	margin: 0;
+	padding: 0;
 }
-ul.games{
+
+.left {
+	float: left;
 }
-ul.games li p{
-background-color:#BBBBBB;
-margin:2px auto 4px;
-padding:2px 0;
-text-align:center;
+
+button.closebttn {
+	padding: 0px;
+	margin: 0px;
+	border: none;
+	cursor: pointer;
+	background-color: transparent;
+	height: 14px;
+	width: 14px;
 }
-ul.games li span{
-color:#777777;
-font-size:10px;
+
+button.closebttn img {
+	width: 13px;
+	height: 13px;
 }
-ul.games li img{
+
+div.GroupWrapper p {
+	padding: 0px;
+	margin: 0px;
+}
+
+div.GrpSettingLft {
+	width: 8%;
+	float: left;
+}
+
+div.GrpSettingCntr {
+	width: 82%;
+	float: left;
+}
+
+div.GrpSettingRght {
+	width: 8%;
+	float: right;
+}
+
+p.GrpSttngNm {
+	width: 71px;
+	float: left;
+}
+
+p.GrpSttngNm input {
+	font-weight: bold;
+	width: 60px;
+}
+
+div.ItemWrapper {
+	background-color: #F6FFD5;
+	margin: 7px 5px;
+}
+
+div.ItmWrpprLft {
+	width: 8%;
+	float: left;
+}
+
+div.ItmWrpprLft input {
+	width: 10px;
+}
+
+div.ItmWrpprCntr {
+	float: left;
+	width: 82%;
+}
+
+div.ItmWrpprRght {
+	width: 8%;
+	float: right;
+}
+
+div.ItmWrpprRght img {
+	width: 10px;
+	height: 10px;
+}
+
+input#GameSettingImageInput {
+	position: relative;
+}
+
+/* ##### ITEMS ############*/
+.ItemNm input {
+	width: 50px;
+	font-size: 12px;
+}
+
+.ItemSt input {
+	width: 16px;
+	font-size: 11px;
+}
+
+.ItemSz input {
+	width: 20px;
+	font-size: 11px;
+}
+
+div.ItemActionBar {
+	display: block;
+	position: absolute;
+	top: -21px;
+}
+
+.GroupContener input {
+	margin: 0px;
+	padding: 2px 1px;
+}
+
+div#GameViewResultsWrapper {
+	min-height: 200px;
+}
+
+div#ResourcenContent div.bgImageView {
+	height: 30px;
+	width: 30px;
+	background-color: threedface;
+	float: right;
+	overflow: hidden;
+}
+
+div#ResourcenContent div.bgImageView img {
+	height: 30px;
+	width: 30px;
+}
+
+ul.games {
+	
+}
+
+ul.games li p {
+	background-color: #BBBBBB;
+	margin: 2px auto 4px;
+	padding: 2px 0;
+	text-align: center;
+}
+
+ul.games li span {
+	color: #777777;
+	font-size: 10px;
+}
+
+ul.games li img {
 	margin: 0 auto;
-	border:none;
+	border: none;
 	display: block;
 }
-div#ageConnectionStatus{
 
+div#ageConnectionStatus {
+	
 }
-ul.games li{
-float:left;
-height:100px;
-background-color:#EEEEEE;
-list-style-type:none;
-margin:10px;
-width:100px;
-}
-ul.games li a{
-color:#444444;
-font-family:verdana;
-font-size:12px;
 
+ul.games li {
+	float: left;
+	height: 100px;
+	background-color: #EEEEEE;
+	list-style-type: none;
+	margin: 10px;
+	width: 100px;
 }
+
+ul.games li a {
+	color: #444444;
+	font-family: verdana;
+	font-size: 12px;
+}
+
 /*
 input.GrpBgInpt{
 	position: absolute;
@@ -493,137 +547,147 @@ img.GrpBgImg{
 	width: 20px;
 	height: 20px;
 }*/
-div#ageChatMsg{
+div#ageChatMsg {
+	height: 110px;
+	overflow: auto;
+}
 
-height: 110px;
-overflow:auto;
+div#ageChatInput input {
+	border: 1px solid #DDDDDD;
+	height: 12px;
+	width: 71%;
 }
-div#ageChatInput input{
-	border:1px solid #DDDDDD;
-height:12px;
-width:71%;
+
+div#ageChatInput button {
+	margin-left: 5px;
+	border: 1px solid #dddddd;
 }
-div#ageChatInput button{
-	margin-left:5px;
-border: 1px solid #dddddd;
+
+div#ageChatMsg p {
+	font-size: 11px;
+	margin: 2px 3px;
 }
-div#ageChatMsg p{
-	font-size:11px;
-margin:2px 3px;
+
+div#ageChat .label {
+	color: #888888;
 }
-div#ageChat .label{
-color:#888888;
-}
+
 /*div#ageFooterBar{
 	position:fixed;
 	width: 100%;
 	height: 10px;
 	bottom:0;
 }*/
-div#ageChat{
-background-color:#FFFFFF;
-border:1px solid #DDDDDD;
-bottom:0;
-left:3px;
-position:fixed;
-width:200px;
+div#ageChat {
+	background-color: #FFFFFF;
+	border: 1px solid #DDDDDD;
+	bottom: 0;
+	left: 3px;
+	position: fixed;
+	width: 200px;
 }
-span.ageWarning{
-    color:#dfba00;
+
+span.ageWarning {
+	color: #dfba00;
 }
-span.ageWarning > span.label{
-color:#ffef77;
-font-size: 10px;
+
+span.ageWarning>span.label {
+	color: #ffef77;
+	font-size: 10px;
 }
-span.ageError{
- color:#e40000;
+
+span.ageError {
+	color: #e40000;
 }
-span.ageError > span.label{
-color:#ff6565;
-font-size: 10px;
+
+span.ageError>span.label {
+	color: #ff6565;
+	font-size: 10px;
 }
-span.ageDebug{
- color:#333333;
+
+span.ageDebug {
+	color: #333333;
 }
-span.ageDebug > span.label{
-color:#848484;
-font-size: 10px;
+
+span.ageDebug>span.label {
+	color: #848484;
+	font-size: 10px;
 }
-span.ageInfo{
-   color:#008000;
+
+span.ageInfo {
+	color: #008000;
 }
-span.ageInfo > span.label{
-color:#77ff77;
-font-size: 10px;
+
+span.ageInfo>span.label {
+	color: #77ff77;
+	font-size: 10px;
 }
+
 /* #####################   CREATE GAME   /netbeans/webaplication/age/web/images /eclipse/workspaces/helios/age/age/images #################*/
 input[type=checkbox].ElmntVsblt {
-    display: none;
+	display: none;
 }
 
 input[type=checkbox].ElmntVsblt+label {
-            
-    background: url(/age/images/unsichtbar.png) top left no-repeat;
-    display: block;
-    width: 22px;
-    height: 20px;
+	background: url(/age/images/unsichtbar.png) top left no-repeat;
+	display: block;
+	width: 22px;
+	height: 20px;
 }
 
 input[type=checkbox].ElmntVsblt:checked+label {
-    background-image:  url(/age/images/sichtbar.png);
+	background-image: url(/age/images/sichtbar.png);
 }
 
-
 input[type=checkbox].GrpSttngOrdr {
-    display: none;
+	display: none;
 }
 
 input[type=checkbox].GrpSttngOrdr+label {
-    background: url(/age/images/order0.png) top left no-repeat;
-    display: block;
-    width: 22px;
-    height: 20px;
+	background: url(/age/images/order0.png) top left no-repeat;
+	display: block;
+	width: 22px;
+	height: 20px;
 }
 
 input[type=checkbox].GrpSttngOrdr:checked+label {
-    background-image:  url(/age/images/order1.png);
+	background-image: url(/age/images/order1.png);
 }
 
-
 input[type=checkbox].GrpSttngStckd {
-    display: none;
+	display: none;
 }
 
 input[type=checkbox].GrpSttngStckd+label {
-    background: url(/age/images/stacked0.png) top left no-repeat;
-    display: block;
-    width: 22px;
-    height: 20px;
+	background: url(/age/images/stacked0.png) top left no-repeat;
+	display: block;
+	width: 22px;
+	height: 20px;
 }
 
 input[type=checkbox].GrpSttngStckd:checked+label {
-    background-image:  url(/age/images/stacked1.png);
+	background-image: url(/age/images/stacked1.png);
 }
 
 input[type=checkbox].GrpSttngRndm {
-    display: none;
+	display: none;
 }
 
 input[type=checkbox].GrpSttngRndm+label {
-    background: url(/age/images/random0.png) top left no-repeat;
-    display: block;
-    width: 22px;
-    height: 20px;
+	background: url(/age/images/random0.png) top left no-repeat;
+	display: block;
+	width: 22px;
+	height: 20px;
 }
 
 input[type=checkbox].GrpSttngRndm:checked+label {
-    background-image:  url(/age/images/random1.png);
+	background-image: url(/age/images/random1.png);
 }
 
-label.test input[type=checkbox]{
-    background-image:  url(/age/images/sichtbar.png);
+label.test input[type=checkbox] {
+	background-image: url(/age/images/sichtbar.png);
 }
 
-label.test input[type=checkbox]:checked{
-    background-image:  url(/age/images/sichtbar.png);
+label.test input[type=checkbox]:checked {
+	background-image: url(/age/images/sichtbar.png);
 }
