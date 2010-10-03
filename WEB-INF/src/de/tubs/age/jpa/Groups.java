@@ -7,6 +7,7 @@ package de.tubs.age.jpa;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -232,5 +233,35 @@ public class Groups extends Model implements IAgeGameElement{
 	}
 	public Template getTemplate() {
 		return template;
+	}
+	public void resetItemPosition() {
+		for (Item item : this.items) {
+			item.getStyle().setLeft(this.style.getLeft());
+			item.getStyle().setTop(this.style.getTop());
+		}
+		
+	}
+	public void setItemsVisibility(boolean visibility2) {
+		this.visibility=visibility2;
+		for (Item item : this.items) {
+			item.setVisibility(visibility2);
+		}
+		
+	}
+	public void randomizeItems() {
+		int maxZIndex = this.getFirstItem().getStyle().getzIndex()+this.items.size();
+		this.style.setzIndex(maxZIndex);
+		Collections.shuffle(this.items);
+		for (Item item : this.items) {
+			item.getStyle().setzIndex(maxZIndex);
+			maxZIndex--;
+		}	
+	}
+	private Item getFirstItem() {
+		Item first = this.items.get(0);
+		for (Item item : this.items) {
+			if(first.getStyle().getzIndex() < item.getStyle().getzIndex()) first = item;
+		}
+		return first;
 	}
 }

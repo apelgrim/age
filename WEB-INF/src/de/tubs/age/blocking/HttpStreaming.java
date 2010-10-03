@@ -63,7 +63,7 @@ public class HttpStreaming extends Comet {
 				        }else{
 				             ip.setInstance(instance);
 				        }
-		       			
+		       			ip.addAtmosphereResource(atmoResource);
 		       			instance.addInstancePlayer(ip);
 		       			atmoResource.setBroadcaster(bc);
 		       			bc.addAtmosphereResource(atmoResource);
@@ -125,22 +125,24 @@ public class HttpStreaming extends Comet {
 			if(ageActionHandler.getType() == AgeActionHandler.TYPE_BROADCAST){
 				gameInstance.broadcast(prepareResponse(ageActionHandler.getResponse()),true);
 	        } 
-	        else if(ageActionHandler.getType() == AgeActionHandler.TYPE_RESPONSE){
+	        else if(ageActionHandler.getType() == AgeActionHandler.TYPE_RESPONSE){      	   	
 	            	PrintWriter writer = res.getWriter();
 					writer.write(ageActionHandler.getResponse());
 					writer.flush();
-	        }
-			
-			
+				//	System.out.println("+++AgeActionHandler.TYPE_RESPONSE: "+prepareResponse(ageActionHandler.getResponse()));
+	        }else if(ageActionHandler.getType()==AgeActionHandler.TYPE_BROADCAST_RESPONSE){
+	        	PrintWriter writer = res.getWriter();
+				writer.write(ageActionHandler.getResponse());
+				writer.flush();
+				gameInstance.broadcast(prepareResponse(ageActionHandler.getrBroadcast()),false);
+	        	
+			}
 		}else if(ageActionHandler.getPhase() == AgeActionHandler.PHASE_CLOSE){
 			if(ageActionHandler.getType()==AgeActionHandler.TYPE_BROADCAST){
 				gameInstance.broadcast(prepareResponse(ageActionHandler.getResponse()),false);
 				ageActionHandler.getAtmosphereResource().resume();	
-				gameInstance.getBroadcaster().removeAtmosphereResource(ageActionHandler.getAtmosphereResource());
-				
-			}
-			
-			
+				gameInstance.getBroadcaster().removeAtmosphereResource(ageActionHandler.getAtmosphereResource());		
+			}	
 		}		
 	}
 

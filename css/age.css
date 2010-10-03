@@ -585,6 +585,7 @@ div#ageChat {
 	left: 3px;
 	position: fixed;
 	width: 200px;
+	z-index: 999999999;
 }
 
 span.ageWarning {
@@ -690,4 +691,7 @@ label.test input[type=checkbox] {
 
 label.test input[type=checkbox]:checked {
 	background-image: url(/age/images/sichtbar.png);
+}
+.drophover{
+border-width: 3px;
 }

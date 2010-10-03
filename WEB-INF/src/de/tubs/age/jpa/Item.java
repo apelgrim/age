@@ -40,6 +40,8 @@ public class Item extends Model implements IAgeGameElement{
     
     @Transient private int resourcen_index;
     @Transient private Template template;
+    @Transient private int owner;
+    
     
     public Item(){
     
@@ -125,7 +127,7 @@ public class Item extends Model implements IAgeGameElement{
 	
 	public String toJSON() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("{style:"+style.toJSON()+",name:'"+name+"',count:"+size+",visibility:"+visibility+",id:"+id+",groupBy:"+group_by+"}");
+		sb.append("{style:"+style.toJSON()+",name:'"+name+"',owner:"+owner+",count:"+size+",visibility:"+visibility+",id:"+id+",groupBy:"+group_by+"}");
 		return sb.toString();
 	}
 	public Item copy(String key) {
@@ -158,6 +160,12 @@ public class Item extends Model implements IAgeGameElement{
 	}
 	public void setSize(int size) {
 		this.size = size;
+	}
+	public int getOwner() {
+		return owner;
+	}
+	public void setOwner(int owner) {
+		this.owner = owner;
 	}
 	
 	

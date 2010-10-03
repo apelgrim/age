@@ -14,6 +14,8 @@ var AgeSettings = {
 		userImagePath:'/age/images/game/',
 		imageTmpPath:'/age/images/tmp/',
 		playerAreaTitleNoPlayer:'-- Player --',
+		itemDomIdPrefix:'ageItem',
+		groupDomIdPrefix:'ageGroup',
 		resourcenTitle:'Resourcen',
 		gameSettingTitle:'Algemeineinstellungen',
 		defaultItemName:'Name',

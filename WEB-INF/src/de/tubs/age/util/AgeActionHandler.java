@@ -81,8 +81,9 @@ public class AgeActionHandler {
 		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
 		this.type=AgeActionHandler.TYPE_RESPONSE;
 		this.response="{n:'pong',v:''}";
-		int player_id = convertToInt(req.getParameter("from"));
-		if(player_id>0) this.instancePlayer.getInstance().notifyPongTime(player_id);
+	//	int player_id = convertToInt(req.getParameter("from"));
+	//	System.out.println("----ageactionhandler action ping for player_id:"+player_id);
+	//	if(player_id>0) this.instancePlayer.getInstance().notifyPongTime(player_id);
 		
 	}
 
@@ -107,25 +108,47 @@ public class AgeActionHandler {
 
 	private void actionVisibility(HttpServletRequest req) {
 		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
-		this.type=AgeActionHandler.TYPE_BROADCAST;
+		
 		Game game = this.instancePlayer.getInstance().getGame();
 		boolean visibility = Boolean.parseBoolean(req.getParameter("v"));
+		boolean isGroup =  Boolean.parseBoolean(req.getParameter("isGroup"));
+		boolean isPrivate =  Boolean.parseBoolean(req.getParameter("private"));
+			//'action=v&i='+this.id+'&player='+player_name+'&v='+vsbl+'&isGroup=true';
 		int id = convertToInt(req.getParameter("i"));
-		String domid = req.getParameter("dom");
-		String player = req.getParameter("player");				
-		String image_name="";
-		String bgColor="";
-		Item item = game.findItem(id);
-		if(item != null) {
-			if(visibility) {
-				image_name=item.getStyle().getBgImageName();
-				bgColor=item.getStyle().getBgColor();
+		String player = req.getParameter("player");	
+		if(isGroup){
+			Groups group = game.findGroup(id);
+			if(group != null){
+				group.setItemsVisibility(visibility);
+				this.type=AgeActionHandler.TYPE_BROADCAST;
+				this.response="{n:'v',v:{itm:"+id+",player:'"+player+"',isGroup:true,grp:"+group.toJSON()+"}}";
+			
 			}
+		}else{
+			String domid = req.getParameter("dom");
+						
+			String image_name="";
+			String bgColor="";
+			Item item = game.findItem(id);
+			if(item != null) {
+				if(visibility) {
+					image_name=item.getStyle().getBgImageName();
+					bgColor=item.getStyle().getBgColor();
+				}
+				
+				if(isPrivate){
+					this.type=AgeActionHandler.TYPE_BROADCAST_RESPONSE;
+					this.rBroadcast="{n:'chat',v:{from:'"+player+"',msg:'*** hat die Sichtbarkeit einer Element aus "+item.getGroups().getName()+" ge&#228;ndert und es ist nur f&#252;r dieser Spieler sichtbar.'}}";		
+				}else{
+					item.setVisibility(visibility);
+					this.type=AgeActionHandler.TYPE_BROADCAST;
+				}
+				
+				this.response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",bgColor:'"+bgColor+"',img:'"+image_name+"',isPrivate:"+isPrivate+"}}";
+			}	
 			
-			
-			item.setVisibility(visibility);
-		}				
-		this.response="{n:'v',v:{itm:"+id+",player:'"+player+"',domid:'"+domid+"',v:"+visibility+",bgColor:'"+bgColor+"',img:'"+image_name+"'}}";
+		}
+		
 	}
 
 	private void actionLeave(HttpServletRequest req) {
@@ -140,6 +163,7 @@ public class AgeActionHandler {
 
 	private void invokeAction(HttpServletRequest req) {
 		if(this.instancePlayer!=null){
+			this.instancePlayer.getPlayer().notifyPongTime();
 			String action = ""+req.getParameter("action");
 			if(action.equalsIgnoreCase("chat")){
 				actionChat(req);
@@ -159,30 +183,86 @@ public class AgeActionHandler {
 				actionChangePlayerName(req);
 			}else if(action.equalsIgnoreCase("stack")){
 				actionStack(req);
-			} 
-			
-			//action=stack&id='+this.id+'&atItem='+atItem+'&playerName='+player_name+'&stacked='+stacked;
-			
-		//	if(!action.equalsIgnoreCase("m")) System.out.println("+++ AgeActionHandler.invokeAction() action:"+action+" response : "+response);
+			}else if(action.equalsIgnoreCase("randomize")){
+				actionRandomizeGroup(req);
+			}else if(action.equalsIgnoreCase("itemowner")){
+				actionChangeItemOwner(req);
+			}else if(action.equalsIgnoreCase("itemupdate")){
+				actionUpdateItem(req);
+			}
 		}else System.out.println("+++ AgeActionHandler.invokeAction() instance player is NULL");
 	}
 	
+	private void actionUpdateItem(HttpServletRequest req) {
+		int id = convertToInt(req.getParameter("id"));
+		int toPlayer = convertToInt(req.getParameter("toPlayer"));
+		Item item = this.instancePlayer.getInstance().getGame().findItem(id);
+		if(item != null){
+			this.type=AgeActionHandler.TYPE_BROADCAST;
+			this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+			this.response="{n:'updateItem',v:"+item.toJSON()+"}";
+		}
+		
+	}
+
+	private void actionChangeItemOwner(HttpServletRequest req) {
+		// action=itemowner&owner='+item.owner+'&id='+item.id
+		int id = convertToInt(req.getParameter("id"));
+		int owner = convertToInt(req.getParameter("owner"));
+		Item item = this.instancePlayer.getInstance().getGame().findItem(id);
+		if(item != null){
+			item.setOwner(owner);
+			this.type=AgeActionHandler.TYPE_BROADCAST;
+			this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+			this.response="{n:'itemOwner',v:{id:"+id+",owner:"+owner+"}}";
+		}
+	}
+
+	private void actionRandomizeGroup(HttpServletRequest req) {
+		//action=randomize&id='+this.id+'&player='+player_name;
+		int id = convertToInt(req.getParameter("id"));
+		String playerName = req.getParameter("player");
+		Groups grp = this.instancePlayer.getInstance().getGame().findGroup(id);
+		grp.randomizeItems();
+		System.out.println("##### actionRandomizeGroup");
+		this.type=AgeActionHandler.TYPE_BROADCAST;
+		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+		this.response="{n:'randomize',v:{id:"+id+",playerName:'"+playerName+"',grp:"+grp.toJSON()+"}}";
+	}
+
 	private void actionStack(HttpServletRequest req) {
 		int id = convertToInt(req.getParameter("id"));
 		int atItem = convertToInt(req.getParameter("atItem"));
 		String playerName = req.getParameter("playerName");
-		String stacked = req.getParameter("stacked");
+		boolean stacked = Boolean.parseBoolean(req.getParameter("stacked"));
 		Groups grp = this.instancePlayer.getInstance().getGame().findGroup(id);
 		if(grp != null){
-			Item item = grp.findItem(atItem);
-			if(item != null){
-				grp.getStyle().setLeft(item.getStyle().getLeft());
-				grp.getStyle().setTop(item.getStyle().getTop());	
-				grp.setStacked(Boolean.parseBoolean(stacked));
+			int left = 0;
+			int top = 0;
+			if(stacked){
+				Item item = grp.findItem(atItem);
+				if(item != null){
+					//left = item.getStyle().getLeft();
+					//top = item.getStyle().getTop();
+					grp.setVisibility(item.isVisibility());
+					grp.getStyle().setLeft(item.getStyle().getLeft());
+					grp.getStyle().setTop(item.getStyle().getTop());	
+					
+					this.type=AgeActionHandler.TYPE_BROADCAST;
+					this.phase=AgeActionHandler.PHASE_ONMESSAGE;
+				}
+			}else{
+			//	left = grp.getStyle().getLeft();
+			//	top = grp.getStyle().getTop();
 				this.type=AgeActionHandler.TYPE_BROADCAST;
-				this.phase=AgeActionHandler.PHASE_ONMESSAGE;
-				this.response="{n:'stack',v:{id:"+id+",atItem:"+atItem+",playerName='"+playerName+"',stacked="+stacked+"}}";
-			}		
+				this.phase=AgeActionHandler.PHASE_ONMESSAGE;		
+			}
+			grp.resetItemPosition();
+			grp.setStacked(stacked);
+			System.out.println("##### stack left:"+left+",top:"+top);
+			this.response="{n:'stack',v:{id:"+id+",playerName:'"+playerName+"',grp:"+grp.toJSON()+"}}";
+		//	this.response="{n:'stack',v:{id:"+id+",left:"+left+",top:"+top+",playerName:'"+playerName+"',stacked:"+stacked+"}}";
+			
 		}	
 	}
 

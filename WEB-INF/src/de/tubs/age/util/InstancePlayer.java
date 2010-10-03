@@ -17,7 +17,8 @@ public class InstancePlayer {
 		this.player=instance.newPlayer();
 		this.player.notifyPongTime();
 	}
-	public void setInstance(Instance instance){
+	public synchronized void setInstance(Instance instance){
+		System.out.println("InstancePlayer.setInstance()");
 		destroy();
 		this.instance = instance;
 		this.player=instance.newPlayer();
@@ -45,6 +46,7 @@ public class InstancePlayer {
 		
 	}
 	public void destroy(){
+		System.out.println("InstancePlayer.destroy()");
 		finalize();
 	}
 	public String getKey() {
