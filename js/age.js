@@ -144,7 +144,7 @@ function Item(id,name,count,visibility,style){
 	    //	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
 	    //	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
 	    	var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
-	    	Log('Item send visibility update:'+update,'d');
+	    	if(debug) Log('Item send visibility update:'+update,'d');
 	    	AgeUpdater.sendUpdate(update);
     	}catch(e){Log('Item.sendItemVisibilityUpdate() - '+e,'e');}
     };
@@ -1041,7 +1041,7 @@ function CometConnector(){
         	 
         }
         if(action=='pong'){
-        	Log('<h3>Connector: Bekome PONG</h3>','d');
+        	if(debug) Log('Connector: Bekome PONG','d');
         	
         }
         if(action=='itemOwner'){
@@ -1050,7 +1050,7 @@ function CometConnector(){
         	var item = GameManager.instance.findItem(id);
         	if(item!=null){
         		item.owner = owner;
-        		Log('owner for item '+id+' changed:'+owner,'d');
+        		if(debug) Log('owner for item '+id+' changed:'+owner,'d');
         	}
         	//{n:'itemOwner',v:{id:"+id+",owner:"+owner+"}}";
         }
@@ -1163,7 +1163,7 @@ function CometConnector(){
         	var img_name = data.img;
         	var isGroup = data.isGroup;
         	var isPrivate = data.isPrivate;
-        	Log(' update visibility','d');
+        	if(debug)Log(' update visibility','d');
         	if(isGroup){
         		var group = GameManager.instance.findGroup(itm_id);
         		if(group != null){
@@ -1269,10 +1269,10 @@ var GameManager = {
             	AgeItemLayer.id = id;
             	if(AgeItemLayer.layerSeqNr < seq){
             		AgeItemLayer.layerSeqNr = seq;
-            		Log('getNextLayerSeqNr if(AgeItemLayer.layerSeqNr < seq):'+AgeItemLayer.layerSeqNr,'e');
+            		if(debug) Log('getNextLayerSeqNr if(AgeItemLayer.layerSeqNr < seq):'+AgeItemLayer.layerSeqNr,'d');
     	    	}else{
     	    		AgeItemLayer.layerSeqNr += 1;
-    	    		Log('getNextLayerSeqNr else:'+AgeItemLayer.layerSeqNr,'e');
+    	    		if(debug) Log('getNextLayerSeqNr else:'+AgeItemLayer.layerSeqNr,'d');
     	    	} 
             }
             return AgeItemLayer.layerSeqNr;
@@ -1453,7 +1453,7 @@ AgeUpdater={
             		this.sendUpdate('action=ping&from='+cur_player.id);
             		
             	} 
-        		Log('<h3>send PING </h3>diff:'+diff+' GameManager.instance.player:'+GameManager.instance.player+' this.lastUpdateTime:'+this.lastUpdateTime,'d');
+        		if(debug) Log('send PING diff:'+diff+' GameManager.instance.player:'+GameManager.instance.player+' this.lastUpdateTime:'+this.lastUpdateTime,'d');
         		this.lastUpdateTime=_date.getTime();
         	}
         }    
@@ -1774,6 +1774,7 @@ function GameSetting(game) {
 	this.gameSettingview = null;
 	this.gameSetting = HTMLRenderer.div( {id : 'GameSetting',_class : ''});
 	this.playersInputHiddenElements=HTMLRenderer.div({});
+	this.bgColor=HTMLRenderer.inputHidden({name:'table.style.bgColor',value:this.game.table.style.bgColor});
 	this.createGameSettingWrapper = function() {
 		var sw = HTMLRenderer.div({id:'GameSettingWrapper',_class:'Wrapper'});
 		sw.append('<h2>'+AgeSettings.gameSettingTitle+'</h2>');
@@ -1834,14 +1835,16 @@ function GameSetting(game) {
 	};
 
      this.getBgColorComponent = function(){
-            var inputColor = HTMLRenderer.inputColorField( {name : 'table.style.bgColor',id:'GameSettingBgColorInput',value : this.game.table.style.bgColor,_class:'color',style:'height:20px;width:20px;'});
+            var inputColor = HTMLRenderer.inputColorField( {name : 'table.style.bgColorComponent',id:'GameSettingBgColorInput',value : this.game.table.style.bgColor,_class:'color',style:'height:20px;width:20px;'});
             //GameCreatorManager.gameCreator.gameSetting.setGameBgColor
 	    var inputColorLabel = HTMLRenderer.label({FOR:'GameSettingBgColorInput',label:'Background Color: '});
             GameCreatorManager.actions.push({action:'',object:GameCreatorManager.gameCreator.gameSetting,domid:'GameSettingBgColorInput'});
             return HTMLRenderer.p( {id : 'GameSettingColor',_class : 'GameSettingInput'}).append(inputColorLabel).append(inputColor);
         };
-        this.setBgColor = function(bgcolor){
+    
+    this.setBgColor = function(bgcolor){
 		this.game.table.style.bgColor = bgcolor;
+		this.bgColor.attr('value',bgcolor);
 	};
 
 	this.getInputTextComponent = function(p){
@@ -1880,7 +1883,7 @@ function GameSetting(game) {
 		this.gameSetting.append(this.getHeightComponent());
 		this.gameSetting.append(this.getBgColorComponent());
 		this.gameSetting.append(this.playersInputHiddenElements);
-
+		this.gameSetting.append(this.bgColor);
 		var inputFile = HTMLRenderer.inputImageField({bind:'GameCreatorManager.gameCreator.gameSetting.setBGImage',name:'table.style.bgImage',id:'GameSettingImageInput',size:'10'});
 		var inputFileLabel = HTMLRenderer.label({FOR:'GameSettingImageInput',label:'Background Image: '});
 		this.gameSetting.append(HTMLRenderer.p( {id : 'GameSettingImage',_class : 'GameSettingInput'}).append(inputFileLabel).append(inputFile));
@@ -2020,6 +2023,7 @@ function GroupCreator(id,index) {
     this.zIndex=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.zIndex',value:this.group.style.zIndex});
     this.top=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.top',value:this.group.style.top});
     this.left=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.left',value:this.group.style.left});
+    this.bgColor=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.bgColor',value:this.group.style.bgColor});
     this.setGroup=function(grp){
     	if(grp != null) this.group = grp;
     };
@@ -2160,10 +2164,11 @@ function GroupCreator(id,index) {
             return 'GameSettingBgColorInput-'+id;
         };
         this.getBgColorComponent = function(){
-            return HTMLRenderer.inputColorField( {name : 'resourcen['+index+'].style.bgColor',id:this.getBgColorComponentId(),value : this.group.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
+            return HTMLRenderer.inputColorField( {name : 'resourcen['+index+'].style.bgColorComponent',id:this.getBgColorComponentId(),value : this.group.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
         };
         this.setBgColor = function(bgcolor){
         	Log('setBgColor:'+bgcolor,'d');
+        	this.bgColor.attr('value',bgcolor);
             this.group.style.bgColor=bgcolor;
         };
         this.getBgImageComponent = function(){
@@ -2270,6 +2275,7 @@ function GroupCreator(id,index) {
 		this.groupContener.append(tmpl_e);
 		this.groupContener.append(this.left);
 		this.groupContener.append(this.top);
+		this.groupContener.append(this.bgColor);
 	    this.group.setPositionComponent({left:this.left,top:this.top,zIndex:this.zIndex});
 		this.groupWrapper.append(this.groupContener);
 		this.groupWrapper.append(this.hiddenItemsSizeComponent);
@@ -2317,6 +2323,7 @@ function ItemCreator(id,index) {
     this.zIndex=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.zIndex',value:this.item.style.zIndex});
     this.top=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.top',value:this.item.style.top});
     this.left=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.left',value:this.item.style.left});
+    this.bgColor=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.bgColor',value:this.item.style.bgColor});
     this.getItem = function(){
         if(this.item.id == -1) this.item.id = id;
         return this.item;
@@ -2394,13 +2401,14 @@ function ItemCreator(id,index) {
     */
     this.setBgColor = function(bgcolor){
         this.item.style.bgColor=bgcolor;
+        this.bgColor.attr('value',bgcolor);
         if(debug) Log('ItemCreator.setBgColort: '+this.item.style.bgColor,'d');
     };
     this.getBgColorComponentId=function(){
         return 'ItemBgColorInput-'+id;
     };
     this.getBgColorComponent = function(){
-        return HTMLRenderer.inputColorField( {name : this.namePrefix+'.style.bgColor',id:this.getBgColorComponentId(),value : this.item.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
+        return HTMLRenderer.inputColorField( {name : this.namePrefix+'.style.bgColorComponent',id:this.getBgColorComponentId(),value : this.item.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
     };
     this.getBgImageComponent = function(){
         return HTMLRenderer.inputImageIcon({bind:this.componentBind+'.setBgImage',_class:'ItemBgInptCntnr',width:17,height:17,src:'image.png',name:this.namePrefix+'.style.bgImage'});
@@ -2447,6 +2455,7 @@ function ItemCreator(id,index) {
         div_center.append(ul);
         div_center.append(this.left);
         div_center.append(this.top);
+        div_center.append(this.bgColor);
         div_center.append(this.getBgImageNameComponent());
         this.item.setPositionComponent({left:this.left,top:this.top,zIndex:this.zIndex}); //groupBy
         div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].id',value:''+this.item.id}));

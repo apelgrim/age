@@ -27,13 +27,8 @@ public class Instance {
 	public Instance(Game game){
 		this.game = game;
 		this.ip = new CopyOnWriteArrayList<InstancePlayer>();
-	//	currentPlayers = new ArrayList<Player>();
-	//	emptyPlayers = new ArrayList<Player>();
 		instance_seq++;
 		inactivePlayers=game.getPlayers().size();
-	//	for (Player player : game.getPlayers()) {
-	//		emptyPlayers.add(player);
-	//	}
 	}
 	public int getPlayersSize(){
 		return this.game.getPlayers().size();
@@ -54,8 +49,7 @@ public class Instance {
 				return newPlayer;
 			}
 		}
-		return null;
-		
+		return null;		
 	}
 	private synchronized Player getFreePlayer() {
 		for (Player player : game.getPlayers()) {
@@ -86,7 +80,7 @@ public class Instance {
 				if (p != null && p.getPlayer().getId() == player_id)
 					return p;
 			}
-		} catch (NullPointerException e) {
+		 }catch (NullPointerException e) {
 			return null;
 		}
 		return null;
@@ -118,8 +112,7 @@ public class Instance {
 					return true;
 				}
 			}
-		}
-		
+		}	
 		return false;
     }
 	public Game getGame() {
@@ -128,10 +121,6 @@ public class Instance {
 	public void setGame(Game game) {
 		this.game = game;
 	}
-//	@Override
-//	protected void finalize(){
-//		
-//	}
 	public Broadcaster getBroadcaster(){
 		if(bc != null) System.out.println("Instance. getBroadcaster(). res size:"+bc.getAtmosphereResources().size());
 		return bc;
@@ -156,26 +145,8 @@ public class Instance {
 		if(bc != null) bc.addAtmosphereResource(atmoResource);
 	}
 	public void broadcast(String msg, boolean delay) {
-//		System.out.println("\n### INSTANCE.broadcast msg:"+msg+" bc SCOPE:"+bc.getScope().toString()+" ++ ID:"+bc.getID()+"  bc.getAtmosphereResources().size:"+bc.getAtmosphereResources().size()+"\n");
-//		Future<Object> f = bc.delayBroadcast(msg, 70, TimeUnit.MILLISECONDS);
 		if(delay) bc.delayBroadcast(msg, 70, TimeUnit.MILLISECONDS);
 		else bc.broadcast(msg);
-
-		
-//		try {
-//			f.get();
-//		} catch (InterruptedException e) {
-//			System.out.println("ERROR: INSTANCE.broadcast() -InterruptedException");
-//	//		e.printStackTrace();
-//		} catch (ExecutionException e) {
-//		//	e.printStackTrace();
-//			System.out.println("ERROR: INSTANCE.broadcast() -ExecutionException");
-//		}catch(CancellationException e){
-//			System.out.println("ERROR: INSTANCE.broadcast() -CancellationException");
-//		}catch(NullPointerException e){
-//			System.out.println("ERROR: INSTANCE.broadcast() -NullPointerException");
-//		}
-		
 	}
 	protected String prepareResponse(String response){
 		return Comet.BEGIN_SCRIPT_TAG+getOnMessageMethod(response)+Comet.END_SCRIPT_TAG;
@@ -194,7 +165,7 @@ public class Instance {
 	}
 	public synchronized  void notifyPongTime(int player_id) {
 		Player p =  findPlayer(player_id);
-		System.out.println("Instance.notifyPongTime for player_id: "+player_id+" plyer:"+p);
+	//	System.out.println("Instance.notifyPongTime for player_id: "+player_id+" plyer:"+p);
 		if(p != null) p.notifyPongTime();
 	}
 	public synchronized  void addInstancePlayer(InstancePlayer ip) {
@@ -206,14 +177,14 @@ public class Instance {
 		
 	}
 	public synchronized void checkIfPlayersAlive() {
-		System.out.println("Instance.checkIfPlayersAlive() this.ip.size():"+this.ip.size());
+	//	System.out.println("Instance.checkIfPlayersAlive() this.ip.size():"+this.ip.size());
 		long curr_time = System.currentTimeMillis();
 		for (InstancePlayer p : this.ip) {
 			if(p != null){
 				try{
 					
 					if((curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT){
-						System.out.println(" ----  checkIfPlayersAlive()destroy (curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT:"+(curr_time-p.getPlayer().getPongTime()) +" > "+ Comet.PING_PONG_TIMEOUT);
+			//			System.out.println(" ----  checkIfPlayersAlive()destroy (curr_time-p.getPlayer().getPongTime()) > Comet.PING_PONG_TIMEOUT:"+(curr_time-p.getPlayer().getPongTime()) +" > "+ Comet.PING_PONG_TIMEOUT);
 						
 					   this.ip.remove(p);
 						p.destroy();
@@ -221,7 +192,7 @@ public class Instance {
 					}
 				}catch(NullPointerException e){
 					this.ip.remove(p);
-					System.out.println("checkIfPlayersAlive() Null pointer exception this.ip.remove(p)");
+			//		System.out.println("checkIfPlayersAlive() Null pointer exception this.ip.remove(p)");
 				}
 				//System.out.println("Instance.checkIfPlayersAlive()(curr_time-p.getPlayer().getPongTime()):"+(curr_time-p.getPlayer().getPongTime()));
 				
