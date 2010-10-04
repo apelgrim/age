@@ -140,7 +140,7 @@ function Item(id,name,count,visibility,style){
     		var player = GameManager.instance.players[GameManager.instance.player];
 	    	var player_name=player.name;
 	    	var domid=this.HTMLElement.attr('id');
-	    	this.setItemVisibilityIcon(this.visibility);
+	    	this.setItemVisibilityIcon(vsbl);
 	    //	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
 	    //	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
 	    	var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
@@ -1111,17 +1111,20 @@ function CometConnector(){
         	GameManager.chat({n:data.from,v:data.msg});
         }
         if(action=='updateItem'){
-  
+ // Log('action update item','e');
         	var item = GameManager.instance.findItem(data.id);
         	if(item != null){
-        		
+        
         		if(data.visibility){
-        			item.style.bgColor = data.bgColor;
-        			item.style.imageName = img_name;
+        			item.style.bgColor = data.style.bgColor;
+        			item.style.imageName = data.style.imageName;
+        		//	Log('updateItem datavisibilistylety true item.style.imageName:'+item.style.imageName,'d');
 				}
 				else{
 					item.style.bgColor = item.group.style.bgColor;
 					item.style.imageName=item.group.style.imageName;
+
+   //     			Log('updateItem datavisibility false item.style.imageName:'+item.style.imageName,'d');
 				}
 				var game = GameManager.instance;
 				item.style.angle = game.players[game.player].angle;
@@ -1289,7 +1292,7 @@ var GameManager = {
 	    		if(item != null){
 	    			if(player == null) item.owner=-1;
 		    		else item.owner=player.id;
-		    		Log('Player.setOwner('+player+') elementId:'+id,'i');
+		    	//	Log('Player.setOwner('+player+') elementId:'+id,'i');
 		    		AgeUpdater.sendUpdate('action=itemowner&owner='+item.owner+'&id='+item.id);
 	    		}
 	    		

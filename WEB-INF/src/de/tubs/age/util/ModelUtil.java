@@ -117,13 +117,14 @@ private static Groups createGroupFromParams(Context c, String prefix, List<Group
 					int w = group.getStyle().getWidth();
 					int h = group.getStyle().getHeight();
 					if(w > 0) item.getStyle().setWidth(w);
-					if(h > 0) item.getStyle().setHeight(h);	
+					if(h > 0) item.getStyle().setHeight(h);
+					item.setVisibility(group.isVisibility());
 					
 					int itm_copies= item.getSize();
 					item.setSize(1);
 					items.add(item);
 					if(itm_copies>1){
-						System.out.println("model util : itm_copies:"+itm_copies);
+					//	System.out.println("model util : itm_copies:"+itm_copies);
 						for(int k=1;k<itm_copies;k++) items.add(item.copy());
 					}
 				
