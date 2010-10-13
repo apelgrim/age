@@ -125,9 +125,21 @@ function Item(id,name,count,visibility,style){
     
     this.setVisibility=function(vsbl){
     	this.visibility=vsbl;
-    	var image_path = this.style.imagesPath+this.style.angle+'_'+this.style.imageName;
+    	
+    	if(vsbl){
+    		var imageName = this.style.imageName;
+    		var bgColor = this.style.bgColor;
+    		this.group.visibility=true;
+    	}
+    	else{
+    		imageName=this.group.style.imageName;
+    		bgColor = this.group.style.bgColor;
+    	}
+    	
+    	var image_path = this.style.imagesPath+this.style.angle+'_'+imageName;
+    	
     	this.setItemVisibilityIcon(this.visibility);
-    	this.HTMLElement.css({backgroundColor:this.style.bgColor});
+    	this.HTMLElement.css({backgroundColor:bgColor});
     	var img_e = this.HTMLElement.children('img').first();
     	if(img_e) img_e.attr('src',image_path);
     };
@@ -141,8 +153,6 @@ function Item(id,name,count,visibility,style){
 	    	var player_name=player.name;
 	    	var domid=this.HTMLElement.attr('id');
 	    	this.setItemVisibilityIcon(vsbl);
-	    //	if(this.visibility) var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v=false';	
-	    //	else update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
 	    	var update = 'action=v&i='+this.id+'&dom='+domid+'&player='+player_name+'&v='+vsbl+'&private='+(this.owner==player.id);
 	    	if(debug) Log('Item send visibility update:'+update,'d');
 	    	AgeUpdater.sendUpdate(update);
@@ -177,6 +187,15 @@ function Item(id,name,count,visibility,style){
     	if(visibility=='none') this.actionBar.css({display:'block'});
     	else this.actionBar.css({display:'none'});
        return this;
+    };
+    this.update=function(data){
+ 		if(data.visibility){
+ 			this.style.bgColor = data.style.bgColor;
+ 			this.style.imageName = data.style.imageName;
+		}
+		var game = GameManager.instance;
+		this.style.angle = game.players[game.player].angle;
+		this.setVisibility(data.visibility);
     };
      this.loadFromJSON = function(i){
 		 this.name = i.name;
@@ -623,8 +642,8 @@ function Renderer(game){
         this.renderPlayers();
 
         var gameResourcen = HTMLRenderer.div({id:'ageResourcen',position:'absolute'});
-        var gameResourcenHdr = HTMLRenderer.div({id:'ageResourcenHdr'}).append('<p>'+AgeSettings.resourcenTitle+'</p>');
-        gameResourcen.append(gameResourcenHdr);
+     //   var gameResourcenHdr = HTMLRenderer.div({id:'ageResourcenHdr'}).append('<p>'+AgeSettings.resourcenTitle+'</p>');
+     //   gameResourcen.append(gameResourcenHdr);
         gameResourcen.append(this.renderResourcen(game.ressourcen));
         this.gameContent.append(gameResourcen);
 
@@ -710,6 +729,7 @@ function Renderer(game){
         			grp_style.imagesPath = itm.style.imagesPath;
         			grp_style.imageName = itm.style.imageName;
         			grp_style.bgImage = itm.style.bgImage;
+        			grp_style.bgColor = itm.style.bgColor;
         		}
         	}
         	var groupDOM = HTMLRenderer.createGameItem(this.getStyle(grp_style),{title:(grp.name)});
@@ -747,7 +767,11 @@ function Renderer(game){
     };
     this.bindItemAction=function(HTMLElement,itm){	
     	if(debug) Log('BINDE ACTION DBCLICK for element.id:'+itm.getDomId()+' HTMLElement.id:'+HTMLElement.attr('id'),'d');
-    	return HTMLElement.bind('dblclick', function () {itm.bindAction(); });
+    	return HTMLElement.bind('dblclick', function () {
+    		itm.bindAction(); 
+    		AgeItemLayer.layerSeqNr += 1;
+    		itm.style.zIndex = AgeItemLayer.layerSeqNr;
+    	});
     };
     this.makeDraggable = function(itemDOM,itemObject){
     	itemDOM.draggable({
@@ -795,17 +819,23 @@ function Renderer(game){
     this.makeDroppable = function(player){
     	player.HTMLElement.droppable({
     		hoverClass: 'drophover',
-    		drop: function( event, ui ) {
-    		 var item = ui.draggable;
-    		 GameManager.setElementOwner(item.attr('id'),player);
+    		over: function(event, ui) {
+	    		var item = ui.draggable;
+			 	var cur_player = GameManager.instance.players[GameManager.instance.player];
+			 	if(cur_player.id == player.id) item.addClass('privateItem');
     	    },
-    	    out: function(event, ui) { 
-    	    	 var item = ui.draggable;
-        		 GameManager.setElementOwner(item.attr('id'),null);
-        		 var params = AgeUtil.extractDomId(item.attr('id'));
-        		 if(params != null) AgeUpdater.sendUpdate('action=itemupdate&toPlayer='+item.owner+'&id='+params[0]);	 
-    	    }
-    		
+    		drop: function( event, ui ) {
+    	    	var item = ui.draggable;
+    			GameManager.setElementOwner(item.attr('id'),player);
+    	    },
+    	    out: function(event, ui) {  
+	    	    var item = ui.draggable;
+	    	    var cur_player = GameManager.instance.players[GameManager.instance.player];
+    		 	if(cur_player.id == player.id) item.removeClass('privateItem');
+	        	GameManager.setElementOwner(item.attr('id'),null);
+	        	var params = AgeUtil.extractDomId(item.attr('id'));
+	        	if(params != null && player.active) AgeUpdater.sendUpdate('action=itemupdate&toPlayer='+item.owner+'&id='+params[0]);	  
+    	    }	
     	});
     	return player;
     };
@@ -980,235 +1010,7 @@ function IConnector(onopen,onmessage,onclose,send,join){
     this.onclose = onclose;
     this.send =send;
     this.join = join;
-}
-function WebSocketConnector(){
- this.base = IConnector;
-   this.base(function(){
-        alert("onopen");
-   },function(){
-        alert("onmessage");
-   },function(){
-        alert("onclose");
-   },function(){
-        alert("send");
-   },function(){
-        alert("join");
-   });
-}
-
-function CometConnector(){
-   this.base = IConnector;
-   this.base(function(){
-        alert("onopen");
-   },function(msg){
-	    var action = msg.n;
-        var data = msg.v;
-        if(debug) Log('Bekomme Daten action:'+action+' data:'+data,'d');
-        if(action=='init'){
-        	if(data){
-        		var status = data.status;
-        		if(status == 0){
-        			Log(data.msg,'e');
-        			GameManager.chat({n:'ageSystem',v:'<span class="ageSystem">*** keine Spieler zugewissen.</span>'});
-        		}else if(status==1){  
-        			try{
-        			if(data.game){
-        				Log('Comet.init loadGame:'+data.game,'i');
-        				GameManager.loadGame(data.game);
-        				
-        				Log('Comet.init setze curren Player:'+data.player.id+' winkel:'+data.player.angle,'i');
-        				GameManager.instance.setCurrentPlayer(data.player);
-        				
-        				Log('Comet.init rendere Game.','i');
-        				GameManager.renderGame();
-        			}
-        			GameManager.local=false;
-        			setInterval("AgeUpdater.listenForUpdate()", AgeSettings.updatePeriod);
-        		//	$(window).unload( function () { GameManager.leaveGame(); } );
-        			}catch(e){Log('CometConnector.init() - '+e,'e');}
-        		
-        		}
-        		else Log('Ich habe unbekannte Init antwort bekommen.!!! status:'+status,'e');
-        	}else Log('Für eine Ation - init wurde keine Daten empfanden!!!','e');
-        	
-        	AgeUtil.setConnectionStatus('idle');
-        }
-        if(action=='j'){
-        	if(data.player){
-        		var player = data.player;
-        		GameManager.joinGame(player);
-        	}
-        	 
-        }
-        if(action=='pong'){
-        	if(debug) Log('Connector: Bekome PONG','d');
-        	
-        }
-        if(action=='itemOwner'){
-        	var id=data.id;
-        	var owner=data.owner;
-        	var item = GameManager.instance.findItem(id);
-        	if(item!=null){
-        		item.owner = owner;
-        		if(debug) Log('owner for item '+id+' changed:'+owner,'d');
-        	}
-        	//{n:'itemOwner',v:{id:"+id+",owner:"+owner+"}}";
-        }
-        if(action=='m'){
-         try{
-        	var item_id=data.i;
-        	var pos=data.pos;
-        	var player_id=data.player;
-        	var cur_player = GameManager.instance.players[GameManager.instance.player];
-         	if(player_id!=cur_player.id){
-         		var cur_player = GameManager.instance.players[GameManager.instance.player];
-        	//	var player = GameManager.instance.findPlayer(player_id);
-                var angle = cur_player.angle;//-player.angle;
-        		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
-        		var isItem=data.isItem;
-        		var groupTyp=data.groupTyp;
-        		if(!isItem && groupTyp=='random'){
-        			var grp = GameManager.instance.findGroup(item_id);
-        			if(grp != null && grp.randomgenerator) var bgImage = grp.style.getImagePath(false);
-        		}  
-        		 if(debug) Log('move data.zIndex:'+data.zIndex+' typeof:'+(typeof data.zIndex)+' pos.dom:'+pos.dom,'d');
-      		   var zIndex = GameManager.getNextLayerSeqNr(data.zIndex);
-        		
-        		$('#'+pos.dom).css( {left : style.left,top : style.top,zIndex:zIndex});
-        		if(bgImage){
-        			var image = $('#'+pos.dom).children('img').first();
-    				image.attr('src',bgImage);
-        			
-        		} 
-        	}
-    	   }catch(e){Log('CometConnector.onmessage() action:move msg:'+e,'e'); }
-        }
-        if(action=='r'){
-        	var grp_id = data.grp;
-        	var itm_id = data.itm;
-    //    	if(debug) Log('CometConnector.onmessage()  action:random grp_id:'+grp_id+', itm_id:'+itm_id,'d');
-        	var groups = GameManager.instance.ressourcen;
-        	for ( var i = 0; i < groups.length; i++) {
-				var grp = groups[i];
-				if(grp.id == grp_id) grp.animateRandom(itm_id);
-			}
-        }
-        if(action=='randomize'){
-        	var grp_id = data.id;
-            var playerName = data.playerName;
-            var grp = GameManager.instance.findGroup(grp_id);
-            if(grp != null){
-            	$('#'+grp.getDomId()).remove();
-            	var g = grp.loadFromJSON(data.grp);
-            	var renderer = GameManager.instance.renderer; 
-            	var renderedGrp = renderer.renderGroup(g);
-            	renderer.gameContent.append(renderedGrp);
-            	GameManager.chat({n:playerName,v:'*** hat die Gruppe '+g.name+' zuffälig geordnet.'});
-            }else Log('Bekomme Randomize Update. Group mit id:'+grp_id+' wurde nicht gefunden.','w');
-        	//{n:'randomize',v:{id:"+id+",playerName:'"+playerName+"',grp:"+grp.toJSON()+"}}";
-        }
-        if(action=='chat'){
-        	GameManager.chat({n:data.from,v:data.msg});
-        }
-        if(action=='updateItem'){
- // Log('action update item','e');
-        	var item = GameManager.instance.findItem(data.id);
-        	if(item != null){
-        
-        		if(data.visibility){
-        			item.style.bgColor = data.style.bgColor;
-        			item.style.imageName = data.style.imageName;
-        		//	Log('updateItem datavisibilistylety true item.style.imageName:'+item.style.imageName,'d');
-				}
-				else{
-					item.style.bgColor = item.group.style.bgColor;
-					item.style.imageName=item.group.style.imageName;
-
-   //     			Log('updateItem datavisibility false item.style.imageName:'+item.style.imageName,'d');
-				}
-				var game = GameManager.instance;
-				item.style.angle = game.players[game.player].angle;
-				item.setVisibility(data.visibility);
-        	}else Log('Comet.action updateItem bekommen, aber keine Aktion augeführt.','w');
-        	
-        }
-        if(action=='stack'){
-        	var grp_id = data.id;
-            var playerName = data.playerName;
-            var stacked = data.grp.stacked;
-            var grp = GameManager.instance.findGroup(grp_id);
-            if(debug) Log('++++++++++++++++ action stack grp.stacked:'+grp.stacked+' stacked:'+stacked,'d');
-            if(grp != null && grp.stacked != stacked){
-            	$('#'+grp.getDomId()).remove();
-            	var g = grp.loadFromJSON(data.grp);
-            	var renderer = GameManager.instance.renderer; 
-            	var renderedGrp = renderer.renderGroup(g);
-            	renderer.gameContent.append(renderedGrp);
-            	if(g.stacked) GameManager.chat({n:playerName,v:'*** hat die Gruppe '+g.name+' gestapelt.'});
-            }else Log('Stack Update bekommen, aber keine Aktion ausgeführt.','w');
-        }
-        if(action=='playerName'){
-        	var player = GameManager.instance.findPlayer(data.id);
-        	if(player != null && data.name && data.name != ''){
-        		GameManager.chat({n:player.name+':',v:'*** hat die Name auf <b>'+data.name+'</b> geändert.'});
-        		player.setName(data.name);
-        		
-        	}  	
-        }
-        if(action=='leave'){
-        	GameManager.removePlayer(data);
-        }
-        if(action=='v'){	
-        	var itm_id = data.itm;
-        	var player_name = data.player;
-        	var itm_dom = data.domid;
-        	var visibility = data.v;
-        	var img_name = data.img;
-        	var isGroup = data.isGroup;
-        	var isPrivate = data.isPrivate;
-        	if(debug)Log(' update visibility','d');
-        	if(isGroup){
-        		var group = GameManager.instance.findGroup(itm_id);
-        		if(group != null){
-        			$('#'+group.getDomId()).remove();
-        			var g = group.loadFromJSON(data.grp);
-        			var renderer = GameManager.instance.renderer; 
-                	var renderedGrp = renderer.renderGroup(g);
-                	renderer.gameContent.append(renderedGrp);
-                	GameManager.chat({n:player_name,v:'*** hat Sichtbarkeit der Gruppe '+g.name+' geändert.'});
-        		}
-        	}else{
-        	var groups = GameManager.instance.ressourcen;
-        	for ( var i = 0; i < groups.length; i++) {
-				var grp = groups[i];			
-				for ( var j = 0; j < grp.items.length; j++) {
-					var itm  = grp.items[j];
-					//if(debug) Log('CometConnector.onmessage()  if(itm.id==itm_id) itm.id:'+itm.id ,'d');
-		        	
-					if(itm.id==itm_id){
-						if(visibility){
-							itm.style.bgColor = data.bgColor;
-							itm.style.imageName = img_name;
-						}
-						else{
-							itm.style.bgColor = grp.style.bgColor;
-							itm.style.imageName=grp.style.imageName;
-						}
-						var game = GameManager.instance;
-						itm.style.angle = game.players[game.player].angle;
-						itm.setVisibility(visibility);
-					//	if(debug) Log('itm.style.imageName: '+itm.style.imageName+' Chat MSG text_element:'+text,'d');
-			        	if(!isPrivate) GameManager.chat({n:player_name,v:' hat eine Element von eine Gruppe <strong>'+grp.name+'</strong> umgedreht.'});
-			        	
-					}
-				}
-			}
-        }
-        }
-   },function(key){
-        alert("onclose"+key);
-   },function(data){
-	   if(debug) Log('CometConnector.send() data:'+data,'d');
+    this.ajax=function(data){
 	    AgeUtil.setConnectionStatus('active');
 		$.ajax({type : "POST", url:GameManager.url+'?key='+GameManager.key, data:data,
 			success: function(data, textStatus, xhr) {
@@ -1231,15 +1033,273 @@ function CometConnector(){
 		  },
 		  timeout:AgeSettings.responseTimeout
 		});
+    };
+}
+function WebSocketConnector(){
+ this.base = IConnector;
+   this.base(function(){
+        alert("onopen");
+   },function(){
+        alert("onmessage");
+   },function(){
+        alert("onclose");
+   },function(){
+        alert("send");
+   },function(){
+        alert("join");
+   });
+}
+var AgeActionHandler={
+	invokeAction:function(action,data){
+		if(action=='init') this.actionInit(data);
+		if(action=='j')	this.actionJoin(data);
+		if(action=='pong') this.actionPong(data);
+		if(action=='itemOwner') this.actionChangeOwner(data);
+		if(action=='m') this.actionMove(data);
+		if(action=='r') this.actionAnimateRandom(data);
+		if(action=='randomize') this.actionShuffleItems(data);
+		if(action=='updateItem') this.actionUpdateItem(data);
+		if(action=='stack') this.actionStack(data);
+		if(action=='playerName') this.actionChangePlayerName(data);
+		if(action=='leave') this.actionLeave(data);
+		if(action=='v') this.actionVisibility(data);
+		if(action=='chat') this.actionChat(data);
+		AgeUtil.setConnectionStatus('idle');
+   },
+   actionInit: function(data){
+	   var status = data.status;
+		if(status == 0){
+			Log(data.msg,'e');
+			GameManager.chat({n:'ageSystem',v:'<span class="ageSystem">*** keine Spieler zugewissen.</span>'});
+		}else if(status==1){  
+			try{
+			if(data.game){
+				Log('Comet.init loadGame:'+data.game,'i');
+				GameManager.loadGame(data.game);
+				
+				Log('Comet.init setze curren Player:'+data.player.id+' winkel:'+data.player.angle,'i');
+				GameManager.instance.setCurrentPlayer(data.player);
+				
+				Log('Comet.init rendere Game.','i');
+				GameManager.renderGame();
+			}
+			GameManager.local=false;
+			setInterval("AgeUpdater.listenForUpdate()", AgeSettings.updatePeriod);
+		//	$(window).unload( function () { GameManager.leaveGame(); } );
+			}catch(e){Log('CometConnector.init() - '+e,'e');}
+		
+		}
+		else Log('Ich habe unbekannte Init antwort bekommen.!!! status:'+status,'e');
+   },
+   actionJoin: function(data){
+	 if(data.player){
+   		var player = data.player;
+   		GameManager.joinGame(player);
+   	 }
+   },
+   actionPong: function(data){
+	   
+   },
+   actionChangeOwner: function(data){
+	  var id=data.id;
+	  var owner=data.owner;
+	  var item = GameManager.instance.findItem(id);
+	  if(item!=null){
+   		item.owner = owner;
+   		if(debug) Log('owner for item '+id+' changed:'+owner,'d');
+   	 }
+   },
+   actionMove: function(data){
+       try{
+       	var item_id=data.i;
+       	var pos=data.pos;
+       	var player_id=data.player;
+       	var cur_player = GameManager.instance.players[GameManager.instance.player];
+        	if(player_id!=cur_player.id){
+        		var cur_player = GameManager.instance.players[GameManager.instance.player];
+       	//	var player = GameManager.instance.findPlayer(player_id);
+               var angle = cur_player.angle;//-player.angle;
+       		var style = Perspective.rotateElement(angle,{left:pos.x,top:pos.y,width:pos.w,height:pos.h});
+       		var isItem=data.isItem;
+       		var groupTyp=data.groupTyp;
+       		if(!isItem && groupTyp=='random'){
+       			var grp = GameManager.instance.findGroup(item_id);
+       			if(grp != null && grp.randomgenerator) var bgImage = grp.style.getImagePath(false);
+       		}  
+       		 if(debug) Log('move data.zIndex:'+data.zIndex+' typeof:'+(typeof data.zIndex)+' pos.dom:'+pos.dom,'d');
+     		   var zIndex = GameManager.getNextLayerSeqNr(data.zIndex);
+       		
+       		$('#'+pos.dom).css( {left : style.left,top : style.top,zIndex:zIndex});
+       		if(bgImage){
+       			var image = $('#'+pos.dom).children('img').first();
+   				image.attr('src',bgImage);
+       			
+       		} 
+       	}
+   	   }catch(e){Log('CometConnector.onmessage() action:move msg:'+e,'e'); }
+   },
+   actionAnimateRandom: function(data){
+	  var grp_id = data.grp;
+   	  var itm_id = data.itm;
+   	  var groups = GameManager.instance.ressourcen;
+   	  for(var i = 0; i < groups.length; i++) {
+			var grp = groups[i];
+			if(grp.id == grp_id) grp.animateRandom(itm_id);
+	  }
+   },
+   actionShuffleItems: function(data){
+	   var grp_id = data.id;
+       var playerName = data.playerName;
+       var grp = GameManager.instance.findGroup(grp_id);
+       if(grp != null){
+       	$('#'+grp.getDomId()).remove();
+       	var g = grp.loadFromJSON(data.grp);
+       	var renderer = GameManager.instance.renderer; 
+       	var renderedGrp = renderer.renderGroup(g);
+       	renderer.gameContent.append(renderedGrp);
+       	GameManager.chat({n:playerName,v:'*** hat die Gruppe '+g.name+' zuffälig geordnet.'});
+       }else Log('Bekomme Randomize Update. Group mit id:'+grp_id+' wurde nicht gefunden.','w');
+   	//{n:'randomize',v:{id:"+id+",playerName:'"+playerName+"',grp:"+grp.toJSON()+"}}";
+   },
+   actionUpdateItem: function(data){
+	   var item = GameManager.instance.findItem(data.id);
+	   	if(item != null){
+	   		item.update(data);
+	   	}else Log('Comet.action updateItem bekommen, aber keine Aktion augeführt.','w');
+   },
+   actionStack: function(data){
+	   var grp_id = data.id;
+       var playerName = data.playerName;
+       var stacked = data.grp.stacked;
+       var grp = GameManager.instance.findGroup(grp_id);
+       if(debug) Log('++++++++++++++++ action stack grp.stacked:'+grp.stacked+' stacked:'+stacked,'d');
+       if(grp != null && grp.stacked != stacked){
+	       	$('#'+grp.getDomId()).remove();
+	       	var g = grp.loadFromJSON(data.grp);
+	       	var renderer = GameManager.instance.renderer; 
+	       	var renderedGrp = renderer.renderGroup(g);
+	       	renderer.gameContent.append(renderedGrp);
+	       	if(g.stacked) GameManager.chat({n:playerName,v:'*** hat die Gruppe '+g.name+' gestapelt.'});
+       }else Log('Stack Update bekommen, aber keine Aktion ausgeführt.','w');
+   },
+   actionChangePlayerName: function(data){
+	   	var player = GameManager.instance.findPlayer(data.id);
+   		if(player != null && data.name && data.name != ''){
+   		GameManager.chat({n:player.name+':',v:'*** hat die Name auf <b>'+data.name+'</b> geändert.'});
+   		player.setName(data.name);
+   		
+   	}  
+   },
+   actionLeave: function(data){
+	   GameManager.removePlayer(data);
+   },
+   actionVisibility: function(data){
+	   	var itm_id = data.itm;
+		var player_name = data.player;
+		var itm_dom = data.domid;
+		var visibility = data.v;
+		var isGroup = data.isGroup;
+		var isPrivate = data.isPrivate;
+		if(debug)Log(' update visibility','d');
+		if(isGroup){
+			var group = GameManager.instance.findGroup(itm_id);
+			if(group != null){
+				$('#'+group.getDomId()).remove();
+				var g = group.loadFromJSON(data.grp);
+				var renderer = GameManager.instance.renderer; 
+	        	var renderedGrp = renderer.renderGroup(g);
+	        	renderer.gameContent.append(renderedGrp);
+	        	GameManager.chat({n:player_name,v:'*** hat Sichtbarkeit der Gruppe '+g.name+' geändert.'});
+			}
+		}else{
+		var groups = GameManager.instance.ressourcen;
+		for ( var i = 0; i < groups.length; i++) {
+			var grp = groups[i];			
+			for ( var j = 0; j < grp.items.length; j++) {
+				var itm  = grp.items[j];
+				if(itm.id==itm_id){
+					if(visibility){
+						itm.style.bgColor = data.bgColor;
+						itm.style.imageName = data.img;
+					}
+					var game = GameManager.instance;
+					itm.style.angle = game.players[game.player].angle;
+					itm.setVisibility(visibility);
+				 	if(!isPrivate) GameManager.chat({n:player_name,v:' hat eine Element von eine Gruppe <strong>'+grp.name+'</strong> umgedreht.'});
+		        	
+				}
+			}
+		}
+	} 
+   },
+   actionChat:function(data){
+	   GameManager.chat({n:data.from,v:data.msg});
+   }
+};
+function LongPollingConnector(){
+	this.base = IConnector;
+	   this.base(function(){
+	        alert("onopen");
+	   },function(msg){
+		    var action = msg.n;
+	        var data = msg.v;
+	        if(action && data) AgeActionHandler.invokeAction(action,data);
+	        else Log('CometConnector.onMessage - bekome unbekannte Daten action: '+action+', data:'+data,'w');
+	   },function(key){
+	        alert("onclose"+key);
+	   },function(data){
+		   this.ajax(data);
+	   },function(url,query){
+			 if(debug) Log(' Erstelle eine IFRAME...','d');
+			 AgeUtil.setConnectionStatus('active');
+			 $('body').append('<iframe name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
+	   });
+}
+function HttpStreamingConnector(){
+	this.base = IConnector;
+	   this.base(function(){
+	        alert("onopen");
+	   },function(msg){
+		    var action = msg.n;
+	        var data = msg.v;
+	        if(action && data) AgeActionHandler.invokeAction(action,data);
+	        else Log('CometConnector.onMessage - bekome unbekannte Daten action: '+action+', data:'+data,'w');
+	   },function(key){
+	        alert("onclose"+key);
+	   },function(data){
+		   this.ajax(data);
+	   },function(url,query){
+			 if(debug) Log(' Erstelle eine IFRAME...','d');
+			 AgeUtil.setConnectionStatus('active');
+			 $('body').append('<iframe name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
+	   });
+}
+/*
+function CometConnector(){
+   this.base = IConnector;
+   this.base(function(){
+        alert("onopen");
+   },function(msg){
+	    var action = msg.n;
+        var data = msg.v;
+        if(action && data) AgeActionHandler.invokeAction(action,data);
+        else Log('CometConnector.onMessage - bekome unbekannte Daten action: '+action+', data:'+data,'w');
+   },function(key){
+        alert("onclose"+key);
+   },function(data){
+	   this.ajax(data);
    },function(url,query){
 		 if(debug) Log(' Erstelle eine IFRAME...','d');
 		 AgeUtil.setConnectionStatus('active');
 		 $('body').append('<iframe name="hidden" src="' +url+'?'+query+'" id="comet-frame" style="display: none;"></iframe>');
-   });
+  });
 
 }
+*/
 WebSocketConnector.prototype = new IConnector;
-CometConnector.prototype = new IConnector;
+//CometConnector.prototype = new IConnector;
+LongPollingConnector.prototype = new IConnector;
+HttpStreamingConnector.prototype = new IConnector;
 var AgeItemLayer = {
 		id:0,
 		layerSeqNr:100
@@ -1357,7 +1417,7 @@ var GameManager = {
 	    		this.contener = data.contener;
 	    		Log('Game contenter is :'+this.contener,'i');
 	    		Log('Erstelle eine Connector...','i');
-	 	        this.connector = new CometConnector();
+	 	        this.connector = new HttpStreamingConnector();
 	 	        Log('Verbinde sich mit den Server...','i');
 	 	        var query='key='+this.key+'&action=join';
 //	 	        if(data.game){

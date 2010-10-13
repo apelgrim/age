@@ -77,15 +77,10 @@ public class AgeActionHandler {
 	}
 
 	private void actionPing(HttpServletRequest req) {
-		this.instancePlayer.getInstance().checkIfPlayersAlive();
 		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
 		this.type=AgeActionHandler.TYPE_RESPONSE;
-		this.response="{n:'pong',v:''}";
-	//	int player_id = convertToInt(req.getParameter("from"));
-	//	System.out.println("----ageactionhandler action ping for player_id:"+player_id);
-	//	if(player_id>0) this.instancePlayer.getInstance().notifyPongTime(player_id);
-		
-	}
+		this.response="{n:'pong',v:'dumpData'}";
+    }
 
 	private void actionRandom(HttpServletRequest req) {
 		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
@@ -134,6 +129,7 @@ public class AgeActionHandler {
 				if(visibility) {
 					image_name=item.getStyle().getBgImageName();
 					bgColor=item.getStyle().getBgColor();
+					if(!isPrivate) item.getGroups().setVisibility(true);
 				}
 				
 				if(isPrivate){
@@ -163,7 +159,7 @@ public class AgeActionHandler {
 
 	private void invokeAction(HttpServletRequest req) {
 		if(this.instancePlayer!=null){
-			this.instancePlayer.getPlayer().notifyPongTime();
+			if(this.instancePlayer.getPlayer() != null) this.instancePlayer.getPlayer().notifyPongTime();
 			String action = ""+req.getParameter("action");
 			if(action.equalsIgnoreCase("chat")){
 				actionChat(req);
@@ -244,7 +240,7 @@ public class AgeActionHandler {
 				if(item != null){
 					//left = item.getStyle().getLeft();
 					//top = item.getStyle().getTop();
-					grp.setVisibility(item.isVisibility());
+				//	grp.setVisibility(item.isVisibility());
 					grp.getStyle().setLeft(item.getStyle().getLeft());
 					grp.getStyle().setTop(item.getStyle().getTop());	
 					

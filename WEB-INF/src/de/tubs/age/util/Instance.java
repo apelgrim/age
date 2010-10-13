@@ -3,6 +3,9 @@ package de.tubs.age.util;
 import java.util.List;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,12 +26,27 @@ public class Instance {
 	private Broadcaster bc;
 	private String key;
 	public static int instance_seq=0;
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private CopyOnWriteArrayList<InstancePlayer> ip;
 	public Instance(Game game){
 		this.game = game;
 		this.ip = new CopyOnWriteArrayList<InstancePlayer>();
 		instance_seq++;
 		inactivePlayers=game.getPlayers().size();
+		runScheduledTasks();
+	}
+	private void runScheduledTasks() {
+		 final Runnable checkPlayers = new Runnable() {
+             public void run() { 
+            	 checkIfPlayersAlive();
+            	 }
+         };
+     final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(checkPlayers, 70, 70, TimeUnit.SECONDS);
+//     scheduler.schedule(new Runnable() {
+//             public void run() { beeperHandle.cancel(true); }
+//         }, 60 * 60, TimeUnit.SECONDS);
+// }
+		
 	}
 	public int getPlayersSize(){
 		return this.game.getPlayers().size();

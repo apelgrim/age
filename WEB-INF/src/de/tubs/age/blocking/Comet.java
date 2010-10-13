@@ -36,10 +36,12 @@ public abstract class Comet implements AtmosphereHandler<HttpServletRequest, Htt
 	public Comet() {
 
 	}
-	public abstract void onRequest(AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource) throws IOException;
+	public abstract void onRequest(AtmosphereResource<HttpServletRequest, HttpServletResponse> atmoResource) 
+																						throws IOException;
 	
 	@Override
-	 public void onStateChange(AtmosphereResourceEvent<HttpServletRequest, HttpServletResponse> event) throws IOException {
+	 public void onStateChange(AtmosphereResourceEvent<HttpServletRequest, HttpServletResponse> event) 
+																					throws IOException {
 
     if (event.isCancelled()) {
     	System.out.println("\n\n###### Comet.onStateChange. event is Canceled\n\n");

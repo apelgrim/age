@@ -49,7 +49,10 @@ div#wrapper {
 #ageContent {
 	margin: 0 auto;
 }
-
+.privateItem:before{
+  content:url(/age/images/privateIcon.png);
+  position:absolute;
+}
 div#game {
 	font-size: 10px;
 }
@@ -71,7 +74,9 @@ div#ageConsole {
 	content: "|||";
 	background-color: white;
 	padding: 1px;
-	margin-left: -9px;
+position:absolute;
+right:0px;
+top:0px;
 	font-size: 12px;
 	/*content:url(/age/images/stacked_sign.png);*/
 }
@@ -159,9 +164,7 @@ div.playerOwner {
 }
 
 div#ageResourcen {
-	height: 200px;
-	width: 180px;
-	border: 1px solid Gainsboro;
+
 }
 
 div#ageResourcenHdr p {
@@ -457,6 +460,13 @@ div.ItemActionBar {
 	display: block;
 	position: absolute;
 	top: -21px;
+	width:50px;
+}
+div.GroupActionBar{
+	display: block;
+	position: absolute;
+	top: -21px;
+	width:70px;
 }
 
 .GroupContener input {
@@ -565,7 +575,7 @@ div#ageChatInput button {
 
 div#ageChatMsg p {
 	font-size: 11px;
-	margin: 2px 3px;
+	margin: 6px 3px;
 }
 
 div#ageChat .label {
