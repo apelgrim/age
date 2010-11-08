@@ -8,19 +8,33 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 <head>
 <!-- <link rel="stylesheet" type="text/css" href="/age/css/click.css" title="Style"/> -->
  <link rel="stylesheet" type="text/css" href="$dir/css/age.css" title="Style"/>
-  <script type="text/javascript" src="$dir/js/jquery-1.4.2.js"></script>
+ <link type="text/css" href="$dir/css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+ 
+ 
+<script type="text/javascript" src="$dir/js/jquery-1.4.2.js"></script>
 <script type="text/javascript" src="$dir/js/jquery-ui-1.8.1.custom.min.js"></script>
 <script type="text/javascript" src="$dir/js/jquery.form.js"></script>
 <script type="text/javascript" src="$dir/js/mColorPicker.js"></script>
 <script type="text/javascript" src="$dir/js/jquery.base64.min.js"></script>
+<script type="text/javascript" src="$dir/js/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="$dir/js/jquery.jscrollpane.min.js"></script>
 <script type="text/javascript" src="$dir/js/age_settings.js"></script>
 <script type="text/javascript" src="$dir/js/age.js"></script>
+
+
+
+
 <title>AGE - $title</title>
 </head>
 <body>
 
   <div id="wrapper">
-   <div id="header"><h1>AGE</h1>eine Ajax Game Engine </div>
+   <div id="header">
+   <a href="./"><img class="logo" src="/age/images/header_bg_logo.png"></img></a>
+   
+   <h1>AGE</h1>
+   <span class="logo">eine Ajax Game Engine</span> 
+   </div>
     #parse($path)
     
   </div>

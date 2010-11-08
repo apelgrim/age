@@ -8,14 +8,9 @@ package de.tubs.age.jpa;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.persistence.Entity;
@@ -217,9 +212,7 @@ public class Style  extends Model{
     }
 
     public void saveAll(String path,EntityManager em) throws IOException {
-  //  	System.out.println("\n\n#######  saveAll bgImageName ist ("+getBgImageName()+") sec:"+sec+" #######\n\n");
-  //      System.out.println("+#+#+#+#+ public void saveAll(String path):path ist NULL? ("+(path==null)+")");
-        if(path!=null) saveImage(path);
+       if(path!=null) saveImage(path);
         save(em);
       
       

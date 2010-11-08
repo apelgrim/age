@@ -1,17 +1,16 @@
-
+<div class="content">
 #if($game)
-Spiel:
-<h3>$game.getName()</h3>
+<h3 class="instance">$game.getName()</h3>
  #if($gameEditKey)
-
-	Link zur Edit:<br/>
+    <div class="edit">
+	<p>Bearbeitunslink:</p>
 	<a href="./edit.htm?editKey=$gameEditKey">./edit.htm?editKey=$gameEditKey</a>
+	 </div>
  #end
-
- <a href="./play.htm?new=$game.key" class="newGame"> neue instance</a>
-
-<br/><br/>
-laufende spiele:
+ 
+<table class="content"><tr><td class="gameList">
+<div id="gameList">
+<p>Verfügbaren Spielinstanzen:</p>
 <ul class="games">
 
 #foreach( $_game in $game.children )
@@ -36,11 +35,15 @@ laufende spiele:
 #end
 
 
-</ul>
+</ul></div>
+</td><td class="line"></td><td class="createGame">
 
-
+ <a href="./play.htm?new=$game.key" class="newGame"> neue instance</a>
+ 
+</td></tr></table>
 
 #else
 keine Spiel gefunden.
 
 #end
+</div>

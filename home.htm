@@ -1,8 +1,6 @@
-
-<a href="./game/new.htm" class="newGame">Spiel erstellen</a>
-
-<br/><br/>
-spiele:
+<div class="content">
+<table class="content"><tr><td class="gameList">
+<div id="gameList">
 <ul class="games">
 
 #foreach( $game in $games )
@@ -26,7 +24,17 @@ spiele:
     #set($src = "")
 #end
 
-
 </ul>
+</div>
+</td><td class="line"></td><td class="createGame">
+
+<a href="./game/new.htm" class="newGame">Spiel erstellen</a>
 
 
+</td></tr></table>
+<script type="text/javascript">
+$(function()
+{
+	$('#gameList').jScrollPane();
+});
+</script>

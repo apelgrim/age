@@ -2,27 +2,17 @@ package de.tubs.age.blocking;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
-import org.atmosphere.cpr.Broadcaster;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
-import org.atmosphere.cpr.BroadcasterFactory;
-import org.atmosphere.handler.AbstractReflectorAtmosphereHandler;
 import org.atmosphere.util.LoggerUtils;
 
-import de.tubs.age.util.InstancePlayer;
 
 public abstract class Comet implements AtmosphereHandler<HttpServletRequest, HttpServletResponse>{//extends AbstractReflectorAtmosphereHandler{ //
 	protected final static String CLUSTER = "org.atmosphere.useCluster";

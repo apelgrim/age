@@ -6,7 +6,6 @@ package de.tubs.age.jpa;
 
 import java.io.IOException;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;

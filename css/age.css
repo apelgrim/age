@@ -1,17 +1,9 @@
 /* 
     Document   : age
     Created on : 21.06.2010, 17:01:45
-    Author     : maciek
-    Description:
-        Purpose of the stylesheet follows.
-*/ /* 
-   TODO customize this sample style
-   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
-   
-   
-   http://findicons.com/pack/4
-   
-   
+    Author     : Maciej Apelgrim
+    Description: Diplom Arbeit
+        
 */
 root {
 	display: block;
@@ -20,11 +12,18 @@ root {
 div {
 	font-size: 14px;
 }
+h3.instance{
+font-size:32px;
+text-align:center;
+}
 
 div.item {
 	position: absolute;
 	z-index: 100;
 	border: 1px solid black;
+}
+div.ageItem{
+cursor: pointer;
 }
 
 div.player {
@@ -40,7 +39,26 @@ div.player {
 	color: #fff;
 	font-family: Arial;
 }
-
+table.content{
+width: 100%;
+}
+div#gameList > p{
+background-color:#EEEEEE;
+color:#162D50;
+font-size:16px;
+padding:4px 3px;
+}
+div.edit{
+	border:2px solid red;
+margin-bottom:20px;
+padding:8px;
+}
+div.edit p{
+	margin: 3px 0px;
+}
+div.edit a{
+	text-decoration: none;
+}
 div#wrapper {
 	margin: 0 auto;
 	width: 90%;
@@ -49,16 +67,19 @@ div#wrapper {
 #ageContent {
 	margin: 0 auto;
 }
-.privateItem:before{
-  content:url(/age/images/privateIcon.png);
-  position:absolute;
+
+.privateItem:before {
+	content: url(/age/images/privateIcon.png);
+	position: absolute;
 }
+
 div#game {
 	font-size: 10px;
 }
 
 div.stacked {
 	border: 1px solid black;
+	cursor: pointer;
 }
 
 div#ageConsole {
@@ -74,12 +95,36 @@ div#ageConsole {
 	content: "|||";
 	background-color: white;
 	padding: 1px;
-position:absolute;
-right:0px;
-top:0px;
+	position: absolute;
+	right: 0px;
+	top: 0px;
 	font-size: 12px;
 	/*content:url(/age/images/stacked_sign.png);*/
 }
+div.content{
+position: relative;
+}
+
+td.gameList{
+width: 56%;
+padding-right:19px;
+}
+div#gameList{
+height: 400px;
+}
+
+td.createGame{
+text-align: center;
+	
+}
+td.line{
+background-color:#162D50;
+width:1px;
+}
+
+
+
+
 
 div#ageConsole p {
 	margin: 3px 0;
@@ -87,24 +132,35 @@ div#ageConsole p {
 
 div#header {
 	padding: 5px;
-	color: #efefef;
-	height: 60px;
+	color:#FFFFFF;
+	height: 101px;
 	margin-bottom: 42px;
-	background-color: #5F9EA0;
+	position:relative;
+	background-color: #90c1f8;
+	background: url(/age/images/header_bg.png) top left repeat-x;
 }
-
+div#header img.logo{
+	position: absolute;
+	border:medium none;
+}
+div#header span.logo{
+	color:#FFFFFF;
+}
 div#header h1 {
 	font-family: Arial;
-	margin: 0;
+	font-size:32px;
+    margin:31px 0 0 37px;
 }
 
 a.newGame {
-	background-color: #A9A9A9;
-	color: #FFFFFF;
+	background-color:#AEDDE9;
+	-moz-border-radius:11px 11px 11px 11px;
+	border-radius:11px 11px 11px 11px;
+	color:#162D50;
 	font-family: Arial;
-	font-size: 15px;
-	font-weight: bold;
-	padding: 10px;
+    font-size:26px;
+    font-weight:bold;
+    padding:20px 53px;
 	text-decoration: none;
 }
 
@@ -123,6 +179,11 @@ div.unactivePlayer>p {
 
 div.activePlayer {
 	border: 1px solid #5F9EA0;
+}
+
+div.RessourcenFooterBar {
+	background-color: #F0F0F0;
+	text-align: right;
 }
 
 div.unactivePlayer {
@@ -164,7 +225,7 @@ div.playerOwner {
 }
 
 div#ageResourcen {
-
+	
 }
 
 div#ageResourcenHdr p {
@@ -182,14 +243,15 @@ div.GroupWrapper {
 	margin: 10px;
 	color: #999999;
 }
-
+div.GroupWrapper div.ItemWrapper div.bgImageView{
+}
 div.GroupContener {
 	border-bottom: 2px solid #DDDDDD;
 	border-top: 2px solid #DDDDDD;
 	background-color: #ffffff;
 	min-height: 20px;
 	padding: 2px 0;
-	max-height: 197px;
+	max-height: 250px;
 	overflow-y: scroll;
 }
 
@@ -250,8 +312,10 @@ div#GameSetting label {
 }
 
 div#GameSettingView img {
-	margin-left: 9px;
-	margin-top: 5px;
+height:173px;
+margin-left:9px;
+margin-top:7px;
+width:173px;
 }
 
 div#GameSettingView {
@@ -273,6 +337,7 @@ button.grpFooter,button.RsrcnFooter {
 div.RsrcnFooterButton {
 	width: 16px;
 	height: 16px;
+	position:relative;
 	float: right;
 }
 
@@ -344,18 +409,17 @@ div.GroupWrapper ul li {
 }
 
 div.GroupSetting ul {
-	float: right;
-	width: 85%;
-}
-
-div.GroupSetting ul li {
-	
+	float: left;
+	width: 80%; } 
+div .GroupSetting   ul   li {
+	margin: 2px 3px;
 }
 
 div.GroupSetting input {
 	font-size: 11px;
+	height: 16px;
 	margin: 0;
-	padding: 0;
+	padding-bottom: 1px;
 }
 
 .left {
@@ -383,18 +447,16 @@ div.GroupWrapper p {
 }
 
 div.GrpSettingLft {
-	width: 8%;
-	float: left;
+	position: absolute;
 }
 
 div.GrpSettingCntr {
-	width: 82%;
-	float: left;
+	margin: 0 16px;
 }
 
 div.GrpSettingRght {
-	width: 8%;
-	float: right;
+	position: absolute;
+	right: 3px;
 }
 
 p.GrpSttngNm {
@@ -410,11 +472,26 @@ p.GrpSttngNm input {
 div.ItemWrapper {
 	background-color: #F6FFD5;
 	margin: 7px 5px;
+	position: relative;
+	padding:4px 0;
+}
+div.GroupWrapper input[type=text]{
+	border:1px solid #dddddd;
+	font-family:sans-serif;
+font-size:12px;
+}
+div.ItemWrapper input[type=text]{
+	padding:0px;
+}
+div.ItemWrapper ul{
+	width:77%;
+}
+div.ItemWrapper ul li{
+	margin:2px 4px;
 }
 
 div.ItmWrpprLft {
-	width: 8%;
-	float: left;
+position: absolute;
 }
 
 div.ItmWrpprLft input {
@@ -422,13 +499,12 @@ div.ItmWrpprLft input {
 }
 
 div.ItmWrpprCntr {
-	float: left;
-	width: 82%;
+margin: 0 16px;
 }
 
 div.ItmWrpprRght {
-	width: 8%;
-	float: right;
+	position: absolute;
+	right: 3px;
 }
 
 div.ItmWrpprRght img {
@@ -460,13 +536,14 @@ div.ItemActionBar {
 	display: block;
 	position: absolute;
 	top: -21px;
-	width:50px;
+	width: 50px;
 }
-div.GroupActionBar{
+
+div.GroupActionBar {
 	display: block;
 	position: absolute;
 	top: -21px;
-	width:70px;
+	width: 70px;
 }
 
 .GroupContener input {
@@ -479,18 +556,40 @@ div#GameViewResultsWrapper {
 }
 
 div#ResourcenContent div.bgImageView {
-	height: 30px;
-	width: 30px;
-	background-color: threedface;
-	float: right;
-	overflow: hidden;
+
 }
 
-div#ResourcenContent div.bgImageView img {
+
+.GroupWrapper div.bgImageView{
+position:absolute;
+text-align:center;
+border:2px dashed #DADADA;
+}
+.GrpSettingCntr div.bgImageView{
+height:36px;
+line-height:30px;
+right:20px;
+top:5px;
+width:37px;
+
+}
+.GrpSettingCntr div.bgImageView img{
 	height: 30px;
+	vertical-align:middle;
 	width: 30px;
 }
-
+.ItemWrapper div.bgImageView{
+height:40px;
+line-height:35px;
+right:20px;
+top:5px;
+width:41px;
+}
+.ItemWrapper div.bgImageView img{
+	height:32px;
+	vertical-align:middle;
+width:32px;
+}
 ul.games {
 	
 }
@@ -511,6 +610,7 @@ ul.games li img {
 	margin: 0 auto;
 	border: none;
 	display: block;
+	max-height:70px;
 }
 
 div#ageConnectionStatus {
@@ -524,6 +624,7 @@ ul.games li {
 	list-style-type: none;
 	margin: 10px;
 	width: 100px;
+	overflow:hidden;
 }
 
 ul.games li a {
@@ -702,6 +803,7 @@ label.test input[type=checkbox] {
 label.test input[type=checkbox]:checked {
 	background-image: url(/age/images/sichtbar.png);
 }
-.drophover{
-border-width: 3px;
+
+.drophover {
+	border-width: 3px;
 }

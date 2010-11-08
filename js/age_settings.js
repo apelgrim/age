@@ -17,7 +17,7 @@ var AgeSettings = {
 		itemDomIdPrefix:'ageItem',
 		groupDomIdPrefix:'ageGroup',
 		resourcenTitle:'Resourcen',
-		gameSettingTitle:'Algemeineinstellungen',
+		gameSettingTitle:'Allgemeine Einstellungen',
 		defaultItemName:'Name',
 		defaultGroupName:'Name',
 		defaultGameName:'Age Name',
@@ -28,7 +28,15 @@ var AgeSettings = {
 		imageVisible:'sichtbar.png',
 		imageUnVisible:'unsichtbar.png',
 		ageConnectionStatusId:'ageConnectionStatus',
+		gameName:'Speilname:',
+		player_size:'Spieler Anzahl:',
+		game_width:'Breite:',
+		game_height:'Höhe:',
+		background_color:'Hintergrundfarbe: ',
+		background_image:'Hintergrundbild: ',
+		msg_size:'Size:',
 		responseTimeout:5000,
 		dragZIndex:999999,
-		updatePeriod:70
+		updatePeriod:70,
+		player:{width:150,height:130,margin:50}
 };

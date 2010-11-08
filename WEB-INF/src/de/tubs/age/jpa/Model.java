@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.persistence.Transient;
 
-import de.tubs.age.jpa.manager.EntityManagerUtil;
 import de.tubs.age.util.AgeUtil;
 
 public abstract class Model {
@@ -15,7 +14,7 @@ public abstract class Model {
 	public abstract int getId();
 	public abstract String toJSON();
 	protected void save(EntityManager em) throws IOException{
-		System.out.println("EntityManager persitst class:"+this.getClass()+" ID:"+this.getId()); 	
+	//	System.out.println("EntityManager persitst class:"+this.getClass()+" ID:"+this.getId()); 	
 		if(getId() > 0 ) em.merge(this);
 		else  em.persist(this);
 	}

@@ -424,7 +424,7 @@ mColorPicker = {
         colorPicker = jQuery('span#color_work_area').html().replace(/type=[^a-z]*color[^a-z]*/gi, 'type="hidden"');
         jQuery('span#color_work_area').html('').remove();
         jQuery(this).after(
-          '<span style="cursor:pointer;border:1px solid black;float:' + flt + ';width:' + width + 'px;height:' + height + 'px;" id="icp_' + id + '">&nbsp;</span>'
+          '<span style="cursor:pointer;border:1px solid #cccccc;float:' + flt + ';width:' + width + 'px;height:' + height + 'px;" id="icp_' + id + '">&nbsp;</span>'
         ).after(colorPicker).remove();   
   
         jQuery('#icp_' + id).css({

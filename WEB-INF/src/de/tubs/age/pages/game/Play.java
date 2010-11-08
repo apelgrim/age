@@ -4,9 +4,6 @@ import java.io.IOException;
 
 import org.apache.click.Context;
 import org.apache.click.util.Bindable;
-import org.atmosphere.cpr.BroadcasterFactory;
-
-import sun.font.FontManager.FamilyDescription;
 
 import de.tubs.age.jpa.Game;
 import de.tubs.age.jpa.manager.GameManager;
@@ -16,6 +13,10 @@ import de.tubs.age.util.GameLoader;
 import de.tubs.age.util.Instance;
 
 public class Play extends LayoutPage{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Bindable protected Game playGame;
 	@Bindable protected Game newGame;
 	@Bindable protected String gameJSON="{}";

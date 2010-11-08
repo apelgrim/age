@@ -3,7 +3,6 @@ package de.tubs.age.blocking;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.TimeUnit;
 
 
 import javax.servlet.ServletContext;

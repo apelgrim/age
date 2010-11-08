@@ -14,13 +14,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import de.tubs.age.jpa.manager.EntityManagerUtil;
 
 /**
  *
@@ -212,7 +210,7 @@ public class Game extends Model{
 	//	if(JSONCache==null){
 		StringBuffer sb = new StringBuffer();
 		sb.append("{name:'" + name + "',_public:" + _public + ",playersSize:"+playersSize+",table:"
-				+ table.toJSON() + ",resourcen:[");
+				+ table.toJSON() + ",ressourcen:[");
 		boolean first = true;
 		for (Groups group : this.groups) {
 			if(first){

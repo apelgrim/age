@@ -220,7 +220,6 @@ public class AgeActionHandler {
 		String playerName = req.getParameter("player");
 		Groups grp = this.instancePlayer.getInstance().getGame().findGroup(id);
 		grp.randomizeItems();
-		System.out.println("##### actionRandomizeGroup");
 		this.type=AgeActionHandler.TYPE_BROADCAST;
 		this.phase=AgeActionHandler.PHASE_ONMESSAGE;
 		this.response="{n:'randomize',v:{id:"+id+",playerName:'"+playerName+"',grp:"+grp.toJSON()+"}}";
@@ -266,7 +265,7 @@ public class AgeActionHandler {
 		int id = convertToInt(req.getParameter("player"));
 		String name = req.getParameter("name");
 		Player player = this.instancePlayer.getInstance().findPlayer(id);
-		System.out.println("name:"+name+" player:"+player+" id:"+id+" instanceplayer.id:"+this.instancePlayer.getPlayer().getId());
+//		System.out.println("name:"+name+" player:"+player+" id:"+id+" instanceplayer.id:"+this.instancePlayer.getPlayer().getId());
 		if(player != null && player.getId() == this.instancePlayer.getPlayer().getId()){
 			this.type=AgeActionHandler.TYPE_BROADCAST;
 			this.phase=AgeActionHandler.PHASE_ONMESSAGE;

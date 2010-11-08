@@ -144,8 +144,8 @@ function Item(id,name,count,visibility,style){
     	if(img_e) img_e.attr('src',image_path);
     };
     this.setItemVisibilityIcon=function(vsbl){
-    	if(vsbl) this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageUnVisible);
-    	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
+    	if(vsbl) this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
+    	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageUnVisible);
     };
     this.sendItemVisibilityUpdate=function(vsbl){
     	try{
@@ -164,8 +164,8 @@ function Item(id,name,count,visibility,style){
     		this.actionBar=HTMLRenderer.div({_class:'ItemActionBar'}).css('display','none');
     		var _item = this;
     		
-    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
-    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
     		if(debug) Log('this.group.stacked:'+this.group.stacked,'d');
     		var img_s = HTMLRenderer.img({src:AgeSettings.imagePath+'stacked0.png'});
     		
@@ -269,7 +269,7 @@ function Player(name,id){
     this.setDomId=function(_id){
         this.style.setDomId(this.getDomIdPrefix()+'-'+_id);
     };
-    this.style = new Style(130, 150,'transparent',null,this.getDomId(),this.getDomIdPrefix(),-1,-1,'absolute');
+    this.style = new Style(AgeSettings.player.height, AgeSettings.player.width,'transparent',null,this.getDomId(),this.getDomIdPrefix(),-1,-1,'absolute');
     this.loadFromJSON = function(p){
     	this.name = p.name;
     	if(debug) Log('Player load form json angle:'+p.angle,'d');
@@ -397,11 +397,11 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     		
     		this.actionBar=HTMLRenderer.div({_class:'GroupActionBar'}).css('display','none');
     		var _group = this;
-    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
-    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		if(this.visibility) var img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageVisible});
+    		else img = HTMLRenderer.img({src:AgeSettings.imagePath+AgeSettings.imageUnVisible});
             
     		var img_s = HTMLRenderer.img({src:AgeSettings.imagePath+'stacked1.png'});
-    		var img_r = HTMLRenderer.img({src:AgeSettings.imagePath+'random1.png'});
+    		var img_r = HTMLRenderer.img({src:AgeSettings.imagePath+'order0.png'});
     		img_s.bind('click', function () {_group.sendGroupStackedUpdate(false,_group.id); });
     		img_r.bind('click', function () {_group.sendRandomizeUpdate(); });   		
     		img.bind('click', function () {_group.sendVisibilityUpdate(!_group.visibility); });
@@ -442,8 +442,8 @@ function Group(name,visibility,stacked,order,randomgenerator,style){
     	if(img_e) img_e.attr('src',image_path);
     };
     this.setItemVisibilityIcon=function(vsbl){
-    	if(vsbl) this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageUnVisible);
-    	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
+    	if(vsbl) this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageVisible);
+    	else this.actionBar.children('img').first().attr('src',AgeSettings.imagePath+AgeSettings.imageUnVisible);
     };
    this.loadFromJSON = function(g){
 	    this.name = g.name;
@@ -498,10 +498,14 @@ function Game(name){
         var _h = parseInt(this.table.style.height);
         var _w = parseInt(this.table.style.width);
         if(debug) Log('Game.computeGameDimension <b>h:'+_h+' w:'+_w+'</b>','d');
-        var padding = 470;
+        var player_dim = 2*AgeUtil.max(AgeSettings.player.width,AgeSettings.player.height);
+        var player_margin = 2*AgeSettings.player.margin;
+        var padding = player_dim+Math.ceil(player_margin*1.5);
+        if(debug) Log('padding:'+padding+' player_margin:'+player_margin+' player_dim:'+player_dim+' AgeUtil.max(_w,_h):'+AgeUtil.max(_w,_h) ,'d');
         if(!isNaN(_w) & !isNaN(_h)){
-            this.style.height=AgeUtil.max(_w,_h)+padding;
-            this.style.width=AgeUtil.max(_w,_h)+padding;
+        	var max_l = AgeUtil.max(_w,_h)+padding;
+            this.style.height=max_l;
+            this.style.width=max_l;
         }
         else Log('Game.computeGameDimension - height or width are NaN','e');
     };
@@ -587,7 +591,7 @@ function Game(name){
 
     	var table = new Table();
     	this.table = table.loadFromJSON(g.table);
-    	var res = g.resourcen;
+    	var res = g.ressourcen;
     	for ( var i = 0; i < res.length; i++) {
     		var group = new Group();
     		group.id = i;
@@ -641,11 +645,11 @@ function Renderer(game){
         //create players
         this.renderPlayers();
 
-        var gameResourcen = HTMLRenderer.div({id:'ageResourcen',position:'absolute'});
-     //   var gameResourcenHdr = HTMLRenderer.div({id:'ageResourcenHdr'}).append('<p>'+AgeSettings.resourcenTitle+'</p>');
-     //   gameResourcen.append(gameResourcenHdr);
-        gameResourcen.append(this.renderResourcen(game.ressourcen));
-        this.gameContent.append(gameResourcen);
+        var gameRessourcen = HTMLRenderer.div({id:'ageRessourcen',position:'absolute'});
+     //   var gameRessourcenHdr = HTMLRenderer.div({id:'ageRessourcenHdr'}).append('<p>'+AgeSettings.ressourcenTitle+'</p>');
+     //   gameRessourcen.append(gameRessourcenHdr);
+        gameRessourcen.append(this.renderRessourcen(game.ressourcen));
+        this.gameContent.append(gameRessourcen);
 
         gameWrapper.append(gameHeader);
         gameWrapper.append(this.gameContent);
@@ -676,16 +680,16 @@ function Renderer(game){
         if(imagePath==null) imagePath=undefined;
         return $(document.createElement('div')).css( {backgroundColor : style.getBgColor(),backgroundImage: imagePath,width: style.width, height:style.height,left: style.left,top:style.top,position:style.position}).attr( {id : style.id}).addClass(style._class);
     };
-    this.renderResourcen = function(resourcen){
-        if(debug) Log('Renderer: Resourcen length is '+resourcen.length,'d');
-        var gameResourcenCnt = HTMLRenderer.div({id:'ageResourcenCnt'});
-        for (var i = 0; i < resourcen.length;  i++) {
-        	var grp = resourcen[i];
-        	 if(grp.randomgenerator)  gameResourcenCnt.append(this.renderRandomGenerator(grp));        	
-             else gameResourcenCnt.append(this.renderGroup(grp));
+    this.renderRessourcen = function(ressourcen){
+        if(debug) Log('Renderer: Ressourcen length is '+ressourcen.length,'d');
+        var gameRessourcenCnt = HTMLRenderer.div({id:'ageRessourcenCnt'});
+        for (var i = 0; i < ressourcen.length;  i++) {
+        	var grp = ressourcen[i];
+        	 if(grp.randomgenerator)  gameRessourcenCnt.append(this.renderRandomGenerator(grp));        	
+             else gameRessourcenCnt.append(this.renderGroup(grp));
             
         }
-        return gameResourcenCnt;
+        return gameRessourcenCnt;
     };
     this.renderRandomGenerator=function(grp){
     	var grps_contener = HTMLRenderer.div({_class:'randomgenerator'});
@@ -820,21 +824,25 @@ function Renderer(game){
     	player.HTMLElement.droppable({
     		hoverClass: 'drophover',
     		over: function(event, ui) {
-	    		var item = ui.draggable;
-			 	var cur_player = GameManager.instance.players[GameManager.instance.player];
-			 	if(cur_player.id == player.id) item.addClass('privateItem');
+    		    if(GameManager.instance != null){
+    		    	var item = ui.draggable;
+    		    	var cur_player = GameManager.instance.players[GameManager.instance.player];
+    		    	if(cur_player.id == player.id) item.addClass('privateItem');
+    		    }else Log('Renderer.makeDropable :over - GameManager.instance is NULL','e');
     	    },
     		drop: function( event, ui ) {
     	    	var item = ui.draggable;
     			GameManager.setElementOwner(item.attr('id'),player);
     	    },
     	    out: function(event, ui) {  
-	    	    var item = ui.draggable;
-	    	    var cur_player = GameManager.instance.players[GameManager.instance.player];
-    		 	if(cur_player.id == player.id) item.removeClass('privateItem');
-	        	GameManager.setElementOwner(item.attr('id'),null);
-	        	var params = AgeUtil.extractDomId(item.attr('id'));
-	        	if(params != null && player.active) AgeUpdater.sendUpdate('action=itemupdate&toPlayer='+item.owner+'&id='+params[0]);	  
+    	    	if(GameManager.instance != null){
+    	    		var item = ui.draggable;
+    	    		var cur_player = GameManager.instance.players[GameManager.instance.player];
+    	    		if(cur_player.id == player.id) item.removeClass('privateItem');
+    	    		GameManager.setElementOwner(item.attr('id'),null);
+    	    		var params = AgeUtil.extractDomId(item.attr('id'));
+    	    		if(params != null && player.active) AgeUpdater.sendUpdate('action=itemupdate&toPlayer='+item.owner+'&id='+params[0]);
+    	    	}else Log('Renderer.makeDropable :out - GameManager.instance is NULL','e');
     	    }	
     	});
     	return player;
@@ -845,7 +853,7 @@ function Renderer(game){
         var players = game.getPlayers();
         Log('# berechne Spieler Position ','i');
         var SITES = 4;
-        var C = 50;
+        var C = AgeSettings.player.margin;
         var p_size = players.length;
         var p_c = Math.floor(p_size/SITES);
         var p_i = p_size % SITES;
@@ -865,7 +873,7 @@ function Renderer(game){
                         y =  table_style.height + table_style.top + C;
                         x = Math.round(table_style.left + table_style.width+(table_style.width / players_per_site)*((1-2*j)/2) - player.style.width/2);
                         player.angle = 0;
-                        if(debug) Log(' # 1 player name:'+player.name+' x='+x+' y='+y,'d');
+                        if(debug) Log('BOTTOM # 1 player name:'+player.name+' x='+x+' y='+y+ 'table_style.height:'+table_style.height+' table_style.top:'+table_style.top+' C:'+C,'d');
                      break;
                     //LEFT
                     case 2:
@@ -879,36 +887,32 @@ function Renderer(game){
                             y = Math.round(table_style.top +table_style.height+(table_style.height / players_per_site)*((1-2*j)/2) - player.style.height/2);
                             player.angle = 90;
                         }
-                        if(debug) Log(' # 2 player name:'+player.name+' x='+x+' y='+y,'d');
+                        if(debug) Log('LEFT # 2 player name:'+player.name+' x='+x+' y='+y+ 'table_style.height:'+table_style.height+' table_style.top:'+table_style.top+' C:'+C,'d');
                         break;
                     //TOP
                     case 3:
                         y =  table_style.top - C - player.style.height; //      interval = table_style.width / players_per_site;
                         x = Math.round(table_style.left + table_style.width+(table_style.width / players_per_site)*((1-2*j)/2)  - player.style.width/2);
                         player.angle = 180;
-                        if(debug) Log(' # 3 player name:'+player.name+' x='+x+' y='+y,'d');
+                        if(debug) Log('TOP # 3 player name:'+player.name+' x='+x+' y='+y+ 'table_style.height:'+table_style.height+' table_style.top:'+table_style.top+' C:'+C,'d');
                        break;
                     //RIGHT
                     case 4:
                         x =  table_style.left + table_style.width + C;
                         y = Math.round(table_style.top+table_style.height+(table_style.height / players_per_site)*((1-2*j)/2) - player.style.height/2);
                         player.angle = 270; 
-                        if(debug) Log(' # 4  player name:'+player.name+' x='+x+' y='+y,'d');
+                        if(debug) Log('RIGHT # 4  player name:'+player.name+' x='+x+' y='+y+ 'table_style.width:'+table_style.width+' table_style.left:'+table_style.left+' C:'+C,'d');
                         break;
                     default:
                         Log('RendererSwich.setPlayers SWITCH error','e');
                         break;
                 }
-
-
                 player.style.setPosition({left:x, top:y});
-                if(player.id == -1) player.setDomId(player_index);
-               
+                if(player.id == -1) player.setDomId(player_index);  
             }
-
         }
     };
-     }
+  }
 
 var Perspective={
     PLAYERS: -1,
@@ -1673,7 +1677,7 @@ var GameCreatorManager={
     	this.update();
     },
     closeGroup: function(grp){
-        GameCreatorManager.gameCreator.resourcenCreator.removeGroup(grp);
+        GameCreatorManager.gameCreator.ressourcenCreator.removeGroup(grp);
     //	grp.groupWrapper.remove();
     },
     displayWizard:function(id){
@@ -1714,7 +1718,7 @@ var GameCreatorManager={
         this.renderedFormContent.append(viewResults);
         viewResults.empty();
         var game = GameCreatorManager.gameCreator.gameSetting.game;
-        game.setRessourcen(GameCreatorManager.gameCreator.resourcenCreator.getResourcen());
+        game.setRessourcen(GameCreatorManager.gameCreator.ressourcenCreator.getRessourcen());
         game.player=-1;
         game.players=[];
         if(debug) Log('createViewResults <b>game.getRenderer().setPlayers()</b>','d');
@@ -1738,7 +1742,7 @@ var GameCreatorManager={
 	    	grp.loadFromJSON(template.value);
 	    	grp.templateId=template.id;
 	    	if(debug)Log('Lade templates template.value:'+template.value,'d');
-	    	GameCreatorManager.gameCreator.resourcenCreator.newGroup(false, grp);
+	    	GameCreatorManager.gameCreator.ressourcenCreator.newGroup(false, grp);
 	    	this.update();
     	}catch(e){Log('GameCreatorManager.loadTemplate(): '+e,'e');}
     },
@@ -1808,23 +1812,23 @@ var AgeTemplates={
 
 function GameCreator(game) {
 	this.gameSetting=null;
-	this.resourcenCreator=null;
+	this.ressourcenCreator=null;
 	this.footerBar = '';//new FooterBar();
 	this.createGameWrapper=function() {
 		return HTMLRenderer.div({id:'GameCreatorWrapper',_class:'CreatorWrapper'});
 	};
-	this.getResourcenCreator = function(){
-		return  this.resourcenCreator;
+	this.getRessourcenCreator = function(){
+		return  this.ressourcenCreator;
 	};
 	this.render = function() {
 		this.gameSetting = new GameSetting(game);
 		var creatorWrapper = this.createGameWrapper();
 		var gameSetting = this.gameSetting.render();
-		this.resourcenCreator = new ResourcenCreator(game);
-		var resourcenArea = this.resourcenCreator.render();
+		this.ressourcenCreator = new RessourcenCreator(game);
+		var ressourcenArea = this.ressourcenCreator.render();
 		var footerBar = this.footerBar;//.render();
 		creatorWrapper.append(gameSetting);
-		creatorWrapper.append(resourcenArea);
+		creatorWrapper.append(ressourcenArea);
 		creatorWrapper.append(footerBar);
 		return creatorWrapper;
 	};
@@ -1845,7 +1849,7 @@ function GameSetting(game) {
 	};
 
 	this.getNameComponent = function(){
-		return this.getInputTextComponent({id:'GameSettingName',_class:'GameSettingInput',label:'Speilname:',FOR:'GameSettingNameInput',
+		return this.getInputTextComponent({id:'GameSettingName',_class:'GameSettingInput',label:AgeSettings.gameName,FOR:'GameSettingNameInput',
                     bind:'GameCreatorManager.gameCreator.gameSetting.setGameName(this.value)',name : 'name',inputId:'GameSettingNameInput',inputValue: this.game.name,size : '15'});
 	};
 
@@ -1855,7 +1859,7 @@ function GameSetting(game) {
 	};
 
     this.getPlayersSizeComponent = function(){
-            return this.getInputTextComponent({id:'GameSettingPlayers',_class:'GameSettingInput',label:'Spieler Anzahl:',FOR:'GameSettingPlayersInput',
+            return this.getInputTextComponent({id:'GameSettingPlayers',_class:'GameSettingInput',label:AgeSettings.player_size,FOR:'GameSettingPlayersInput',
                     bind:'GameCreatorManager.gameCreator.gameSetting.setGamePlayersSize(this.value)',name : 'playersSize',inputId:'GameSettingPlayersInput',inputValue: this.game.playersSize,size : '15'});
         };
 
@@ -1876,7 +1880,7 @@ function GameSetting(game) {
     	
     };
     this.getWidthComponent = function(){
-            	return this.getInputTextComponent({id:'GameSettingWidth',inputValue:this.game.table.style.width,_class:'GameSettingInput',label:'Breite:',FOR:'GameSettingWidthInput',
+            	return this.getInputTextComponent({id:'GameSettingWidth',inputValue:this.game.table.style.width,_class:'GameSettingInput',label:AgeSettings.game_width,FOR:'GameSettingWidthInput',
                     bind:'GameCreatorManager.gameCreator.gameSetting.setGameWidth(this.value)',name : 'table.style.width',inputId:'GameSettingWidthInput',inputValue: this.game.table.style.width,size : '15'});
 
         };
@@ -1887,7 +1891,7 @@ function GameSetting(game) {
 	};
 
     this.getHeightComponent = function(){
-            	return this.getInputTextComponent({id:'GameSettingHeigth',inputValue:this.game.table.style.height,_class:'GameSettingInput',label:'Höhe:',FOR:'GameSettingWidthInput',
+            	return this.getInputTextComponent({id:'GameSettingHeigth',inputValue:this.game.table.style.height,_class:'GameSettingInput',label:AgeSettings.game_height,FOR:'GameSettingWidthInput',
                     bind:'GameCreatorManager.gameCreator.gameSetting.setGameHeight(this.value)',name : 'table.style.height',inputId:'GGameSettingWidthInput',inputValue: this.game.table.style.height,size : '15'});
 
         };
@@ -1900,7 +1904,7 @@ function GameSetting(game) {
      this.getBgColorComponent = function(){
             var inputColor = HTMLRenderer.inputColorField( {name : 'table.style.bgColorComponent',id:'GameSettingBgColorInput',value : this.game.table.style.bgColor,_class:'color',style:'height:20px;width:20px;'});
             //GameCreatorManager.gameCreator.gameSetting.setGameBgColor
-	    var inputColorLabel = HTMLRenderer.label({FOR:'GameSettingBgColorInput',label:'Background Color: '});
+	    var inputColorLabel = HTMLRenderer.label({FOR:'GameSettingBgColorInput',label:AgeSettings.background_color});
             GameCreatorManager.actions.push({action:'',object:GameCreatorManager.gameCreator.gameSetting,domid:'GameSettingBgColorInput'});
             return HTMLRenderer.p( {id : 'GameSettingColor',_class : 'GameSettingInput'}).append(inputColorLabel).append(inputColor);
         };
@@ -1919,9 +1923,10 @@ function GameSetting(game) {
     //	var _tmp = tmp & true;
     	if(fileName){
     	this.gameSettingview.empty();
-   // 	if($.browser.mozilla || $.browser.msie){
-  //  		this.gameSettingview.append(HTMLRenderer.img({src:fileName}));
-//		}else{
+     	if($.browser.mozilla || $.browser.msie){
+    		this.gameSettingview.append(HTMLRenderer.img({src:fileName}));
+    		var image = fileName;
+		}else{
     	
     	    var image_path = AgeSettings.imageTmpPath;
     	    if(GameManager.key != null && !tmp) image_path = AgeSettings.userImagePath+GameManager.key+'/';
@@ -1931,10 +1936,11 @@ function GameSetting(game) {
 	    	this.game.table.style.imageName = fileName;
 	    	this.game.table.style.imagesPath = image_path;
 	    	
-	    	this.game.table.style.bgImage = image;
+	    	
 	    	this.gameSettingview.append('<img src="'+image+'" style="width:170px;"/>');//css({backgroundImage:'url("'+image_path+'")'});
     	}
-//		}
+     	this.game.table.style.bgImage = image;
+		}
     	
     };
 	this.render = function() {
@@ -1948,7 +1954,7 @@ function GameSetting(game) {
 		this.gameSetting.append(this.playersInputHiddenElements);
 		this.gameSetting.append(this.bgColor);
 		var inputFile = HTMLRenderer.inputImageField({bind:'GameCreatorManager.gameCreator.gameSetting.setBGImage',name:'table.style.bgImage',id:'GameSettingImageInput',size:'10'});
-		var inputFileLabel = HTMLRenderer.label({FOR:'GameSettingImageInput',label:'Background Image: '});
+		var inputFileLabel = HTMLRenderer.label({FOR:'GameSettingImageInput',label:AgeSettings.background_image});
 		this.gameSetting.append(HTMLRenderer.p( {id : 'GameSettingImage',_class : 'GameSettingInput'}).append(inputFileLabel).append(inputFile));
 
 		this.gameSettingview = HTMLRenderer.div({id:'GameSettingView',_class : ''});
@@ -1960,10 +1966,10 @@ function GameSetting(game) {
 		return settingWrapper;
 	};
 }
-function ResourcenCreator(game) {
-	this.resourcenWrapper=null;
-	this.resourcenFotoer = null;
-	this.resourcenContent = null;
+function RessourcenCreator(game) {
+	this.ressourcenWrapper=null;
+	this.ressourcenFotoer = null;
+	this.ressourcenContent = null;
 	this.groupList = null;
 	this.hiddenGroupsSizeComponent=null;
 	this.groups = null;
@@ -1994,37 +2000,37 @@ function ResourcenCreator(game) {
 		this.hiddenGroupsSizeComponent.attr({value:''+this.groups.length});
 	};
 	this.render=function() {
-		if(this.hiddenGroupsSizeComponent == null) this.hiddenGroupsSizeComponent =HTMLRenderer.inputHidden({name:'resourcenSize',value:'0'});
+		if(this.hiddenGroupsSizeComponent == null) this.hiddenGroupsSizeComponent =HTMLRenderer.inputHidden({name:'ressourcenSize',value:'0'});
 		if(this.groupList == null) this.groupList = this.createGroupList();
 		if(this.groups == null){
 			this.groups = new Array();
-			this.setResourcen(game.ressourcen,true);
+			this.setRessourcen(game.ressourcen,true);
          }
 		
-		if(this.resourcenWrapper == null) this.resourcenWrapper = this.createResourcenWrapper();
-		if(this.resourcenContent == null) this.resourcenContent = this.createResourcenContent();
-		if(this.resourcenFotoer == null) this.resourcenFotoer = this.createResourcenFooter();
-		this.resourcenContent.append(this.groupList);
-		this.resourcenContent.append(HTMLRenderer.clear());
-		this.resourcenWrapper.append(this.resourcenContent);
-		this.resourcenWrapper.append(this.hiddenGroupsSizeComponent);
-		this.resourcenWrapper.append(this.resourcenFotoer);
-		return this.resourcenWrapper;
+		if(this.ressourcenWrapper == null) this.ressourcenWrapper = this.createRessourcenWrapper();
+		if(this.ressourcenContent == null) this.ressourcenContent = this.createRessourcenContent();
+		if(this.ressourcenFotoer == null) this.ressourcenFotoer = this.createRessourcenFooter();
+		this.ressourcenContent.append(this.groupList);
+		this.ressourcenContent.append(HTMLRenderer.clear());
+		this.ressourcenWrapper.append(this.ressourcenContent);
+		this.ressourcenWrapper.append(this.hiddenGroupsSizeComponent);
+		this.ressourcenWrapper.append(this.ressourcenFotoer);
+		return this.ressourcenWrapper;
 	};
-	this.setResourcen = function(ressourcen,action){
+	this.setRessourcen = function(ressourcen,action){
 		if(ressourcen.length==0)this.newGroup(action,null);
 		for ( var i = 0; i < ressourcen.length; i++) {
 			this.newGroup(action,ressourcen[i]);
 		}
 	};
-	this.getResourcen = function(){
+	this.getRessourcen = function(){
 		var groups = new Array();
-		if(debug) Log('ResourcenCreator.getResourcen - this.groups.length:'+this.groups.length,'d');
+		if(debug) Log('RessourcenCreator.getRessourcen - this.groups.length:'+this.groups.length,'d');
 		for ( var i = 0; i < this.groups.length; i++) {
 			var grp = this.groups[i];		
 			if(grp.id != null){
 				grp.group.items = grp.getItems();
-                 if(debug) Log('--ResourcenCreator.getResourcen grp.group.items.length:'+(grp.group.items.length)+' - groups.push(grp.group).','d');
+                 if(debug) Log('--RessourcenCreator.getRessourcen grp.group.items.length:'+(grp.group.items.length)+' - groups.push(grp.group).','d');
 				groups.push(grp.group);
 			}
 		}
@@ -2033,16 +2039,16 @@ function ResourcenCreator(game) {
 	this.createGroupList = function(){
 		return HTMLRenderer.div({});
 	};
-	this.createResourcenWrapper = function() {
-		var rw = HTMLRenderer.div({id:'ResourcenWrapper',_class:'Wrapper'});
-		rw.append('<h2>Resourcen</h2>');
+	this.createRessourcenWrapper = function() {
+		var rw = HTMLRenderer.div({id:'RessourcenWrapper',_class:'Wrapper'});
+		rw.append('<h2>Ressourcen</h2>');
 		return rw;
 	};
-	this.createResourcenContent=function() {
-		return HTMLRenderer.div({id:'ResourcenContent',_class:'Content'});
+	this.createRessourcenContent=function() {
+		return HTMLRenderer.div({id:'RessourcenContent',_class:'Content'});
 	};
-	this.createResourcenFooter=function() {
-		var footer = HTMLRenderer.div( {id : 'ResourcenFooterBar',_class : 'ResourcenFooterBar'});
+	this.createRessourcenFooter=function() {
+		var footer = HTMLRenderer.div( {id : 'RessourcenFooterBar',_class : 'RessourcenFooterBar'});
         
 		var _template = HTMLRenderer.div({_class:'RsrcnFooterButton'});
 		var _template_show = HTMLRenderer.buttonItem({_class:'RsrcnFooter',title:'Load from template',image:'template.png'});
@@ -2075,18 +2081,18 @@ function GroupCreator(id,index) {
 	this.domid = null;
     this.index = index;
     this.id = id;
-    this.componentBind = 'GameCreatorManager.gameCreator.resourcenCreator.groups['+index+']';
+    this.componentBind = 'GameCreatorManager.gameCreator.ressourcenCreator.groups['+index+']';
 	this.groupWrapper = null;
 	this.groupContener = null;
 	this.hiddenItemsSizeComponent = null;
 	this.group = new Group();
-	this.bgImageView=HTMLRenderer.div({_class:'bgImageView'});
+	this.bgImageView=(HTMLRenderer.div({_class:'bgImageView'})).append('<img src="'+AgeSettings.imagePath+'image-bg_small.png"/>');
 	this.items = null;
     this.itemIdSec=0;
-    this.zIndex=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.zIndex',value:this.group.style.zIndex});
-    this.top=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.top',value:this.group.style.top});
-    this.left=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.left',value:this.group.style.left});
-    this.bgColor=HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.bgColor',value:this.group.style.bgColor});
+    this.zIndex=HTMLRenderer.inputHidden({name:'ressourcen['+index+'].style.zIndex',value:this.group.style.zIndex});
+    this.top=HTMLRenderer.inputHidden({name:'ressourcen['+index+'].style.top',value:this.group.style.top});
+    this.left=HTMLRenderer.inputHidden({name:'ressourcen['+index+'].style.left',value:this.group.style.left});
+    this.bgColor=HTMLRenderer.inputHidden({name:'ressourcen['+index+'].style.bgColor',value:this.group.style.bgColor});
     this.setGroup=function(grp){
     	if(grp != null) this.group = grp;
     };
@@ -2156,7 +2162,7 @@ function GroupCreator(id,index) {
 
         this.getNameComponent = function(){
         	if(debug) Log('GroupCreator getNameComponent:'+this.group.name,'d');
-            return HTMLRenderer.inputText({bind:this.componentBind+'.setName(this.value)',name : 'resourcen['+index+'].name',
+            return HTMLRenderer.inputText({bind:this.componentBind+'.setName(this.value)',name : 'ressourcen['+index+'].name',
                 _class : 'GrpSttngNm',id:'GroupSettingNameInput-' + id,value :this.group.name,size : '8'});
         };
         this.setName = function(name){
@@ -2175,7 +2181,7 @@ function GroupCreator(id,index) {
             return this.group.name;
         };
         this.getStackedComponent = function(){
-            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setStacked(this.checked)',name : 'resourcen['+index+'].stacked',_class : 'GrpSttngStckd',id:'GroupSettingStckdInput-' +
+            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setStacked(this.checked)',name : 'ressourcen['+index+'].stacked',_class : 'GrpSttngStckd',id:'GroupSettingStckdInput-' +
                     id,value : 'true',checked:this.group.stacked,title:'(nicht) gestappelt'});
         };
         this.setStacked = function(stacked){
@@ -2183,21 +2189,21 @@ function GroupCreator(id,index) {
             this.group.stacked = stacked;
         };
         this.getVisibilityComponent = function(){
-            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setVisibility(this.checked)',name : 'resourcen['+index+'].visibility',_class : 'GrpSttngVsblt ElmntVsblt',
+            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setVisibility(this.checked)',name : 'ressourcen['+index+'].visibility',_class : 'GrpSttngVsblt ElmntVsblt',
                 id:'GroupSettingVsbltInput-' + id,value :'true',checked:this.group.visibility,title:'(un)sichtbar'});
         };
         this.setVisibility = function(visibility){
             this.group.visibility = visibility;
         };
         this.getOrderComponent = function(){
-            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setOrder(this.checked)',name : 'resourcen['+index+'].order',_class : 'GrpSttngOrdr',id:'GroupSettingOrdrInput-' +
+            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setOrder(this.checked)',name : 'ressourcen['+index+'].order',_class : 'GrpSttngOrdr',id:'GroupSettingOrdrInput-' +
                     id,value :'true',checked:this.group.order,title:'(un)geordnet'});
         };
         this.setOrder = function(order){
             this.group.order = order;
         };
         this.getRandomgeneratorComponent = function(){
-            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setRandomgenerator(this.checked)',name : 'resourcen['+index+'].randomgenerator',_class : 'GrpSttngRndm',id:'GroupSettingRndmInput-' +
+            return HTMLRenderer.inputImageCheckBox({bind:this.componentBind+'.setRandomgenerator(this.checked)',name : 'ressourcen['+index+'].randomgenerator',_class : 'GrpSttngRndm',id:'GroupSettingRndmInput-' +
                     id,value : 'true',checked:this.group.randomgenerator,title:'(nicht) zufallig'});
         };
         this.setRandomgenerator = function(randomgenerator){
@@ -2205,11 +2211,11 @@ function GroupCreator(id,index) {
         };
         this.getSizeComponent = function(){
              var span = HTMLRenderer.span({});
-             span.append('size:');
-             span.append(HTMLRenderer.inputText( {bind:this.componentBind+'.setWidth(this.value)',name : 'resourcen['+index+'].style.width',_class : 'GrpSttngSz',
+             span.append(AgeSettings.msg_size);
+             span.append(HTMLRenderer.inputText( {bind:this.componentBind+'.setWidth(this.value)',name : 'ressourcen['+index+'].style.width',_class : 'GrpSttngSz',
                  id:'GroupSettingWidthInput-' + id,value : this.group.style.width,size : '1'}));
              span.append('x');
-             span.append(HTMLRenderer.inputText( {bind:this.componentBind+'.setHeight(this.value)',name : 'resourcen['+index+'].style.height',_class : 'GrpSttngSz',id:'GroupSettingHeightInput-' + id,value : this.group.style.height,size : '1'}));
+             span.append(HTMLRenderer.inputText( {bind:this.componentBind+'.setHeight(this.value)',name : 'ressourcen['+index+'].style.height',_class : 'GrpSttngSz',id:'GroupSettingHeightInput-' + id,value : this.group.style.height,size : '1'}));
 	     return span;
         };
         this.setWidth = function(w){
@@ -2227,7 +2233,7 @@ function GroupCreator(id,index) {
             return 'GameSettingBgColorInput-'+id;
         };
         this.getBgColorComponent = function(){
-            return HTMLRenderer.inputColorField( {name : 'resourcen['+index+'].style.bgColorComponent',id:this.getBgColorComponentId(),value : this.group.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
+            return HTMLRenderer.inputColorField( {name : 'ressourcen['+index+'].style.bgColorComponent',id:this.getBgColorComponentId(),value : this.group.style.bgColor,_class:'color',style:'height:18px;width:18px;'});
         };
         this.setBgColor = function(bgcolor){
         	Log('setBgColor:'+bgcolor,'d');
@@ -2235,23 +2241,31 @@ function GroupCreator(id,index) {
             this.group.style.bgColor=bgcolor;
         };
         this.getBgImageComponent = function(){
-            return HTMLRenderer.inputImageIcon({bind:this.componentBind+'.setBGImage',_class:'GrpBgInptCntnr',width:20,height:20,src:'image.png',name:'resourcen['+index+'].style.bgImage'});
+            return HTMLRenderer.inputImageIcon({bind:this.componentBind+'.setBGImage',_class:'GrpBgInptCntnr',width:20,height:20,src:'image.png',name:'ressourcen['+index+'].style.bgImage'});
         };
         this.setBGImage=function(fileName,tmp){
         	if(fileName != '' && fileName != null){
-        		var image_path = AgeSettings.imageTmpPath;
-        		if(GameManager.key != null & !tmp) image_path = AgeSettings.userImagePath+GameManager.key+'/';
-        		var image = image_path+'0_'+fileName;
-        		if(debug) Log('GroupCreator.setBGImage:'+fileName+' _tmp? '+tmp+' GameManager.key:'+GameManager.key+' AgeSettings.imageTmpPath+fileName:'+image_path,'d');
-        		this.group.style.imageName = fileName;
-        		this.group.style.imagesPath = image_path;
-        		this.group.style.bgImage = image;
         		this.bgImageView.empty();
-        		this.bgImageView.append('<img src="'+image+'"/>');	
-        	}
+        		if($.browser.mozilla || $.browser.msie){
+        			this.bgImageView.append(HTMLRenderer.img({src:fileName}));
+        			var image = fileName;
+        		}else{
+        		
+	        		var image_path = AgeSettings.imageTmpPath;
+	        		if(GameManager.key != null & !tmp) image_path = AgeSettings.userImagePath+GameManager.key+'/';
+	        		var image = image_path+'0_'+fileName;
+	        		if(debug) Log('GroupCreator.setBGImage:'+fileName+' _tmp? '+tmp+' GameManager.key:'+GameManager.key+' AgeSettings.imageTmpPath+fileName:'+image_path,'d');
+	        		this.group.style.imageName = fileName;
+	        		this.group.style.imagesPath = image_path;
+	        		
+	        		
+	        		this.bgImageView.append('<img src="'+image+'"/>');
+        		}
+        		this.group.style.bgImage = image;
+        	}else Log('ItemCreator.setBGImage() fileName ist null','e');
         };
         this.getBgImageNameComponent=function(){
-        	return HTMLRenderer.inputHidden({name:'resourcen['+index+'].style.bgImageName',value:this.group.style.bgImage});
+        	return HTMLRenderer.inputHidden({name:'ressourcen['+index+'].style.bgImageName',value:this.group.style.bgImage});
         };
 	this.createGroupSetting = function() {
 		this.domid ='GroupSetting-' + id;
@@ -2272,12 +2286,13 @@ function GroupCreator(id,index) {
                 div_center.append(this.bgImageView);
                 var ul = HTMLRenderer.ul();
                 ul.append(HTMLRenderer.li({content:this.getNameComponent()}));
+                ul.append(HTMLRenderer.li({content:this.getSizeComponent()}));
                 ul.append(HTMLRenderer.li({content:this.getVisibilityComponent()}));
                 ul.append(HTMLRenderer.li({content:this.getOrderComponent()}));
                 ul.append(HTMLRenderer.li({content:this.getStackedComponent()}));
-                ul.append(HTMLRenderer.li({content:this.getRandomgeneratorComponent()}));
+                ul.append(HTMLRenderer.li({content:this.getRandomgeneratorComponent()}));     
+                
                 ul.append(HTMLRenderer.li({content:this.getBgColorComponent()}));
-                ul.append(HTMLRenderer.li({content:this.getSizeComponent()}));
                 ul.append(HTMLRenderer.li({content:this.getBgImageComponent()}));
                 div_center.append(ul);
                 div_center.append(this.getBgImageNameComponent());
@@ -2293,9 +2308,10 @@ function GroupCreator(id,index) {
                 div_right.append(_close);
 
                 gs.append(div_left);
-                gs.append(div_center);
                 gs.append(div_right);
-                gs.append(HTMLRenderer.clear());
+                gs.append(div_center);
+                
+           //     gs.append(HTMLRenderer.clear());
 
                 return gs;
 	};
@@ -2306,7 +2322,7 @@ function GroupCreator(id,index) {
 		}
 	};
 	this.render = function() {
-		if(this.hiddenItemsSizeComponent == null) this.hiddenItemsSizeComponent =HTMLRenderer.inputHidden({name:'resourcen['+index+'].items',value:'0'});
+		if(this.hiddenItemsSizeComponent == null) this.hiddenItemsSizeComponent =HTMLRenderer.inputHidden({name:'ressourcen['+index+'].items',value:'0'});
         if(this.groupWrapper == null) this.groupWrapper = this.createGroupWrapper();
 		if(this.groupContener == null) this.groupContener = this.createGroupContener();
 		if(this.items == null){	
@@ -2332,9 +2348,9 @@ function GroupCreator(id,index) {
 			this.groupContener.append(itemCreator.render());
 		}
 		*/
-		this.groupContener.append(HTMLRenderer.inputHidden({name:'resourcen['+index+'].id',value:''+this.group.id}));
+		this.groupContener.append(HTMLRenderer.inputHidden({name:'ressourcen['+index+'].id',value:''+this.group.id}));
 		var tmpl_e = '';
-		if(this.group.templateId != null) tmpl_e  = HTMLRenderer.inputHidden({name:'resourcen['+index+'].templateId',value:this.group.templateId});
+		if(this.group.templateId != null) tmpl_e  = HTMLRenderer.inputHidden({name:'ressourcen['+index+'].templateId',value:this.group.templateId});
 		this.groupContener.append(tmpl_e);
 		this.groupContener.append(this.left);
 		this.groupContener.append(this.top);
@@ -2380,9 +2396,9 @@ function ItemCreator(id,index) {
     this._class = null;
     this.item = new Item();
     this.itemWrapper = null;
-    this.componentBind = 'GameCreatorManager.gameCreator.resourcenCreator.groups['+index[0]+'].items['+index[1]+']';
-    this.namePrefix='resourcen['+index[0]+'].items['+index[1]+']';
-    this.bgImageView=HTMLRenderer.div({_class:'bgImageView'});
+    this.componentBind = 'GameCreatorManager.gameCreator.ressourcenCreator.groups['+index[0]+'].items['+index[1]+']';
+    this.namePrefix='ressourcen['+index[0]+'].items['+index[1]+']';
+    this.bgImageView=(HTMLRenderer.div({_class:'bgImageView'})).append('<img src="'+AgeSettings.imagePath+'image-bg_small.png"/>');
     this.zIndex=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.zIndex',value:this.item.style.zIndex});
     this.top=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.top',value:this.item.style.top});
     this.left=HTMLRenderer.inputHidden({name:this.namePrefix+'.style.left',value:this.item.style.left});
@@ -2427,7 +2443,7 @@ function ItemCreator(id,index) {
     };
     this.getSizeComponent = function(){
              var span = HTMLRenderer.span({});
-             span.append('size:');
+             span.append(AgeSettings.msg_size);
              span.append(HTMLRenderer.inputText( {bind:this.componentBind+'.setWidth(this.value)',
             	 name : this.namePrefix+'.style.width',
                  id:'ItemWidthInput-' + id,value : this.item.style.width,size : '1'}));
@@ -2478,15 +2494,22 @@ function ItemCreator(id,index) {
     };
     this.setBgImage=function(fileName,tmp){
     	if(fileName != '' && fileName != null){
-    	var image_path = AgeSettings.imageTmpPath;
- 	    if(GameManager.key != null & !tmp) image_path = AgeSettings.userImagePath+GameManager.key+'/';
- 	    var image = image_path+'0_'+fileName;
-	    if(debug) Log('ItemCreator.setBGImage:'+fileName+' tmp? '+tmp+' AgeSettings.imageTmpPath+fileName:'+image_path,'d');
-	    this.item.style.imageName = fileName;
-	    this.item.style.imagesPath = image_path;
-	    this.item.style.bgImage = image;
-	    this.bgImageView.empty();
-	    this.bgImageView.append('<img src="'+image+'"/>');	
+    	this.bgImageView.empty();
+    	if($.browser.mozilla || $.browser.msie){
+    		this.bgImageView.append(HTMLRenderer.img({src:fileName}));
+    		var image = fileName;
+    	}else{
+	    	var image_path = AgeSettings.imageTmpPath;
+	 	    if(GameManager.key != null & !tmp) image_path = AgeSettings.userImagePath+GameManager.key+'/';
+	 	    var image = image_path+'0_'+fileName;
+		    if(debug) Log('ItemCreator.setBGImage:'+fileName+' tmp? '+tmp+' AgeSettings.imageTmpPath+fileName:'+image_path,'d');
+		    this.item.style.imageName = fileName;
+		    this.item.style.imagesPath = image_path;
+		    
+		   
+		    this.bgImageView.append('<img src="'+image+'"/>');	
+    	}
+    	this.item.style.bgImage = image;
     	}
     	
     };
@@ -2511,8 +2534,8 @@ function ItemCreator(id,index) {
         var ul = HTMLRenderer.ul();
         ul.append(HTMLRenderer.li({content:this.getNameComponent(),_class : 'ItemNm'}));
         ul.append(HTMLRenderer.li({content:this.getCountComponent(),_class :'ItemSt'}));
+        ul.append(HTMLRenderer.li({content:this.getSizeComponent(),_class : 'ItemSz'}));
         ul.append(HTMLRenderer.li({content:this.getVisibilityComponent()}));
-	    ul.append(HTMLRenderer.li({content:this.getSizeComponent(),_class : 'ItemSz'}));
         ul.append(HTMLRenderer.li({content:this.getBgColorComponent()}));
         ul.append(HTMLRenderer.li({content:this.getBgImageComponent()}));
         div_center.append(ul);
@@ -2521,18 +2544,19 @@ function ItemCreator(id,index) {
         div_center.append(this.bgColor);
         div_center.append(this.getBgImageNameComponent());
         this.item.setPositionComponent({left:this.left,top:this.top,zIndex:this.zIndex}); //groupBy
-        div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].id',value:''+this.item.id}));
-    //    div_center.append(HTMLRenderer.inputHidden({name:'resourcen['+index[0]+'].items['+index[1]+'].groupBy',value:''+this.item.groupBy}));
+        div_center.append(HTMLRenderer.inputHidden({name:'ressourcen['+index[0]+'].items['+index[1]+'].id',value:''+this.item.id}));
+    //    div_center.append(HTMLRenderer.inputHidden({name:'ressourcen['+index[0]+'].items['+index[1]+'].groupBy',value:''+this.item.groupBy}));
 
         var _close = HTMLRenderer.buttonItem({image:'closed.png',_class:'closebttn'});
         div_right.append(_close);
 
-        _close.bind('click', function() {GameCreatorManager.gameCreator.resourcenCreator.groups[index[0]].removeItem(id);});
+        _close.bind('click', function() {GameCreatorManager.gameCreator.ressourcenCreator.groups[index[0]].removeItem(id);});
 
 
         this.itemWrapper.append(div_left);
-        this.itemWrapper.append(div_center);
         this.itemWrapper.append(div_right);
+        this.itemWrapper.append(div_center);
+       
         this.itemWrapper.append(HTMLRenderer.clear());
 
         return this.itemWrapper;
@@ -2607,38 +2631,15 @@ var HTMLRenderer = {
     	var file_input = $(document.createElement('input')).attr( {id : param.id,TYPE:'file',name: param.name,size:param.size}).addClass(param._class);
     	file_input.bind('change', function(){
     		if(debug) Log('HTMLRenderer.inputImageField change ajax tmp.image='+file_input.val(),'d');
-    		//HTMLRenderer.img({src:file_input.getAsDataURL()}); //firefox !!!!
-    	//	Log(file_input.getAsDataURL(),'w');
-    	
-    		
-    		/*	if($.browser.mozilla){
-    			eval(''+param.bind+'(\''+this.files[0].getAsDataURL()+'\')');
+    			if($.browser.mozilla){
+    				eval(''+param.bind+'(\''+this.files[0].getAsDataURL()+'\')');
     		}else if($.browser.msie){
-    			if(debug) Log('IMAGE PATH:'+this.val(),'d');
+    		//	if(debug) Log('IMAGE PATH:'+this.val(),'d');
     			eval(''+param.bind+'(\''+this.val()+'\')');
     			
-    		}else{*/
-    			AgeUpdater.ajaxFileUpload({input:file_input,bind:param.bind});
-    	//	}
-    	
-    			
-    			//	$('body').append(HTMLRenderer.img({src:this.files[0].getAsDataURL(),alt:'alt'}));
-    	//	AgeUpdater.ajaxFileUpload({input:file_input,bind:param.bind});
-    	//	var onsubmit = ;
-/*
-    		form.submit(function() {
-    			if(debug) Log('HTMLRenderer.inputImageField change ajax submit','d');
-    			  alert($(this).serialize());
-    			  return false;
-    			});
-    			*/
-    	/*	$.ajax({type: "POST", url: "/age/game/xhr.htm",
-    			 data: .serialize(),
-    			   success: function(msg){
-    			 //    alert(msg);
-    			     if(param.bind != null) eval(''+param.bind+'(\''+msg+'\')'); 
-    			   }
-    			 });*/
+    			}else{
+    				AgeUpdater.ajaxFileUpload({input:file_input,bind:param.bind});
+    			}
     	});
    // 	if(debug) Log('HTMLRenderer.inputImageField change bind:'+param.bind+'(msg)','d');
 		return file_input;

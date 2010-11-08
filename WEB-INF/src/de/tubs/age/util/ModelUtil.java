@@ -27,8 +27,8 @@ public class ModelUtil {
 	   game.getTable().getStyle().setHeight(convertToInt(c.getRequestParameter("table.style.height")));
 	   game.getTable().getStyle().setWidth(convertToInt(c.getRequestParameter("table.style.width")));
 	   game.getTable().getStyle().setBgImageFileItem(c.getFileItem("table.style.bgImage"));
-	   int resourcenSize = AgeUtil.min(convertToInt(c.getRequestParameter("resourcenSize")), DEFAULT_MAX_SIZE);
-	   game.setResourcen(createResourcen(c,game,resourcenSize));
+	   int ressourcenSize = AgeUtil.min(convertToInt(c.getRequestParameter("ressourcenSize")), DEFAULT_MAX_SIZE);
+	   game.setResourcen(createResourcen(c,game,ressourcenSize));
 	   
    }
    private static Item createItemFromParams(Context c, String prefix, List<Item> items) {
@@ -70,12 +70,12 @@ private static List<Player> createPlayers(Context c,Game game, int playersSize){
 	}
 	return players;
 }
-private static List<Groups> createResourcen(Context c,Game game, int resourcenSize){
+private static List<Groups> createResourcen(Context c,Game game, int ressourcenSize){
 	 List<Groups> groups = new ArrayList<Groups>();
-	   for (int i = 0; i < resourcenSize; i++) {
-			int itm_size = AgeUtil.min(convertToInt(c.getRequestParameter("resourcen[" + i+ "].items")), DEFAULT_MAX_SIZE);
+	   for (int i = 0; i < ressourcenSize; i++) {
+			int itm_size = AgeUtil.min(convertToInt(c.getRequestParameter("ressourcen[" + i+ "].items")), DEFAULT_MAX_SIZE);
 			if(itm_size>0){			
-				Groups grp = createGroupFromParams(c,"resourcen[" + i+ "]",game.getResourcen());
+				Groups grp = createGroupFromParams(c,"ressourcen[" + i+ "]",game.getResourcen());
 				if(grp!=null){
 					if(grp.getItems().size()>0){ 
 						if(game.getResourcen().size() < GameLoader.MAX_GROUPS){

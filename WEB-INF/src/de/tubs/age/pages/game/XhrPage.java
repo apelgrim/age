@@ -1,29 +1,24 @@
 package de.tubs.age.pages.game;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.click.Context;
 import org.apache.click.Page;
-import org.apache.click.control.FileField;
-import org.apache.click.control.Form;
 import org.apache.click.util.Bindable;
-import org.apache.click.util.ClickUtils;
 import org.apache.commons.fileupload.FileItem;
 
-import de.tubs.age.pages.LayoutPage;
 import de.tubs.age.util.AgeUtil;
 
 public class XhrPage  extends Page{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Bindable public String title = "Xhr"; 
     @Bindable protected String msg;
 public XhrPage(){
